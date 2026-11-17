@@ -1,0 +1,22 @@
+import {test,expect} from '@playwright/test';
+test('rental showcase keeps fictional fixtures explicitly labeled without fabricated photos across five paths, adapts labels, cascades edits and opens source details',async({page,request})=>{
+ const data=await(await request.post('/api/spaces/demo/rental-showcase')).json();
+ await page.setViewportSize({width:1920,height:1080});await page.goto('/#'+data.id);
+ await expect(page.locator('.flow-row')).toHaveCount(5);await expect(page.locator('.tree-origin .tree-choice')).toHaveCount(2);
+ await expect(page.locator('[data-tree-node=rental-more-budget] .tree-choice')).toHaveCount(3);
+ await expect(page.locator('[data-tree-node=rental-close-work] .tree-choice')).toHaveCount(1);
+ await expect(page.locator('[data-tree-node=rental-suburban-space] .tree-choice')).toHaveCount(1);
+ await expect(page.locator('.tree-choice img')).toHaveCount(0);
+ await expect(page.locator('.u-demo-note')).toContainText('虚构演示');
+ await page.locator('[data-flow-condition=rental-more-budget] [data-tree-condition]').click();
+ await expect(page.locator('.board-controlbar')).toContainText('月租');await expect(page.locator('.board-controlbar')).toContainText('面积');await expect(page.locator('.board-controlbar')).toContainText('通勤');await expect(page.locator('.universal-root')).not.toContainText('内存');
+ await page.locator('[data-live-condition=price][data-live-value="4000"]').click();await expect(page.locator('[data-tree-node=rental-more-budget] .tree-choice')).toHaveCount(2);await expect(page.locator('[data-tree-node=rental-close-work] .tree-choice')).toHaveCount(0);
+ await page.locator('[data-live-condition=price][data-live-value="5000"]').click();await expect(page.locator('[data-tree-node=rental-close-work] .tree-choice')).toHaveCount(1);
+ await page.locator('[data-tree-node=rental-more-budget] [data-tree-candidate=housing-2]').click();const dialog=page.getByRole('dialog',{name:'方案详情'});
+ await expect(dialog).toContainText('4,600元/月');await expect(dialog).toContainText('58㎡');await expect(dialog).toContainText('15分钟');await expect(dialog.locator('img')).toHaveCount(0);
+ await dialog.getByRole('button',{name:'来源依据',exact:true}).click();await expect(dialog).toContainText('虚构示例');await page.keyboard.press('Escape');
+ await expect(dialog).toHaveCount(0);await page.locator('#conversation-message').click();await expect(page.locator('.canvas-thread')).toBeVisible();await page.keyboard.press('Escape');
+ const snapshot=await(await request.get('/api/spaces/'+data.id+'/export')).json();const imported=await request.post('/api/spaces/import',{data:snapshot});expect(imported.status()).toBe(201);
+ await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+ await page.locator('.space-menu>summary').click();await page.locator('.space-menu-list [data-delete-space]').click();await expect(page.getByRole('dialog',{name:'删除这个决策空间？'})).toBeVisible();await page.getByRole('button',{name:'取消',exact:true}).click();
+});

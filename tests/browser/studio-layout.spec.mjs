@@ -1,0 +1,30 @@
+import {test,expect} from '@playwright/test';
+
+test('home explains the workflow, examples populate the research input, and decision reasoning survives reopening',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/classic');
+ await expect(page.locator('.welcome-visual')).toBeVisible();
+ await expect(page.locator('.hero-principles')).toContainText('随条件变化');
+ await page.getByRole('button',{name:'选购笔记本',exact:true}).click();
+ await expect(page.locator('#question')).toHaveValue(/2kg/);
+ await page.getByRole('button',{name:/打开笔记本决策演示/}).click();
+ await expect(page.locator('#workspace')).toBeVisible();
+ const original=page.url();
+ await page.getByRole('button',{name:'研究记录与版本',exact:true}).click();
+ await page.getByLabel('这次的倾向').selectOption('forge');
+ await page.getByLabel('你的判断').fill('我接受稍重的机身，希望把更多预算留给其他设备。');
+ await page.getByRole('button',{name:'记录这次判断 ↗',exact:true}).click();
+ await expect(page.locator('#decision-record-status')).toContainText('已记录');
+ await expect(page.getByLabel('这次的倾向')).toHaveValue('forge');
+ const saved=page.url();
+ expect(saved).not.toBe(original);
+ await page.reload();
+ await page.getByRole('button',{name:'研究记录与版本',exact:true}).click();
+ await expect(page.getByLabel('你的判断')).toHaveValue('我接受稍重的机身，希望把更多预算留给其他设备。');
+ await page.goto(original);
+ await page.getByRole('button',{name:'研究记录与版本',exact:true}).click();
+ await expect(page.locator('#decision-record-status')).toHaveText('尚未记录');
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+ expect(errors).toEqual([]);
+});

@@ -1,0 +1,104 @@
+import {test,expect} from '@playwright/test';
+import {completeFixture} from './complete-space.fixture.mjs';
+
+test('each scenario displays all eligible options; clicking a photo only opens details',async({page,request})=>{
+  const stored=await(await request.post('/api/spaces/demo')).json(),data={...stored,...completeFixture()};data.canvasScenarioIds=data.scenarios.map(s=>s.id);
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.route('**/api/spaces/'+data.id,r=>r.fulfill({json:data}));
+  await page.route('https://example.com/fixture-product-*.svg',r=>r.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="240" height="150"><rect width="240" height="150" fill="#dae8d4"/></svg>'}));
+  await page.goto('/#'+data.id);
+  await expect(page.locator('.tree-origin > .tree-candidates > .tree-choice')).toHaveCount(2);
+  await expect(page.locator('[data-tree-node="scenario-budget"] > .tree-candidates > .tree-choice')).toHaveCount(1);
+  await expect(page.locator('[data-tree-node="scenario-commute"] > .tree-candidates > .tree-choice')).toHaveCount(1);
+  await expect(page.locator('.tree-inspector')).toHaveCount(0);
+  await expect(page.locator('.tree-choice .u-price')).toHaveCount(0);
+  const baseline=await page.locator('.tree-origin > .tree-candidates').textContent();
+  await page.locator('[data-flow-condition="scenario-commute"] > [data-tree-condition]').click();
+  await expect(page.locator('.tree-inspector .u-option')).toHaveCount(0);
+  await expect(page.getByRole('group',{name:'预算上限',exact:true})).toBeVisible();
+  await page.locator('.board-controlbar [data-live-condition=price][data-live-value="6000"]').click();
+  await page.locator('.board-controlbar [data-live-condition=weight][data-live-value="2"]').click();
+  const choices=page.locator('[data-tree-node="scenario-commute"] > .tree-candidates > .tree-choice');
+  await expect(choices).toHaveCount(2);
+  await choices.filter({hasText:'联想'}).click();
+  await expect(page.locator('.u-option')).toContainText('4,688元');
+  await expect(page.locator('.u-filmstrip')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await choices.filter({hasText:'惠普'}).click();
+  await expect(page.locator('.u-option')).toContainText('5,199元');
+  await expect(choices).toHaveCount(2);
+  expect(await page.locator('.tree-origin > .tree-candidates').textContent()).toBe(baseline);
+  await expect(page.locator('.u-option .u-specs')).toHaveAttribute('open','');
+  await expect(page.locator('.u-option')).toContainText('512 GB');
+  await page.locator('.u-option').getByRole('button',{name:'查看依据'}).click();
+  const cpu=page.locator('.option-evidence article').filter({hasText:'处理器 · Core 5 210H'}).first();
+  await expect(cpu.locator('blockquote')).toContainText('CPU型号Core 5 210H');
+  await page.keyboard.press('Escape');
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test('no matches keep rejected references separate from the eligible grid',async({page,request})=>{
+  const stored=await(await request.post('/api/spaces/demo')).json(),data={...stored,...completeFixture()};data.canvasScenarioIds=data.scenarios.map(s=>s.id);
+  data.settings.budget=1000;data.settings.maxWeight=1;
+  data.scenarios.forEach(s=>{s.settings.budget=1000;s.settings.maxWeight=1;});
+  await page.route('**/api/spaces/'+data.id,r=>r.fulfill({json:data}));
+  await page.goto('/#'+data.id);
+  await expect(page.locator('.tree-node > .tree-candidates > .tree-choice')).toHaveCount(0);
+  await expect(page.locator('.tree-no-eligible')).toHaveCount(3);
+  await page.locator('[data-flow-condition="scenario-budget"] [data-tree-condition]').click();await page.locator('.inspector-references .tree-excluded > summary').click();
+  await page.locator('.inspector-references .tree-reference-choice').first().click();
+  await expect(page.locator('.tree-reference-note')).toContainText('未作为符合条件的推荐');
+  await expect(page.locator('.tree-reference-note')).toContainText('价格超过上限');
+});
+
+test('large eligible sets remain fully visible on the canvas instead of a carousel or selected winner',async({page,request})=>{
+  const stored=await(await request.post('/api/spaces/demo')).json(),data={...stored,...completeFixture()};data.canvasScenarioIds=data.scenarios.map(s=>s.id);
+  for(let i=0;i<7;i++){const c=structuredClone(data.candidates[0]);c.id='software-fixture-'+i;c.name='软件测试方案 '+i;c.facts.price={value:3000+i*100,status:'confirmed',sourceId:null,quote:'',confirmation:'user-assumption'};data.candidates.push(c);}
+  await page.route('**/api/spaces/'+data.id,r=>r.fulfill({json:data}));
+  await page.goto('/#'+data.id);
+  const tiles=page.locator('.tree-origin > .tree-candidates > .tree-choice');
+  await expect(tiles).toHaveCount(9);
+  expect(await tiles.evaluateAll(items=>items.every(e=>e.getBoundingClientRect().height>0))).toBe(true);
+  await tiles.first().click();await expect(tiles).toHaveCount(9);await page.keyboard.press('Escape');
+  await tiles.filter({hasText:'软件测试方案 6'}).click();await expect(tiles).toHaveCount(9);
+  await expect(page.locator('.u-option')).toContainText('软件测试方案');
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+});
+
+test('an agent-generated qualitative layout and a subsequent new dimension render without domain templates',async({page,request})=>{
+  const d=await(await request.post('/api/spaces/demo/housing')).json();
+  const schema={id:'adaptive',label:'带猫的明亮住处',optionLabel:'住处',reason:'优先检查养宠和采光。',fields:[{key:'pets',label:'允许带猫',type:'boolean',unit:'',direction:1,aliases:['带猫'],preferred:true},{key:'light',label:'自然采光',type:'enum',unit:'',direction:1,options:['充足','一般','不足'],aliases:['采光']}],layout:{primaryField:'light',summaryFields:['pets']}};
+  const initial={...d,title:'带猫的明亮住处',question:'找可以带猫、采光充足的住处。',mode:'live',schema,settings:{limits:{pets:true,light:'充足'},weights:{pets:1,light:1}},candidates:[{id:'a',name:'虚构测试住处',sourceId:'x',facts:{pets:{value:true,status:'cited',sourceId:'x',quote:'明确允许带猫'},light:{value:'充足',status:'cited',sourceId:'x',quote:'自然采光充足'}}}],sources:[{id:'x',title:'软件测试虚构资料',text:'虚构测试住处 明确允许带猫，自然采光充足。',kind:'fixture',url:null,retrievedAt:new Date().toISOString()}],baselineCandidateIds:['a'],scenarios:[],activeScenarioId:'scenario-baseline'};
+  initial.baselineSettings=structuredClone(initial.settings);
+  const next=structuredClone(initial);next.id=crypto.randomUUID();next.schema.fields.push({key:'quiet',label:'夜间安静',type:'boolean',unit:'',direction:1});next.schema.layout={primaryField:'quiet',summaryFields:['light','pets']};
+  next.baselineSettings.limits.quiet=null;next.baselineSettings.weights.quiet=0;
+  next.settings.limits.quiet=true;next.settings.weights.quiet=1;
+  next.scenarios=[{id:'quiet-branch',name:'还需要夜间安静',candidateIds:['a'],settings:next.settings}];next.activeScenarioId='quiet-branch';next.candidates[0].facts.quiet={value:true,status:'cited',sourceId:'x',quote:'夜间安静'};
+  const jobA=crypto.randomUUID(),jobB=crypto.randomUUID();
+  await page.route('**/api/health',async r=>{const h=await(await r.fetch()).json();return r.fulfill({json:{...h,live:true}});});
+  await page.route('**/api/settings',async r=>{const config=await(await r.fetch()).json();return r.fulfill({json:{...config,ready:true}});});
+  await page.route('**/api/research',r=>{expect(r.request().postDataJSON().adaptive).toBe(true);return r.fulfill({json:{id:jobA}});});
+  await page.route('**/api/jobs/'+jobA,r=>r.fulfill({json:{id:jobA,type:'research',status:'complete',events:[],spaceId:d.id}}));
+  await page.route('**/api/spaces/'+d.id,r=>r.fulfill({json:initial}));
+  await page.route('**/api/spaces/'+d.id+'/conversation',r=>r.fulfill({json:{...initial,conversation:[{role:'assistant',content:'Research is needed',researchRequest:r.request().postDataJSON().message,scenarioId:'scenario-baseline'}]}}));
+  await page.route('**/api/spaces/'+d.id+'/adapt',r=>{expect(r.request().postDataJSON().change).toBe('还需要夜间安静');return r.fulfill({json:{id:jobB}});});
+  await page.route('**/api/jobs/'+jobB,r=>r.fulfill({json:{id:jobB,type:'adapt',status:'complete',events:[],spaceId:next.id}}));
+  await page.route('**/api/spaces/'+next.id,r=>r.fulfill({json:next}));
+  await page.goto('/');await page.locator('#question').fill(initial.question);
+  await page.getByRole('button',{name:'开始研究',exact:true}).click();
+  await page.locator('.tree-origin .tree-choice').first().click();
+  await expect(page.locator('.u-option').last().locator('.u-price')).toHaveText('充足');
+  await expect(page.locator('.board-controlbar')).toContainText('允许带猫');
+  await expect(page.locator('.board-controlbar')).not.toContainText('月租');
+  await expect(page.locator('.board-controlbar')).not.toContainText('面积');
+  await page.keyboard.press('Escape');
+  await page.locator('[data-tree-compose]').first().click();
+  await page.locator('#conversation-message').fill('还需要夜间安静');await page.locator('#u-conversation').evaluate(form=>form.requestSubmit());await page.locator('[data-chat-research]').last().click();
+  await page.locator('[data-tree-node="quiet-branch"] .tree-choice').click();
+  await expect(page.locator('.board-controlbar')).toContainText('夜间安静');
+  await expect(page.locator('.u-option').last().locator('.u-price')).toHaveText('是');
+  await expect(page.locator('.tree-origin')).not.toContainText('夜间安静');
+});

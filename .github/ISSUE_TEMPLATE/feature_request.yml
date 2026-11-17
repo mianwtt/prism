@@ -1,0 +1,17 @@
+name: Feature request
+description: Propose an improvement to research, What-if exploration or decision memory
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to decide?
+      description: Describe the user task and where the current workflow falls short. Use fictional or sanitized examples.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What should improve?
+      description: Describe the desired behavior and why it helps. Please keep credentials and personal decisions out of this issue.
+    validations:
+      required: true

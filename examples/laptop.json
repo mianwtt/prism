@@ -1,0 +1,530 @@
+{
+  "title": "Java 开发笔记本：预算与便携性对比 · 虚构演示",
+  "question": "预算 7000 元，选一台适合 Java 开发的笔记本，关注内存、重量和价格。",
+  "mode": "demo",
+  "settings": {
+    "limits": {
+      "price": 7000,
+      "memory": 16,
+      "weight": 2,
+      "battery": null
+    },
+    "weights": {
+      "price": 35,
+      "memory": 25,
+      "weight": 30,
+      "battery": 10
+    },
+    "evidenceMode": "reviewed"
+  },
+  "sources": [
+    {
+      "id": "source-atlas",
+      "title": "Atlas 14 · 固定测试资料",
+      "url": null,
+      "retrievedAt": "2026-11-09T00:00:00.000Z",
+      "kind": "fixture",
+      "text": "Atlas 14。价格 6499 元。内存 32 GB。重量 1.42 kg。标称续航 12 小时。以上均为虚构测试数据，不对应任何在售商品。"
+    },
+    {
+      "id": "source-forge",
+      "title": "Forge 15 · 固定测试资料",
+      "url": null,
+      "retrievedAt": "2026-11-09T00:00:00.000Z",
+      "kind": "fixture",
+      "text": "Forge 15。价格 5999 元。内存 16 GB。重量 1.65 kg。标称续航 8 小时。以上均为虚构测试数据，不对应任何在售商品。"
+    },
+    {
+      "id": "source-aero",
+      "title": "Aero 13 · 固定测试资料",
+      "url": null,
+      "retrievedAt": "2026-11-09T00:00:00.000Z",
+      "kind": "fixture",
+      "text": "Aero 13。价格 7299 元。内存 32 GB。重量 1.3 kg。标称续航 15 小时。以上均为虚构测试数据，不对应任何在售商品。"
+    },
+    {
+      "id": "offer-atlas",
+      "title": "Atlas 14 · 合成渠道报价",
+      "url": null,
+      "retrievedAt": "2026-11-09T00:00:00.000Z",
+      "kind": "fixture",
+      "text": "Atlas 14 同一测试配置，价格 6499 元，内存 32 GB。合成渠道资料，不是真实商家或实际报价。"
+    },
+    {
+      "id": "offer-forge",
+      "title": "Forge 15 · 合成渠道报价",
+      "url": null,
+      "retrievedAt": "2026-11-09T00:00:00.000Z",
+      "kind": "fixture",
+      "text": "Forge 15 同一测试配置，价格 5999 元，内存 16 GB。合成渠道资料，不是真实商家或实际报价。"
+    },
+    {
+      "id": "offer-aero",
+      "title": "Aero 13 · 合成渠道报价",
+      "url": null,
+      "retrievedAt": "2026-11-09T00:00:00.000Z",
+      "kind": "fixture",
+      "text": "Aero 13 同一测试配置，价格 7299 元，内存 32 GB。合成渠道资料，不是真实商家或实际报价。"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "atlas",
+      "name": "Atlas 14",
+      "tag": "均衡开发本",
+      "facts": {
+        "price": {
+          "value": 6499,
+          "sourceId": "source-atlas",
+          "quote": "Atlas 14。价格 6499 元。内存 32 GB。重量 1.42 kg。标称续航 12 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 6499,
+              "sourceId": "source-atlas",
+              "quote": "Atlas 14。价格 6499 元。内存 32 GB。重量 1.42 kg。标称续航 12 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            },
+            {
+              "value": 6499,
+              "sourceId": "offer-atlas",
+              "quote": "Atlas 14 同一测试配置，价格 6499 元，内存 32 GB。合成渠道资料，不是真实商家或实际报价。",
+              "status": "confirmed"
+            }
+          ]
+        },
+        "memory": {
+          "value": 32,
+          "sourceId": "source-atlas",
+          "quote": "Atlas 14。价格 6499 元。内存 32 GB。重量 1.42 kg。标称续航 12 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 32,
+              "sourceId": "source-atlas",
+              "quote": "Atlas 14。价格 6499 元。内存 32 GB。重量 1.42 kg。标称续航 12 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            },
+            {
+              "value": 32,
+              "sourceId": "offer-atlas",
+              "quote": "Atlas 14 同一测试配置，价格 6499 元，内存 32 GB。合成渠道资料，不是真实商家或实际报价。",
+              "status": "confirmed"
+            }
+          ]
+        },
+        "weight": {
+          "value": 1.42,
+          "sourceId": "source-atlas",
+          "quote": "Atlas 14。价格 6499 元。内存 32 GB。重量 1.42 kg。标称续航 12 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 1.42,
+              "sourceId": "source-atlas",
+              "quote": "Atlas 14。价格 6499 元。内存 32 GB。重量 1.42 kg。标称续航 12 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            }
+          ]
+        },
+        "battery": {
+          "value": 12,
+          "sourceId": "source-atlas",
+          "quote": "Atlas 14。价格 6499 元。内存 32 GB。重量 1.42 kg。标称续航 12 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 12,
+              "sourceId": "source-atlas",
+              "quote": "Atlas 14。价格 6499 元。内存 32 GB。重量 1.42 kg。标称续航 12 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            }
+          ]
+        }
+      },
+      "sourceId": "source-atlas",
+      "displayDetails": []
+    },
+    {
+      "id": "forge",
+      "name": "Forge 15",
+      "tag": "预算优先",
+      "facts": {
+        "price": {
+          "value": 5999,
+          "sourceId": "source-forge",
+          "quote": "Forge 15。价格 5999 元。内存 16 GB。重量 1.65 kg。标称续航 8 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 5999,
+              "sourceId": "source-forge",
+              "quote": "Forge 15。价格 5999 元。内存 16 GB。重量 1.65 kg。标称续航 8 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            },
+            {
+              "value": 5999,
+              "sourceId": "offer-forge",
+              "quote": "Forge 15 同一测试配置，价格 5999 元，内存 16 GB。合成渠道资料，不是真实商家或实际报价。",
+              "status": "confirmed"
+            }
+          ]
+        },
+        "memory": {
+          "value": 16,
+          "sourceId": "source-forge",
+          "quote": "Forge 15。价格 5999 元。内存 16 GB。重量 1.65 kg。标称续航 8 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 16,
+              "sourceId": "source-forge",
+              "quote": "Forge 15。价格 5999 元。内存 16 GB。重量 1.65 kg。标称续航 8 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            },
+            {
+              "value": 16,
+              "sourceId": "offer-forge",
+              "quote": "Forge 15 同一测试配置，价格 5999 元，内存 16 GB。合成渠道资料，不是真实商家或实际报价。",
+              "status": "confirmed"
+            }
+          ]
+        },
+        "weight": {
+          "value": 1.65,
+          "sourceId": "source-forge",
+          "quote": "Forge 15。价格 5999 元。内存 16 GB。重量 1.65 kg。标称续航 8 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 1.65,
+              "sourceId": "source-forge",
+              "quote": "Forge 15。价格 5999 元。内存 16 GB。重量 1.65 kg。标称续航 8 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            }
+          ]
+        },
+        "battery": {
+          "value": 8,
+          "sourceId": "source-forge",
+          "quote": "Forge 15。价格 5999 元。内存 16 GB。重量 1.65 kg。标称续航 8 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 8,
+              "sourceId": "source-forge",
+              "quote": "Forge 15。价格 5999 元。内存 16 GB。重量 1.65 kg。标称续航 8 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            }
+          ]
+        }
+      },
+      "sourceId": "source-forge",
+      "displayDetails": []
+    },
+    {
+      "id": "aero",
+      "name": "Aero 13",
+      "tag": "便携优先",
+      "facts": {
+        "price": {
+          "value": 7299,
+          "sourceId": "source-aero",
+          "quote": "Aero 13。价格 7299 元。内存 32 GB。重量 1.3 kg。标称续航 15 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 7299,
+              "sourceId": "source-aero",
+              "quote": "Aero 13。价格 7299 元。内存 32 GB。重量 1.3 kg。标称续航 15 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            },
+            {
+              "value": 7299,
+              "sourceId": "offer-aero",
+              "quote": "Aero 13 同一测试配置，价格 7299 元，内存 32 GB。合成渠道资料，不是真实商家或实际报价。",
+              "status": "confirmed"
+            }
+          ]
+        },
+        "memory": {
+          "value": 32,
+          "sourceId": "source-aero",
+          "quote": "Aero 13。价格 7299 元。内存 32 GB。重量 1.3 kg。标称续航 15 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 32,
+              "sourceId": "source-aero",
+              "quote": "Aero 13。价格 7299 元。内存 32 GB。重量 1.3 kg。标称续航 15 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            },
+            {
+              "value": 32,
+              "sourceId": "offer-aero",
+              "quote": "Aero 13 同一测试配置，价格 7299 元，内存 32 GB。合成渠道资料，不是真实商家或实际报价。",
+              "status": "confirmed"
+            }
+          ]
+        },
+        "weight": {
+          "value": 1.3,
+          "sourceId": "source-aero",
+          "quote": "Aero 13。价格 7299 元。内存 32 GB。重量 1.3 kg。标称续航 15 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 1.3,
+              "sourceId": "source-aero",
+              "quote": "Aero 13。价格 7299 元。内存 32 GB。重量 1.3 kg。标称续航 15 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            }
+          ]
+        },
+        "battery": {
+          "value": 15,
+          "sourceId": "source-aero",
+          "quote": "Aero 13。价格 7299 元。内存 32 GB。重量 1.3 kg。标称续航 15 小时。以上均为虚构测试数据，不对应任何在售商品。",
+          "status": "confirmed",
+          "confirmation": "synthetic-fixture",
+          "evidence": [
+            {
+              "value": 15,
+              "sourceId": "source-aero",
+              "quote": "Aero 13。价格 7299 元。内存 32 GB。重量 1.3 kg。标称续航 15 小时。以上均为虚构测试数据，不对应任何在售商品。",
+              "status": "confirmed"
+            }
+          ]
+        }
+      },
+      "sourceId": "source-aero",
+      "displayDetails": []
+    }
+  ],
+  "trace": [
+    {
+      "type": "demo",
+      "message": "已载入固定测试资料；没有发起联网搜索或模型调用。"
+    }
+  ],
+  "schema": {
+    "id": "imported",
+    "label": "已保存的选择",
+    "optionLabel": "方案",
+    "fields": [
+      {
+        "key": "price",
+        "label": "价格",
+        "conditionLabel": "预算",
+        "type": "number",
+        "unit": "元",
+        "direction": -1,
+        "preferred": null,
+        "options": [],
+        "range": {
+          "min": 2000,
+          "max": 12000
+        },
+        "step": 1000,
+        "aliases": [
+          "预算"
+        ],
+        "reason": ""
+      },
+      {
+        "key": "memory",
+        "label": "内存",
+        "conditionLabel": "内存",
+        "type": "number",
+        "unit": "GB",
+        "direction": 1,
+        "preferred": null,
+        "options": [],
+        "range": {
+          "min": 8,
+          "max": 64
+        },
+        "step": 16,
+        "aliases": [],
+        "reason": ""
+      },
+      {
+        "key": "weight",
+        "label": "重量",
+        "conditionLabel": "重量",
+        "type": "number",
+        "unit": "kg",
+        "direction": -1,
+        "preferred": null,
+        "options": [],
+        "range": {
+          "min": 0.8,
+          "max": 3
+        },
+        "step": 0.2,
+        "aliases": [],
+        "reason": ""
+      },
+      {
+        "key": "battery",
+        "label": "标称续航",
+        "conditionLabel": "标称续航",
+        "type": "number",
+        "unit": "小时",
+        "direction": 1,
+        "preferred": null,
+        "options": [],
+        "range": {
+          "min": 0,
+          "max": 20
+        },
+        "step": 1,
+        "aliases": [],
+        "reason": ""
+      }
+    ],
+    "layout": {
+      "primaryField": "price",
+      "summaryFields": [
+        "memory",
+        "weight"
+      ]
+    },
+    "reason": "沿用这个空间已保存的比较维度和来源。"
+  },
+  "baselineSettings": {
+    "limits": {
+      "price": 7000,
+      "memory": 16,
+      "weight": 2,
+      "battery": null
+    },
+    "weights": {
+      "price": 35,
+      "memory": 25,
+      "weight": 30,
+      "battery": 10
+    },
+    "evidenceMode": "reviewed"
+  },
+  "scenarios": [
+    {
+      "id": "scenario-baseline",
+      "name": "当前情况",
+      "settings": {
+        "limits": {
+          "price": 7000,
+          "memory": 16,
+          "weight": 2,
+          "battery": null
+        },
+        "weights": {
+          "price": 35,
+          "memory": 25,
+          "weight": 30,
+          "battery": 10
+        },
+        "evidenceMode": "reviewed"
+      },
+      "candidateIds": [
+        "atlas",
+        "forge",
+        "aero"
+      ]
+    },
+    {
+      "id": "example-0",
+      "parentScenarioId": "scenario-baseline",
+      "name": "预算收紧",
+      "settings": {
+        "limits": {
+          "price": 6000,
+          "memory": 16,
+          "weight": 2,
+          "battery": null
+        },
+        "weights": {
+          "price": 35,
+          "memory": 25,
+          "weight": 30,
+          "battery": 10
+        },
+        "evidenceMode": "reviewed"
+      },
+      "candidateIds": [
+        "atlas",
+        "forge",
+        "aero"
+      ]
+    },
+    {
+      "id": "example-1",
+      "parentScenarioId": "scenario-baseline",
+      "name": "轻装出门",
+      "settings": {
+        "limits": {
+          "price": 8000,
+          "memory": 16,
+          "weight": 1.35,
+          "battery": null
+        },
+        "weights": {
+          "price": 35,
+          "memory": 25,
+          "weight": 30,
+          "battery": 10
+        },
+        "evidenceMode": "reviewed"
+      },
+      "candidateIds": [
+        "atlas",
+        "forge",
+        "aero"
+      ]
+    },
+    {
+      "id": "example-2",
+      "parentScenarioId": "scenario-baseline",
+      "name": "更多内存",
+      "settings": {
+        "limits": {
+          "price": 8000,
+          "memory": 32,
+          "weight": 2,
+          "battery": null
+        },
+        "weights": {
+          "price": 35,
+          "memory": 25,
+          "weight": 30,
+          "battery": 10
+        },
+        "evidenceMode": "reviewed"
+      },
+      "candidateIds": [
+        "atlas",
+        "forge",
+        "aero"
+      ]
+    }
+  ],
+  "activeScenarioId": "example-0",
+  "importedFromLegacy": true,
+  "canvasScenarioIds": [
+    "scenario-baseline",
+    "example-0",
+    "example-1",
+    "example-2"
+  ]
+}

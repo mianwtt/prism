@@ -1,0 +1,408 @@
+[
+  {
+    "id": "cny-symbol-decimals",
+    "field": {
+      "key": "price",
+      "label": "价格",
+      "unit": "元"
+    },
+    "value": 5199,
+    "quote": "¥5,199.00",
+    "accept": true
+  },
+  {
+    "id": "cny-number-unit",
+    "field": {
+      "key": "price",
+      "label": "价格",
+      "unit": "元"
+    },
+    "value": 5199,
+    "quote": "页面标价5199元",
+    "accept": true
+  },
+  {
+    "id": "cny-starting",
+    "field": {
+      "key": "price",
+      "label": "价格",
+      "unit": "元"
+    },
+    "value": 5199,
+    "quote": "价格5199元起",
+    "accept": false
+  },
+  {
+    "id": "cny-reference",
+    "field": {
+      "key": "price",
+      "label": "价格",
+      "unit": "元"
+    },
+    "value": 5199,
+    "quote": "参考价5199元",
+    "accept": false
+  },
+  {
+    "id": "cny-coupon",
+    "field": {
+      "key": "price",
+      "label": "价格",
+      "unit": "元"
+    },
+    "value": 4199,
+    "quote": "券后4199元",
+    "accept": false
+  },
+  {
+    "id": "cny-subsidy",
+    "field": {
+      "key": "price",
+      "label": "价格",
+      "unit": "元"
+    },
+    "value": 4199,
+    "quote": "国补后4199元",
+    "accept": false
+  },
+  {
+    "id": "cny-trade-in",
+    "field": {
+      "key": "price",
+      "label": "价格",
+      "unit": "元"
+    },
+    "value": 4199,
+    "quote": "以旧换新4199元",
+    "accept": false
+  },
+  {
+    "id": "cny-range",
+    "field": {
+      "key": "price",
+      "label": "价格",
+      "unit": "元"
+    },
+    "value": 5199,
+    "quote": "价格区间4199-5199元",
+    "accept": false
+  },
+  {
+    "id": "cny-dollar-mismatch",
+    "field": {
+      "key": "price",
+      "label": "价格",
+      "unit": "元"
+    },
+    "value": 5199,
+    "quote": "售价5199美元",
+    "accept": false
+  },
+  {
+    "id": "news-price",
+    "field": {
+      "key": "price",
+      "label": "价格",
+      "unit": "元"
+    },
+    "value": 5199,
+    "quote": "售价5199元",
+    "title": "上市新闻：测试方案甲",
+    "accept": false
+  },
+  {
+    "id": "rent-monthly",
+    "field": {
+      "key": "rent",
+      "label": "月租",
+      "unit": "元/月"
+    },
+    "value": 3200,
+    "quote": "月租3200元/月",
+    "accept": true
+  },
+  {
+    "id": "rent-symbol-monthly",
+    "field": {
+      "key": "rent",
+      "label": "月租",
+      "unit": "元/月"
+    },
+    "value": 3200,
+    "quote": "￥3,200/月",
+    "accept": true
+  },
+  {
+    "id": "rent-yearly-mismatch",
+    "field": {
+      "key": "rent",
+      "label": "月租",
+      "unit": "元/月"
+    },
+    "value": 3200,
+    "quote": "租金3200元/年",
+    "accept": false
+  },
+  {
+    "id": "rent-daily-mismatch",
+    "field": {
+      "key": "rent",
+      "label": "月租",
+      "unit": "元/月"
+    },
+    "value": 3200,
+    "quote": "月租3200元/天",
+    "accept": false
+  },
+  {
+    "id": "area-chinese",
+    "field": {
+      "key": "area",
+      "label": "面积",
+      "unit": "㎡"
+    },
+    "value": 32,
+    "quote": "面积32平方米",
+    "accept": true
+  },
+  {
+    "id": "area-square-symbol",
+    "field": {
+      "key": "area",
+      "label": "面积",
+      "unit": "㎡"
+    },
+    "value": 32,
+    "quote": "面积32㎡",
+    "accept": true
+  },
+  {
+    "id": "commute-distance-not-time",
+    "field": {
+      "key": "commute",
+      "label": "通勤",
+      "unit": "分钟"
+    },
+    "value": 3,
+    "quote": "距离公司3公里",
+    "accept": false
+  },
+  {
+    "id": "commute-minutes",
+    "field": {
+      "key": "commute",
+      "label": "通勤",
+      "unit": "分钟"
+    },
+    "value": 25,
+    "quote": "通勤25分钟",
+    "accept": true
+  },
+  {
+    "id": "ram-gb",
+    "field": {
+      "key": "ram",
+      "label": "内存",
+      "unit": "GB"
+    },
+    "value": 24,
+    "quote": "内存24GB",
+    "accept": true
+  },
+  {
+    "id": "vram-is-not-ram",
+    "field": {
+      "key": "ram",
+      "label": "内存",
+      "unit": "GB"
+    },
+    "value": 24,
+    "quote": "显存24GB",
+    "accept": false
+  },
+  {
+    "id": "number-substring",
+    "field": {
+      "key": "ram",
+      "label": "内存",
+      "unit": "GB"
+    },
+    "value": 16,
+    "quote": "内存216GB",
+    "accept": false
+  },
+  {
+    "id": "weight-kg",
+    "field": {
+      "key": "weight",
+      "label": "重量",
+      "unit": "kg"
+    },
+    "value": 1.64,
+    "quote": "机身重量1.64kg",
+    "accept": true
+  },
+  {
+    "id": "weight-chinese",
+    "field": {
+      "key": "weight",
+      "label": "重量",
+      "unit": "kg"
+    },
+    "value": 1.64,
+    "quote": "净重1.64千克",
+    "accept": true
+  },
+  {
+    "id": "weight-package",
+    "field": {
+      "key": "weight",
+      "label": "重量",
+      "unit": "kg"
+    },
+    "value": 2,
+    "quote": "包装毛重2kg",
+    "accept": false
+  },
+  {
+    "id": "battery-capacity-not-hours",
+    "field": {
+      "key": "battery",
+      "label": "续航",
+      "unit": "小时"
+    },
+    "value": 70,
+    "quote": "电池容量70Wh",
+    "accept": false
+  },
+  {
+    "id": "pets-explicit-yes",
+    "field": {
+      "key": "pets",
+      "label": "允许养宠",
+      "type": "boolean",
+      "aliases": [
+        "养宠"
+      ]
+    },
+    "value": true,
+    "quote": "明确允许养宠",
+    "accept": true
+  },
+  {
+    "id": "pets-negation-mismatch",
+    "field": {
+      "key": "pets",
+      "label": "允许养宠",
+      "type": "boolean",
+      "aliases": [
+        "养宠"
+      ]
+    },
+    "value": true,
+    "quote": "不允许养宠",
+    "accept": false
+  },
+  {
+    "id": "pets-explicit-no",
+    "field": {
+      "key": "pets",
+      "label": "允许养宠",
+      "type": "boolean",
+      "aliases": [
+        "养宠"
+      ]
+    },
+    "value": false,
+    "quote": "不允许养宠",
+    "accept": true
+  },
+  {
+    "id": "quiet-unrelated-quote",
+    "field": {
+      "key": "quiet",
+      "label": "安静",
+      "type": "boolean"
+    },
+    "value": true,
+    "quote": "周边交通方便",
+    "accept": false
+  },
+  {
+    "id": "enum-explicit",
+    "field": {
+      "key": "light",
+      "label": "采光",
+      "type": "enum",
+      "options": [
+        "充足",
+        "一般",
+        "不足"
+      ]
+    },
+    "value": "充足",
+    "quote": "采光充足",
+    "accept": true
+  },
+  {
+    "id": "enum-inferred",
+    "field": {
+      "key": "light",
+      "label": "采光",
+      "type": "enum",
+      "options": [
+        "充足",
+        "一般",
+        "不足"
+      ]
+    },
+    "value": "充足",
+    "quote": "位于三楼朝南",
+    "accept": false
+  },
+  {
+    "id": "fabricated-quote",
+    "field": {
+      "key": "fee",
+      "label": "费用",
+      "unit": "元"
+    },
+    "value": 300,
+    "quote": "费用300元",
+    "sourceText": "测试方案甲 费用600元",
+    "accept": false
+  },
+  {
+    "id": "weight-grams-conversion",
+    "field": {
+      "key": "mass_g",
+      "label": "重量",
+      "unit": "g"
+    },
+    "value": 1640,
+    "quote": "净重1.64kg",
+    "accept": true
+  },
+  {
+    "id": "time-hours-conversion",
+    "field": {
+      "key": "duration",
+      "label": "耗时",
+      "unit": "分钟"
+    },
+    "value": 120,
+    "quote": "总耗时2小时",
+    "accept": true
+  },
+  {
+    "id": "unit-wrong-conversion",
+    "field": {
+      "key": "mass_g",
+      "label": "重量",
+      "unit": "g"
+    },
+    "value": 2,
+    "quote": "净重2kg",
+    "accept": false
+  }
+]

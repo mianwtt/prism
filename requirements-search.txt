@@ -1,0 +1,2 @@
+# Optional local search backend; installed into an isolated environment.
+tofu-search==0.12.25

@@ -1,0 +1,337 @@
+{
+  "title": "住得更近，还是住得更宽敞？ · 虚构演示",
+  "question": "在杭州租房，月租预算 4000 元，面积至少 30 平米，通勤不超过 45 分钟。比较租金、空间和通勤的取舍。",
+  "mode": "demo",
+  "schema": {
+    "id": "housing",
+    "label": "租房选择",
+    "optionLabel": "房源",
+    "fields": [
+      {
+        "key": "price",
+        "label": "月租",
+        "conditionLabel": "月租",
+        "type": "number",
+        "unit": "元/月",
+        "direction": -1,
+        "preferred": null,
+        "options": [],
+        "range": null,
+        "step": 500,
+        "aliases": [
+          "租金",
+          "预算"
+        ],
+        "reason": ""
+      },
+      {
+        "key": "area",
+        "label": "面积",
+        "conditionLabel": "面积",
+        "type": "number",
+        "unit": "㎡",
+        "direction": 1,
+        "preferred": null,
+        "options": [],
+        "range": null,
+        "step": 10,
+        "aliases": [],
+        "reason": ""
+      },
+      {
+        "key": "commute",
+        "label": "通勤",
+        "conditionLabel": "通勤",
+        "type": "number",
+        "unit": "分钟",
+        "direction": -1,
+        "preferred": null,
+        "options": [],
+        "range": null,
+        "step": 10,
+        "aliases": [],
+        "reason": ""
+      }
+    ],
+    "layout": {
+      "primaryField": "price",
+      "summaryFields": [
+        "area",
+        "commute"
+      ]
+    },
+    "reason": ""
+  },
+  "settings": {
+    "limits": {
+      "price": 4000,
+      "area": 30,
+      "commute": 45
+    },
+    "weights": {
+      "price": 1,
+      "area": 1,
+      "commute": 1
+    }
+  },
+  "baselineSettings": {
+    "limits": {
+      "price": 4000,
+      "area": 30,
+      "commute": 45
+    },
+    "weights": {
+      "price": 1,
+      "area": 1,
+      "commute": 1
+    }
+  },
+  "baselineCandidateIds": [
+    "housing-0",
+    "housing-1",
+    "housing-2",
+    "housing-3"
+  ],
+  "candidates": [
+    {
+      "id": "housing-0",
+      "name": "沿河一居",
+      "sourceId": "housing-example-0",
+      "enabled": true,
+      "facts": {
+        "price": {
+          "value": 3200,
+          "status": "example",
+          "quote": "沿河一居，月租 3200 元/月，面积 32 ㎡，通勤 42 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-0"
+        },
+        "area": {
+          "value": 32,
+          "status": "example",
+          "quote": "沿河一居，月租 3200 元/月，面积 32 ㎡，通勤 42 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-0"
+        },
+        "commute": {
+          "value": 42,
+          "status": "example",
+          "quote": "沿河一居，月租 3200 元/月，面积 32 ㎡，通勤 42 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-0"
+        }
+      }
+    },
+    {
+      "id": "housing-1",
+      "name": "地铁旁一居",
+      "sourceId": "housing-example-1",
+      "enabled": true,
+      "facts": {
+        "price": {
+          "value": 3900,
+          "status": "example",
+          "quote": "地铁旁一居，月租 3900 元/月，面积 40 ㎡，通勤 25 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-1"
+        },
+        "area": {
+          "value": 40,
+          "status": "example",
+          "quote": "地铁旁一居，月租 3900 元/月，面积 40 ㎡，通勤 25 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-1"
+        },
+        "commute": {
+          "value": 25,
+          "status": "example",
+          "quote": "地铁旁一居，月租 3900 元/月，面积 40 ㎡，通勤 25 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-1"
+        }
+      }
+    },
+    {
+      "id": "housing-2",
+      "name": "近公司两居",
+      "sourceId": "housing-example-2",
+      "enabled": true,
+      "facts": {
+        "price": {
+          "value": 4600,
+          "status": "example",
+          "quote": "近公司两居，月租 4600 元/月，面积 58 ㎡，通勤 15 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-2"
+        },
+        "area": {
+          "value": 58,
+          "status": "example",
+          "quote": "近公司两居，月租 4600 元/月，面积 58 ㎡，通勤 15 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-2"
+        },
+        "commute": {
+          "value": 15,
+          "status": "example",
+          "quote": "近公司两居，月租 4600 元/月，面积 58 ㎡，通勤 15 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-2"
+        }
+      }
+    },
+    {
+      "id": "housing-3",
+      "name": "远郊大两居",
+      "sourceId": "housing-example-3",
+      "enabled": true,
+      "facts": {
+        "price": {
+          "value": 3500,
+          "status": "example",
+          "quote": "远郊大两居，月租 3500 元/月，面积 62 ㎡，通勤 60 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-3"
+        },
+        "area": {
+          "value": 62,
+          "status": "example",
+          "quote": "远郊大两居，月租 3500 元/月，面积 62 ㎡，通勤 60 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-3"
+        },
+        "commute": {
+          "value": 60,
+          "status": "example",
+          "quote": "远郊大两居，月租 3500 元/月，面积 62 ㎡，通勤 60 分钟。所有数据为虚构示例。",
+          "sourceId": "housing-example-3"
+        }
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "housing-example-0",
+      "title": "沿河一居 · 虚构演示",
+      "kind": "fixture",
+      "url": null,
+      "text": "沿河一居，月租 3200 元/月，面积 32 ㎡，通勤 42 分钟。所有数据为虚构示例。",
+      "retrievedAt": "2026-11-09T00:00:00.000Z"
+    },
+    {
+      "id": "housing-example-1",
+      "title": "地铁旁一居 · 虚构演示",
+      "kind": "fixture",
+      "url": null,
+      "text": "地铁旁一居，月租 3900 元/月，面积 40 ㎡，通勤 25 分钟。所有数据为虚构示例。",
+      "retrievedAt": "2026-11-09T00:00:00.000Z"
+    },
+    {
+      "id": "housing-example-2",
+      "title": "近公司两居 · 虚构演示",
+      "kind": "fixture",
+      "url": null,
+      "text": "近公司两居，月租 4600 元/月，面积 58 ㎡，通勤 15 分钟。所有数据为虚构示例。",
+      "retrievedAt": "2026-11-09T00:00:00.000Z"
+    },
+    {
+      "id": "housing-example-3",
+      "title": "远郊大两居 · 虚构演示",
+      "kind": "fixture",
+      "url": null,
+      "text": "远郊大两居，月租 3500 元/月，面积 62 ㎡，通勤 60 分钟。所有数据为虚构示例。",
+      "retrievedAt": "2026-11-09T00:00:00.000Z"
+    }
+  ],
+  "trace": [],
+  "warnings": [],
+  "activeScenarioId": "example-0",
+  "scenarios": [
+    {
+      "id": "scenario-baseline",
+      "name": "当前情况",
+      "settings": {
+        "limits": {
+          "price": 4000,
+          "area": 30,
+          "commute": 45
+        },
+        "weights": {
+          "price": 1,
+          "area": 1,
+          "commute": 1
+        }
+      },
+      "candidateIds": [
+        "housing-0",
+        "housing-1",
+        "housing-2",
+        "housing-3"
+      ]
+    },
+    {
+      "id": "example-0",
+      "parentScenarioId": "scenario-baseline",
+      "name": "更近一点",
+      "settings": {
+        "limits": {
+          "price": 4000,
+          "area": 30,
+          "commute": 30
+        },
+        "weights": {
+          "price": 1,
+          "area": 1,
+          "commute": 1
+        }
+      },
+      "candidateIds": [
+        "housing-0",
+        "housing-1",
+        "housing-2",
+        "housing-3"
+      ]
+    },
+    {
+      "id": "example-1",
+      "parentScenarioId": "scenario-baseline",
+      "name": "空间优先",
+      "settings": {
+        "limits": {
+          "price": 4000,
+          "area": 50,
+          "commute": 45
+        },
+        "weights": {
+          "price": 1,
+          "area": 1,
+          "commute": 1
+        }
+      },
+      "candidateIds": [
+        "housing-0",
+        "housing-1",
+        "housing-2",
+        "housing-3"
+      ]
+    },
+    {
+      "id": "example-2",
+      "parentScenarioId": "scenario-baseline",
+      "name": "多一点预算",
+      "settings": {
+        "limits": {
+          "price": 5000,
+          "area": 30,
+          "commute": 45
+        },
+        "weights": {
+          "price": 1,
+          "area": 1,
+          "commute": 1
+        }
+      },
+      "candidateIds": [
+        "housing-0",
+        "housing-1",
+        "housing-2",
+        "housing-3"
+      ]
+    }
+  ],
+  "canvasScenarioIds": [
+    "scenario-baseline",
+    "example-0",
+    "example-1",
+    "example-2"
+  ]
+}

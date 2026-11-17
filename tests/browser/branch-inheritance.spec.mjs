@@ -1,0 +1,53 @@
+import {test,expect} from '@playwright/test';
+import {inheritanceFixture} from './inheritance-space.fixture.mjs';
+
+test('16 to 32 updates descendants, removes empty continuation arrows, marks recovery and undo restores the tree',async({page,request})=>{
+ const original=inheritanceFixture(),data=await(await request.post('/api/spaces/import',{data:original})).json();
+ await page.setViewportSize({width:1920,height:1080});await page.goto('/#'+data.id);
+ await page.locator('[data-flow-condition=expanded] [data-tree-condition]').click();
+ const root=page.locator('.universal-root'),parent=page.locator('[data-tree-node=expanded]');
+ await expect(parent.locator('.tree-choice')).toHaveCount(3);
+ const zoom=await root.getAttribute('data-flow-zoom');
+ await page.locator('.canvas-inspector [data-live-condition=memory][data-live-value="32"]').click();
+ await expect(parent.locator('.tree-choice')).toHaveCount(0);
+ await expect(page.locator('[data-flow-row=budget]')).toHaveCount(0);await expect(page.locator('[data-flow-row=light]')).toHaveCount(0);
+ await expect(page.locator('[data-flow-edge=budget]')).toHaveCount(0);await expect(page.locator('[data-flow-edge=light]')).toHaveCount(0);
+ await expect(page.locator('[data-tree-node=memory] .tree-choice')).toHaveCount(1);
+ await expect(page.locator('[data-flow-condition=memory]')).toContainText('放宽内存');await expect(page.locator('[data-flow-condition=memory]')).toContainText('32GB');
+ await expect(page.locator('[data-flow-edge=memory]').first()).toHaveAttribute('data-flow-state','recovery');
+ await expect(parent.locator('.empty-followups')).toContainText('2 条空结果分支');
+ await expect(page.locator('.tree-origin .tree-choice')).toHaveCount(2);await expect(page.locator('.tree-origin .board-limits')).toContainText('16GB');
+ expect(await root.getAttribute('data-flow-zoom')).toBe(zoom);
+ await page.getByRole('button',{name:'撤销',exact:true}).click();
+ await expect(parent.locator('.tree-choice')).toHaveCount(3);await expect(page.locator('[data-flow-row=budget]')).toHaveCount(1);await expect(page.locator('[data-flow-row=light]')).toHaveCount(1);
+ await expect(page.locator('[data-tree-node=budget] .tree-choice')).toHaveCount(1);
+ await page.locator('[data-live-condition=memory][data-live-value="32"]').click();
+ await page.locator('.space-menu>summary').click();await page.locator('[data-u-save]').click();
+ await expect.poll(()=>page.evaluate(()=>location.hash.slice(1))).not.toBe(data.id);
+ const saved=await(await request.get('/api/spaces/'+await page.evaluate(()=>location.hash.slice(1)))).json();
+ expect(saved.scenarios.find(s=>s.id==='budget').settings.limits.memory).toBe(32);expect(saved.scenarios.find(s=>s.id==='light').settings.limits.memory).toBe(32);
+ expect(saved.scenarios.find(s=>s.id==='memory').settings.limits.memory).toBe(24);
+ expect(saved.scenarios.find(s=>s.id==='memory').overrides.limits).toContain('memory');
+ await page.reload();await expect(page.locator('[data-flow-row=budget]')).toHaveCount(0);
+ await page.locator('[data-flow-condition=expanded] [data-tree-condition]').click();
+ await page.locator('[data-live-condition=memory][data-live-value="16"]').click();
+ await expect(page.locator('[data-tree-node=expanded] .tree-choice')).toHaveCount(3);await expect(page.locator('[data-tree-node=budget] .tree-choice')).toHaveCount(1);
+ const unchanged=await(await request.get('/api/spaces/'+data.id)).json();expect(unchanged.baselineSettings).toEqual(original.baselineSettings);
+});
+
+test('dragging an ancestor condition preserves the slider while recalculating the subtree, including after an equal-valued override',async({page,request})=>{
+ const data=await(await request.post('/api/spaces/import',{data:inheritanceFixture()})).json();await page.goto('/#'+data.id);
+ await page.locator('[data-flow-condition=expanded] [data-tree-condition]').click();
+ const input=page.locator('[data-live-input=memory]');await input.fill('24');await input.dispatchEvent('change');
+ await page.locator('.space-menu>summary').click();await page.locator('[data-u-save]').click();await expect.poll(()=>page.evaluate(()=>location.hash.slice(1))).not.toBe(data.id);await page.reload();
+ await page.locator('[data-flow-condition=expanded] [data-tree-condition]').click();
+ const slider=page.locator('[data-live-range=memory]');
+ await slider.evaluate(el=>{el.dataset.marker='same-slider';el.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));el.value='32';el.dispatchEvent(new Event('input',{bubbles:true}));});
+ await expect(slider).toHaveAttribute('data-marker','same-slider');await expect(page.locator('[data-flow-row=budget]')).toHaveCount(0);
+ await expect(page.locator('[data-tree-node=memory] .tree-choice')).toHaveCount(1);
+ await slider.evaluate(el=>{el.value='16';el.dispatchEvent(new Event('input',{bubbles:true}));});
+ await expect(slider).toHaveAttribute('data-marker','same-slider');await expect(page.locator('[data-flow-row=budget]')).toHaveCount(1);
+ await expect(page.locator('[data-tree-node=memory] .tree-choice')).toHaveCount(1);
+ await slider.dispatchEvent('change');
+ expect(await page.locator('.flow-edges g path').evaluateAll(paths=>paths.every(p=>!p.getAttribute('d').includes('NaN')))).toBe(true);
+});

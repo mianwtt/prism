@@ -1,0 +1,25 @@
+import {test,expect} from '@playwright/test';
+import {completeFixture} from './complete-space.fixture.mjs';
+test('image details open in a floating dialog without moving the canvas; sources and all closing methods work',async({page,request})=>{
+  const saved=await(await request.post('/api/spaces/demo')).json(),data={...saved,...completeFixture()};
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.route('**/api/spaces/'+data.id,r=>r.fulfill({json:data}));
+  await page.goto('/#'+data.id);
+  const tile=page.locator('.tree-origin > .tree-candidates > .tree-choice').filter({hasText:'惠普'});
+  await tile.scrollIntoViewIfNeeded();const scrollBefore=await page.evaluate(()=>scrollY);
+  await tile.click();
+  const dialog=page.getByRole('dialog',{name:'方案详情'});
+  await expect(dialog).toBeVisible();await expect(dialog).toContainText('5,199元');await expect(dialog).toContainText('Core 5 210H');
+  expect(Math.abs(await page.evaluate(()=>scrollY)-scrollBefore)).toBeLessThan(3);
+  await dialog.getByRole('button',{name:'来源依据',exact:true}).click();
+  await expect(dialog.locator('.option-evidence')).toContainText('CPU型号Core 5 210H');
+  await expect(dialog.locator('.option-evidence')).toContainText('内存容量16GB');
+  await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);
+  expect(Math.abs(await page.evaluate(()=>scrollY)-scrollBefore)).toBeLessThan(3);
+  await tile.click();await page.mouse.click(2,2);await expect(dialog).toHaveCount(0);
+  await tile.click();await dialog.getByRole('button',{name:'关闭方案详情'}).click();await expect(dialog).toHaveCount(0);
+  await page.setViewportSize({width:390,height:844});await tile.click();await expect(dialog).toBeVisible();
+  const box=await dialog.boundingBox();expect(box.width).toBeLessThanOrEqual(390);expect(box.height).toBeLessThanOrEqual(844);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+  expect(errors).toEqual([]);
+});

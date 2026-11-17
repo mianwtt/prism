@@ -1,0 +1,53 @@
+import { openEditor, openEvidence, openHistory, openCanvas } from "./ui.mjs";
+import { test, expect } from "@playwright/test";
+
+test("legacy research explains missing and ambiguous facts instead of treating every field as pending", async ({ page, request }) => {
+  const space = await (await request.post("/api/spaces/demo")).json();
+  space.mode = "live";
+  space.settings.budget = 2425;
+  space.candidates = [space.candidates[0]];
+  const c = space.candidates[0];
+  c.name = "TestBook (24GB/512GB)";
+  c.tag = "待核验真实候选";
+  c.facts.price = { value: 6599, sourceId: "s1", quote: "官方起售价为 6599 元", status: "unreviewed" };
+  c.facts.memory = { value: 24, sourceId: "s1", quote: "内存提供 24 GB / 32 GB 两种配置。", status: "unreviewed" };
+  c.facts.battery = { value: null, status: "unknown", quote: "", sourceId: null };
+  await page.route("**/api/spaces/" + space.id, route => route.fulfill({ json: space }));
+  const errors = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("/classic#" + space.id);
+  await expect(page.locator("#candidate-table strong").first()).toHaveText("TestBook");
+  await expect(page.locator("#candidate-table")).toContainText("起售价或参考价");
+  await expect(page.locator("#candidate-table")).toContainText("多种内存配置");
+  await expect(page.locator("#candidate-table")).toContainText("缺少资料");
+  await expect(page.locator("#quality-summary")).toContainText("3 项缺失或存在疑点");
+  await openEditor(page);
+  await page.locator("#calculation-mode").selectOption("provisional");
+  await expect(page.locator("#recommendation h3")).toContainText("资料尚不足以排名");
+  await page.locator("#skip-battery").click();
+  await expect(page.locator("#pref-battery")).toHaveValue("0");
+  await expect(page.locator("#recommendation h3")).toContainText("资料尚不足以排名");
+  await openEvidence(page);
+  await page.getByRole("button", { name: "查看 TestBook (24GB/512GB) 的价格证据" }).click();
+  await expect(page.locator("#evidence-body")).toContainText("起售价或参考价");
+  await page.getByRole("button", { name: "关闭证据窗口" }).click();
+  await page.screenshot({ path: "work/prism-quality-review.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test("calculation mode saves explicitly and survives reopening a version", async ({ page }) => {
+  await page.goto("/classic");
+  await page.getByRole("button", { name: /打开笔记本决策演示/ }).click();
+  await openEditor(page);
+  await page.locator("#calculation-mode").selectOption("provisional");
+  await expect(page.locator("#recommendation")).toContainText("试算优先方案");
+  await openCanvas(page);
+  await page.getByRole("button", { name: /保存新版本/ }).click();
+  await expect(page.locator("#version-label")).toContainText("v2");
+  await expect(page.locator("#version-diff")).toContainText("计算依据");
+  await page.reload();
+  await expect(page.locator("#calculation-mode")).toHaveValue("provisional");
+  await expect(page.locator("#candidate-table")).toContainText("试算");
+});

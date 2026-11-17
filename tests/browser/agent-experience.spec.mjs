@@ -1,0 +1,32 @@
+import {test,expect} from '@playwright/test';
+import {completeFixture} from './complete-space.fixture.mjs';
+
+test('default canvas focuses on the changed choice; scores, tables and execution details require an explicit opening',async({page,request})=>{
+ const created=await(await request.post('/api/spaces/demo')).json();
+ const space={...created,...completeFixture()};
+ await page.route('**/api/spaces/'+space.id,r=>r.fulfill({json:space}));
+ await page.route('https://example.com/fixture-product-*.svg',r=>r.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240"><rect width="400" height="240" fill="#e4edd9"/></svg>'}));
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/classic#'+space.id);
+ await expect(page.locator('.agent-presence')).toBeVisible();
+ await expect(page.locator('.choice-origin strong')).toContainText('惠普');
+ await expect(page.locator('.choice-destination strong')).toContainText('惠普');
+ await expect(page.locator('.choice-destination .journey-photo img')).toBeVisible();
+ await expect(page.locator('#decision-insight')).toBeHidden();
+ await expect(page.locator('#evidence-pane')).toBeHidden();
+ expect(await page.locator('.candidate-shelf').evaluate(el=>el.open)).toBe(false);
+ expect(await page.locator('.exploration-log').evaluate(el=>el.open)).toBe(false);
+ await page.locator('.scenario-switches [data-select-scenario="scenario-budget"]').click();
+ await expect(page.locator('.choice-origin strong')).toContainText('惠普');
+ await expect(page.locator('.choice-destination strong')).toContainText('联想');
+ await expect(page.locator('.journey-difference')).toContainText('少花 ¥511');
+ await expect(page.locator('.journey-difference')).toContainText('更重 250g');
+ await page.locator('.candidate-shelf > summary').click();
+ await page.locator('.product-winner .product-price').click();
+ await expect(page.locator('#evidence-dialog')).toBeVisible();
+ await expect(page.locator('#evidence-body blockquote').first()).toContainText('4688');
+ await page.getByRole('button',{name:'关闭证据窗口'}).click();
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+ expect(errors).toEqual([]);
+});

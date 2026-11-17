@@ -1,0 +1,31 @@
+import {test,expect} from '@playwright/test';
+import {completeFixture} from './complete-space.fixture.mjs';
+
+test('quick conditions update eligibility and explain exits without a research request or mutating the pinned baseline',async({page,request})=>{
+ const created=await(await request.post('/api/spaces/demo')).json(),space={...created,...completeFixture()};
+ const third=structuredClone(space.candidates[0]);third.id='third-option';third.name='Third test fixture';third.facts.price={value:6500,status:'confirmed',sourceId:null,quote:''};
+ space.candidates.push(third);
+ let searches=0;
+ await page.route('**/api/spaces/'+space.id,r=>r.fulfill({json:space}));
+ await page.route('**/api/spaces/*/explore',r=>{searches++;return r.fulfill({status:503,json:{error:'unexpected search'}});});
+ await page.goto('/classic#'+space.id);
+ await expect(page.locator('.choice-option')).toHaveCount(3);
+ const branches=await page.locator('.scenario-switches button').count();
+ await page.getByRole('button',{name:'预算减少 1000 元',exact:true}).click();
+ await expect(page.locator('.quick-budget output')).toHaveText('¥6,000');
+ await expect(page.locator('.choice-option')).toHaveCount(2);
+ await expect(page.locator('.condition-reaction')).toContainText('1 个退出');
+ await expect(page.locator('.condition-exits')).toContainText('Third test fixture');
+ await page.getByRole('button',{name:'预算减少 1000 元',exact:true}).click();
+ await expect(page.locator('.choice-option')).toHaveCount(1);
+ await expect(page.locator('.choice-destination strong')).toContainText('联想');
+ await page.getByLabel('快速调整最低内存').selectOption('32');
+ await expect(page.locator('.choice-option')).toHaveCount(0);
+ await expect(page.locator('.choice-destination strong')).toContainText('暂时没有匹配方案');
+ await page.locator('.condition-exits summary').click();
+ await expect(page.locator('.condition-exits ul')).toContainText('内存');
+ expect(searches).toBe(0);
+ expect(await page.locator('.scenario-switches button').count()).toBe(branches+1);
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+});

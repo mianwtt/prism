@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prism — 看清每一个选择</title>
+    <meta
+      name="description"
+      content="从证据到选择：可追溯、可编辑、可计算的 AI 研究与决策工作台。"
+    />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/studio.css" />
+    <link rel="stylesheet" href="/universal.css" />
+    <link rel="stylesheet" href="/compact-canvas.css" />
+    <link rel="stylesheet" href="/workflow.css" />
+    <link rel="stylesheet" href="/studio-design.css" />
+    <link rel="stylesheet" href="/branch-comparison.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a href="/" class="brand"
+        ><img src="/favicon.svg" alt="" width="36" height="36" />prism<span
+          >DECISION STUDIO</span
+        ></a
+      >
+      <button id="new-space" class="new-button"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-7M11 13l1-4 7-7 3 3-7 7-4 1Z"/></svg><span>开始一次探索</span></button>
+      <button id="import-space" class="text-button" type="button"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 3H6v18h12V7l-4-4ZM14 3v5h4M9 14h6m-3-3v6"/></svg><span>导入决策文件</span></button>
+      <input id="import-file" type="file" accept=".json,application/json" hidden aria-label="选择 Prism 决策 JSON 文件" />
+      <div class="sidebar-purpose"><span>RESEARCH</span><i>→</i><span>WHAT IF</span><i>→</i><span>DECIDE</span></div>
+      <div class="nav-label">决策空间</div>
+      <nav id="spaces" aria-label="已保存的决策空间"></nav>
+      <div class="side-bottom">
+        <span class="status-dot"></span> 你的本地工作区<br /><small
+          >PRISM · YOUR DECISIONS</small
+        >
+      </div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <span
+          >工作空间 <span class="slash">/</span>
+          <span id="breadcrumb">开始探索</span></span
+        >
+        <div class="topbar-actions">
+          <button id="jobs-button" class="secondary" title="研究任务"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>研究任务</span></button>
+          <button id="settings-button" class="secondary" title="研究设置"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="16" cy="17" r="3"/></svg><span>研究设置</span></button
+          >
+        </div>
+      </header>
+      <div id="server-notice" class="notice server-notice" hidden></div>
+      <section id="welcome" class="welcome">
+        <div class="welcome-hero"><div class="welcome-copy"><div class="studio-kicker"><i></i> 给每个选择，多一种可能</div>
+        <h1>研究一个问题，<br /><span>看见多种可能。</span></h1>
+        <p class="intro">让 AI 整理信息、比较选择。<br />继续对话，或换个条件，看看选择如何变化。</p>
+        <div class="hero-principles"><span>有来源的研究</span><span>随条件变化的选择</span><span>留得住的判断</span></div></div>
+        <div class="welcome-visual" aria-label="从一个问题探索不同选择的示意图"><div class="visual-caption"><span>ONE QUESTION. MORE POSSIBILITIES.</span><i></i></div><div class="visual-question"><span class="visual-mark">✦</span><div><small>从你的问题开始</small><strong>哪种选择，更适合我？</strong></div></div><div class="visual-forks"><svg viewBox="0 0 360 80" fill="none" aria-hidden="true"><path d="M180 0 V26 Q180 40 164 40 H92 Q76 40 76 56 V80 M180 26 Q180 40 196 40 H268 Q284 40 284 56 V80"/></svg><div><article><span>WHAT IF / A</span><strong>如果更在意预算？</strong><p>探索另一种取舍</p></article><article><span>WHAT IF / B</span><strong>如果更在意时间？</strong><p>看见不同的选择</p></article></div></div><button type="button" class="visual-demo" data-home-demo>在演示中试一试 <span>↗</span></button></div></div>
+        <p id="agent-status" class="agent-status">研究 Agent 正在连接…</p>
+        <div class="welcome-start"><div class="start-heading"><span>开启一次研究</span><small><span id="question-domain">由助手根据你的目标整理</span></small></div>
+        <form id="research-form" class="research-box">
+          <label for="question">说说你的目标、预算和在意的事</label>
+          <textarea id="question" required minlength="8" maxlength="2000" placeholder="我在考虑……希望……但又担心……"></textarea>
+          <div class="research-actions">
+            <button id="live-status" class="setup-link" type="button">
+              正在检查研究服务…</button
+            ><button class="primary" id="research-button" type="submit" aria-label="开始研究" title="开始研究">
+              <span>开始研究 ↗</span><svg class="ui-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
+            </button>
+          </div>
+        </form>
+        <div class="question-starters"><span>你在考虑什么？</span><button type="button" data-example-question="帮我选一台 7000 元以内适合 Java 开发的笔记本，至少 16GB 内存，重量不超过 2kg。">选购笔记本</button><button type="button" data-example-question="在杭州滨江租房，月租预算 4000 元，面积至少 30 平米，通勤不超过 45 分钟，比较不同房源。">找一处新住处</button><button type="button" data-example-question="帮我比较上海到杭州的周末出行方式，单程预算 200 元，总耗时不超过 2 小时。">规划一次出行</button></div>
+        <div class="demo-entry">
+          <span>想先感受一下？</span
+          ><button id="demo-button" class="text-button">
+            打开笔记本决策演示 <span>→</span>
+          </button><button id="housing-demo-button" class="text-button" type="button">体验住房选择 →</button>
+        </div>
+        </div><section class="recent-explorations" aria-label="最近的探索"><div><span>继续上次的思考</span><small>已保存的决策空间</small></div><div id="home-recent"></div></section>
+        <p class="scope-note">
+          每次研究保留来源。改变条件，比较不同选择；当前情况始终为你保留。
+        </p>
+      </section>
+      <section id="job-panel" class="job-panel" hidden>
+        <div class="eyebrow">PRISM / RESEARCH</div>
+        <h2 id="job-title">正在寻找有依据的答案</h2>
+        <p id="job-description">
+          我去查找具体方案和公开资料。你可以随时回来查看进度。
+        </p>
+        <ol id="job-events"></ol>
+        <p id="job-error" class="settings-error" role="alert" hidden></p>
+        <div class="job-actions">
+          <button id="resume-job" class="primary" hidden>从检查点继续</button
+          ><button id="reconnect-job" class="secondary" hidden>
+            重新连接任务</button
+          ><button id="leave-job" class="secondary">返回首页</button>
+        </div>
+      </section>
+      <section id="workspace" class="workspace" hidden>
+        <div class="workspace-heading">
+          <div>
+            <div class="eyebrow">YOUR DECISION, MADE VISIBLE</div>
+            <h1 id="space-title"></h1>
+            <p id="space-question"></p>
+          </div>
+          <div class="heading-actions">
+            <button id="supplement-button" class="primary">补充检索</button>
+            <button id="save-button" class="secondary">保存新版本</button>
+            <details class="workspace-more"><summary>更多 ···</summary><div class="workspace-menu"><button id="refresh-button" class="secondary" title="重读已保存的网页，不会搜索新页面">更新原网页</button><button id="export-button" class="secondary">导出 JSON ↗</button></div></details>
+          </div>
+        </div>
+        <div id="mode-notice" class="notice"></div>
+        <div id="research-overview" class="research-overview" aria-live="polite"></div>
+        <nav class="workspace-tabs" aria-label="决策工作区"><button type="button" data-workspace-pane="canvas" class="active" aria-label="情景推演"><span>01</span> What-if 画布</button><button type="button" data-workspace-pane="evidence" aria-label="来源与参数"><span>02</span> 资料与依据</button><button type="button" data-workspace-pane="history" aria-label="研究记录与版本"><span>03</span> 决策记录</button></nav>
+        <section class="scenario-workbench" aria-label="What-if 情景画布">
+          <div class="scenario-heading"><div><span class="eyebrow">WHAT-IF / 决策画布</span><h2>换一个条件，看见不同选择。</h2><p>选择情景，在下方对比图片与参数。点击数字查看依据，编辑条件实时推演。</p></div><span id="scenario-version"></span></div>
+          <div class="scenario-layout">
+            <div class="scenario-main">
+              <div id="decision-insight"></div>
+              <div class="canvas-toolbar"><div class="scenario-presets"><button type="button" data-add-scenario="budget">＋ 预算增加 1000 元</button><button type="button" data-add-scenario="light">＋ 重量限制 1.3 kg</button><button type="button" data-add-scenario="copy">＋ 自定义分支</button></div><div><button id="canvas-zoom-out" type="button" aria-label="缩小画布">−</button><output id="canvas-zoom-label">100%</output><button id="canvas-zoom-in" type="button" aria-label="放大画布">＋</button><button id="canvas-fit" type="button">适应画布</button></div></div>
+              <div id="scenario-viewport" tabindex="0" aria-label="情景关系图，可滚动和缩放"><div id="scenario-scene"></div></div>
+              <button id="toggle-scenario-editor" class="secondary" type="button" aria-expanded="false">编辑当前情景条件</button>
+              <div id="scenario-impact" aria-live="polite"></div>
+            </div>
+            <div id="scenario-inspector"></div>
+          </div>
+        </section>
+        <div id="evidence-pane" class="workspace-grid" hidden>
+          <section class="canvas">
+            <div class="section-heading">
+              <h2>方案比较 <span id="candidate-count"></span></h2>
+              <button id="manage-candidates" class="text-button">
+                编辑候选方案</button
+              ><span id="version-label"></span>
+            </div>
+            <div
+              id="recommendation"
+              class="recommendation"
+              aria-live="polite"
+            ></div>
+            <details id="diff-panel" class="diff-panel" hidden open>
+              <summary>相对上一版本的变化</summary>
+              <div id="version-diff"></div>
+            </details>
+            <p id="quality-summary" class="quality-summary" aria-live="polite"></p>
+            <section class="source-comparison" aria-label="多源证据对照">
+              <div class="section-heading"><div><span class="eyebrow">EVIDENCE / SOURCE COMPARISON</span><h2>同一方案，不同来源怎么说？</h2></div><label for="source-candidate">对照方案 <select id="source-candidate"></select></label></div>
+              <p id="source-summary" class="table-note"></p>
+              <div id="source-matrix" class="table-wrap"></div>
+              <details class="source-library"><summary id="source-library-title">全部检索来源</summary><div id="source-library"></div></details>
+            </section>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>候选方案</th>
+                    <th>价格</th>
+                    <th>内存</th>
+                    <th>重量</th>
+                    <th>标称续航</th>
+                    <th>当前结果</th>
+                  </tr>
+                </thead>
+                <tbody id="candidate-table"></tbody>
+              </table>
+            </div>
+            <p class="table-note">
+              点击数字查看原文、确认参数或录入个人假设。标称续航的测试条件可能不同，默认权重仅供演示。
+            </p>
+            <details id="budget-exploration"><summary>预算转折点 · 查看哪些价格会改变候选范围</summary>
+            <div class="section-heading space-top">
+              <h2>预算探索</h2>
+              <span>确定性计算 / CNY</span>
+            </div>
+            <div id="thresholds" class="thresholds"></div>
+            <p class="table-note">
+              只改变预算，其余设置保持当前值。进入候选范围不代表一定成为第一名。
+            </p>
+            </details>
+            <div class="lower-grid">
+              <section>
+                <div class="section-heading"><h2>研究记录</h2></div>
+                <div id="trace"></div>
+              </section>
+              <section>
+                <div class="section-heading">
+                  <h2>版本历史</h2>
+                  <span>点击恢复</span>
+                </div>
+                <div id="history"></div>
+              </section>
+            </div>
+          </section>
+          <aside class="controls">
+            <div class="control-heading">
+              <span class="eyebrow">WHAT IF LAB</span>
+              <h2>你的选择，你来定义。</h2>
+              <p id="selected-scenario-label">编辑选中的情景分支</p>
+              <label for="scenario-name">情景名称</label><input id="scenario-name" maxlength="40" />
+              <button id="remove-scenario" type="button" class="text-button">删除当前分支</button>
+            </div>
+            <div class="control-group">
+              <label for="calculation-mode">计算依据</label>
+              <select id="calculation-mode">
+                <option value="reviewed">仅使用已确认参数</option>
+                <option value="provisional">试算：允许有引用的未核验参数</option>
+              </select>
+              <p id="calculation-note" class="muted"></p>
+            </div>
+            <div class="control-group">
+              <h3>硬性约束</h3>
+              <label for="budget"
+                >预算上限 <output id="budget-value"></output></label
+              ><input id="budget" type="range" min="0" max="15000" step="1" />
+              <div class="range-labels">
+                <span>¥0</span><span>拖动探索预算</span>
+              </div>
+              <label for="memory">最低内存</label
+              ><select id="memory">
+                <option value="8">8 GB</option>
+                <option value="16">16 GB</option>
+                <option value="32">32 GB</option>
+                <option value="64">64 GB</option>
+              </select>
+              <label for="max-weight"
+                >重量上限 <output id="weight-value"></output></label
+              ><input
+                id="max-weight"
+                type="range"
+                min="0.8"
+                max="3"
+                step="0.01"
+              />
+            </div>
+            <div class="control-group">
+              <h3>偏好权重 <span>自动归一化</span></h3>
+              <div id="weight-controls"></div>
+              <button id="skip-battery" class="text-button" type="button">暂不比较续航（将续航权重设为 0）</button>
+            </div>
+            <details class="method">
+              <summary>计算规则与边界</summary>
+              <p>
+                先检查预算、内存与重量约束，再计算加权分数。固定归一化范围：价格
+                2000–12000 元，内存 8–64GB，重量 0.8–3kg，标称续航
+                0–20h。超出范围截断。分数仅表示当前模型中的偏好匹配，不是产品质量或购买成功概率。
+              </p>
+              <p>
+                默认只使用已确认参数。选择试算后，可使用单位明确、非起售价或参考价的未核验引文；缺失数据始终不参与计算。CPU、屏幕、售后及开发工具兼容性本版未建模。
+              </p>
+            </details>
+            <button id="reset-button" class="text-button">
+              重置为当前版本的设置 ↺
+            </button>
+          </aside>
+        </div>
+      </section>
+      <div id="toast" role="status" hidden></div>
+    </main>
+    <dialog id="evidence-dialog">
+      <div class="dialog-heading">
+        <div>
+          <div class="eyebrow">EVIDENCE INSPECTOR</div>
+          <h2 id="evidence-title"></h2>
+        </div>
+        <button
+          id="close-evidence"
+          class="icon-button"
+          aria-label="关闭证据窗口"
+        >
+          ×
+        </button>
+      </div>
+      <div id="evidence-body"></div>
+    </dialog>
+    <dialog id="settings-dialog" aria-labelledby="settings-title">
+      <div class="dialog-heading">
+        <div>
+          <div class="eyebrow">RESEARCH SETTINGS</div>
+          <h2 id="settings-title">连接你的研究服务</h2>
+        </div>
+        <button
+          id="close-settings"
+          class="icon-button"
+          aria-label="关闭研究设置"
+        >
+          ×
+        </button>
+      </div>
+      <p class="settings-intro">
+        连接支持 JSON 输出的模型，再选择搜索方式。已有本机环境时，tofu-search
+        不需要商业搜索密钥。保存后立即生效。
+      </p>
+      <form id="settings-form" autocomplete="off">
+        <label for="model-url">模型服务地址（Base URL）</label
+        ><input
+          id="model-url"
+          type="url"
+          required
+          placeholder="https://api.openai.com/v1"
+        />
+        <p class="muted">
+          支持兼容 Chat Completions 的服务，地址通常以 /v1 结尾。
+        </p>
+        <label for="model-name">模型名称</label
+        ><input
+          id="model-name"
+          type="text"
+          required
+          placeholder="填写你服务商提供的模型 ID"
+        />
+        <label for="model-key"
+          >模型 API Key <span id="model-key-status"></span></label
+        ><input
+          id="model-key"
+          type="password"
+          autocomplete="new-password"
+          placeholder="请输入模型密钥"
+        />
+        <label for="search-provider">搜索服务</label
+        ><select id="search-provider">
+          <option value="tofu">tofu-search · 本机运行，无需搜索密钥</option>
+          <option value="tavily">Tavily · 需要 API Key</option>
+        </select>
+        <p id="search-provider-help" class="muted"></p>
+        <div id="search-key-field">
+          <label for="search-key"
+            >Tavily API Key <span id="search-key-status"></span></label
+          ><input
+            id="search-key"
+            type="password"
+            autocomplete="new-password"
+            placeholder="tvly-…"
+          />
+        </div>
+        <p class="muted">
+          密钥保存在本机 data/provider-settings.json，不进入
+          Git、决策导出或浏览器存储。研究问题和资料会发送到配置的服务，调用可能产生费用。
+        </p>
+        <p id="settings-error" class="settings-error" role="alert" hidden></p>
+        <div class="settings-footer">
+          <button id="settings-demo" type="button" class="text-button">
+            暂不配置，体验演示 →</button
+          ><button id="save-settings" type="submit" class="primary">
+            保存配置
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <script type="module" src="/app.mjs"></script>
+    <dialog id="jobs-dialog" aria-labelledby="jobs-title">
+      <div class="dialog-heading">
+        <div>
+          <div class="eyebrow">RESEARCH MEMORY</div>
+          <h2 id="jobs-title">研究任务</h2>
+        </div>
+        <button id="close-jobs" class="icon-button" aria-label="关闭研究任务">
+          ×
+        </button>
+      </div>
+      <p class="muted">
+        任务和检查点保存在本机。继续中断任务时，尚未完成的搜索或模型调用可能重新执行。
+      </p>
+      <div id="jobs-list"></div>
+    </dialog>
+    <dialog id="candidates-dialog" aria-labelledby="candidates-title">
+      <div class="dialog-heading">
+        <div>
+          <div class="eyebrow">YOUR OPTIONS</div>
+          <h2 id="candidates-title">编辑候选方案</h2>
+        </div>
+        <button
+          id="close-candidates"
+          class="icon-button"
+          aria-label="关闭候选编辑"
+        >
+          ×
+        </button>
+      </div>
+      <form id="candidates-form">
+        <div id="candidate-edit-list"></div>
+        <label for="new-candidate-name">添加候选方案</label
+        ><input
+          id="new-candidate-name"
+          maxlength="150"
+          placeholder="输入具体型号或方案名称"
+        />
+        <p class="muted">
+          新方案的参数先标为未知。保存后点击表格中的“未知”录入个人假设；暂停比较会保留方案及历史。
+        </p>
+        <button class="primary" type="submit">保存方案</button>
+      </form>
+    </dialog>
+  </body>
+</html>

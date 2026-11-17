@@ -1,0 +1,20 @@
+name: Bug report
+description: Report a reproducible problem with fictional or sanitized data
+body:
+  - type: markdown
+    attributes:
+      value: "Never attach keys, provider settings, personal decisions or unredacted traces. Follow SECURITY.md for vulnerabilities."
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Include expected and actual behavior; specify demo or live research.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, browser and Prism version. Do not include credentials.
+    validations:
+      required: true

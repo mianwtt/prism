@@ -29,7 +29,7 @@ if (paths) {
     if (/\.(png|jpg|jpeg|gif|webp|ico|zip|pdf)$/i.test(path)) continue;
     const content = git(["show", ":" + path]);
     if (
-      /\b(?:sk-[A-Za-z0-9_-]{16,}|tvly-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b/.test(
+      /\b(?:sk-[A-Za-z0-9_-]{16,}|tvly-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b|\brediss?:\/\/[^\s"'`/]*:[^\s"'`@/]+@/.test(
         content,
       )
     )
@@ -37,7 +37,7 @@ if (paths) {
     if (path === ".env.example") {
       for (const line of content.split(/\r?\n/))
         if (
-          /^(?:LLM_BASE_URL|LLM_MODEL|LLM_API_KEY|TAVILY_API_KEY)=/.test(
+          /^(?:LLM_BASE_URL|LLM_MODEL|LLM_API_KEY|TAVILY_API_KEY|REDIS_URL)=/.test(
             line,
           ) &&
           line.split("=").slice(1).join("=").trim() !== "XXX"

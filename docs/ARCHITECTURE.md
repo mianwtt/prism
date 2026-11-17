@@ -15,6 +15,8 @@ The planner proposes 1–8 numeric, boolean or categorical dimensions plus a bou
 
 `src/research-providers.mjs` connects model/search services. ChatOllama handles local Ollama; compatible providers use the HTTP adapter. `src/jobs.mjs` persists task records and graph checkpoints in SQLite. Completed graph steps can resume after restart; an interrupted external request may repeat. Only one research job runs at a time.
 
+The optional application-scoped Redis layer in `src/search-cache.mjs` caches successful search observations with bounded TTLs. Both tofu and Tavily share the adapter; saved sources retain their original observation time. Independent source/price reads and citation rechecks remain uncached. Cache faults fall back to the original search. This is neither a job queue nor model memory; JSON decisions and SQLite checkpoints retain their existing roles. See [the technical report](TECHNICAL-REPORT.md) for keys, counters and evaluation.
+
 The historical laptop workflow remains for compatibility. `src/legacy-decision.mjs` adapts saved laptop records for the shared renderer; it does not choose the schema for new live research.
 
 ## What-if is deterministic

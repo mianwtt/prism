@@ -19,7 +19,9 @@ npm run test:release
 npm run test:runtime
 ```
 
-The latest local run on 2026-11-17 passed **161 unit/HTTP tests and 55 browser tests**. Separate clean Windows installations on Node 24.19.0 and 22.23.5 also passed runtime checks; Node 22 passed the same 161 unit/HTTP tests. See [verification](reports/VERIFICATION.md). Controlled tests do not establish live retrieval accuracy or remote CI success.
+The latest local run on 2026-11-17 passed **173 unit/HTTP tests and 55 browser tests** on Node 24, plus **3 isolated real-Redis integration tests**. Earlier separate clean Windows installations passed on Node 24.19.0 and 22.23.5; the earlier Node 22 run covered 161 unit/HTTP tests. See [verification](reports/VERIFICATION.md). Controlled tests do not establish live retrieval accuracy or remote CI success.
+
+The optional cache integration runs separately with `npm run test:cache:redis` and an explicit `PRISM_TEST_REDIS_URL`. It requires a real Redis, uses only its own scoped keys and does not call live search/model services. See the [technical report](TECHNICAL-REPORT.md).
 
 `test:runtime` starts its own server with temporary storage, checks all declared static routes plus demo/import/export/deletion, and removes its fictional data. It never loads the checkout's `.env`. The `-- --url http://127.0.0.1:PORT` option instead checks an explicit local instance, creating and removing only its own demo roots; CI uses this for a disposable container.
 

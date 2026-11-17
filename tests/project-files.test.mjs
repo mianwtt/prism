@@ -87,6 +87,18 @@ test('source audit checks actual module imports without treating code examples i
   await assert.rejects(auditProject(root), /src\/core.mjs: unresolved literal relative import near line 4/);
 });
 
+test('source audit rejects a Redis credential URL and nonplaceholder template without printing credentials', async t => {
+  const { root, put } = await fixture(t);
+  const credential = 'cache-fixture-password', uri = 'redis://' + ':' + credential + '@127.0.0.1:6379';
+  await put('src/cache.mjs', 'export const endpoint = ' + JSON.stringify(uri) + ';');
+  await put('.env.example', 'REDIS_URL=' + uri + '\n');
+  await assert.rejects(auditProject(root), error => {
+    assert.match(error.message, /possible credential detected/);
+    assert.match(error.message, /public provider values must use XXX/);
+    assert.equal(error.message.includes(credential), false); return true;
+  });
+});
+
 test('source and archive checks reject redirected directories', async t => {
   const {root} = await fixture(t);
   const external = await fixture(t);

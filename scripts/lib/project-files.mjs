@@ -10,7 +10,7 @@ export const SOURCE_ENTRIES=['src','public','scripts','tests','examples','docs',
 const REQUIRED=['package.json','package-lock.json','README.md','docs/i18n/README.en.md','LICENSE','.env.example','src/server.mjs','public/index.html'];
 const SKIP=new Set(['.git','node_modules','data','work','test-results','playwright-report','__pycache__','.DS_Store']);
 const binary=/\.(?:png|jpe?g|gif|webp|ico|pdf|zip|gz|woff2?|ttf)$/i;
-const secret=/\b(?:sk-[A-Za-z0-9_-]{16,}|tvly-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/;
+const secret=/\b(?:sk-[A-Za-z0-9_-]{16,}|tvly-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\brediss?:\/\/[^\s"'`/]*:[^\s"'`@/]+@/;
 const portable=path=>path.replaceAll('\\','/');
 export const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function inside(root,path){const part=relative(root,path);return Boolean(part)&&!part.startsWith('..'+(process.platform==='win32'?'\\':'/'))&&part!=='..'&&!isAbsolute(part);}
@@ -49,7 +49,7 @@ export async function auditProject(directory,{checkIndex=false}={}){
   if(binary.test(file.path))continue;
   const text=file.bytes.toString('utf8');
   if(secret.test(text))issues.push(file.path+': possible credential detected');
-  if(file.path==='.env.example')for(const line of text.split(/\r?\n/))if(/^(?:LLM_BASE_URL|LLM_MODEL|LLM_API_KEY|TAVILY_API_KEY|SEARCH_PROVIDER)=/.test(line)&&line.split('=').slice(1).join('=').trim()!=='XXX')issues.push(file.path+': public provider values must use XXX');
+  if(file.path==='.env.example')for(const line of text.split(/\r?\n/))if(/^(?:LLM_BASE_URL|LLM_MODEL|LLM_API_KEY|TAVILY_API_KEY|SEARCH_PROVIDER|REDIS_URL)=/.test(line)&&line.split('=').slice(1).join('=').trim()!=='XXX')issues.push(file.path+': public provider values must use XXX');
   if(file.path.endsWith('.mjs')){
    try{
     for(const record of parse(text)[0]){

@@ -1,6 +1,7 @@
 import {safeUrl} from './evidence.mjs';
 import {candidateSources} from './source-extraction.mjs';
 import {isMerchantProduct,merchantPlatform} from './source-types.mjs';
+import {searchRetrievedAt,searchCacheMetadata} from './search-cache.mjs';
 
 export function merchantSearchPlans(name){
  const plans=[['京东','jd.com'],['天猫','detail.tmall.com'],['淘宝','item.taobao.com'],['苏宁','suning.com']];
@@ -38,12 +39,12 @@ export async function gatherCandidateSources(candidates,originalSources,io,progr
           const existing=sources.find(s=>s.url===url);
           if(existing){
             existing.retrieval={...existing.retrieval,engine:result.engine||existing.retrieval?.engine||'未记录',query,platform:merchantPlatform(url),sourceType:isMerchantProduct(url)?'merchant':'supplement'};
-            if(result.raw_content&&text.length>existing.text.length){existing.text=text;existing.kind='page';existing.retrievedAt=new Date().toISOString();}
+            if(result.raw_content&&text.length>existing.text.length){existing.text=text;existing.kind='page';existing.retrievedAt=searchRetrievedAt(result);existing.retrieval={...existing.retrieval,...searchCacheMetadata(result)};}
             continue;
           }
           let id='target-'+(sources.length+1);while(sources.some(s=>s.id===id))id+='x';
-          sources.push({id,url,title:String(result.title||url).slice(0,200),text,kind:result.raw_content?'page':'search-excerpt',retrievedAt:new Date().toISOString(),
-            retrieval:{engine:result.engine||'未记录',platform:merchantPlatform(url),sourceType:isMerchantProduct(url)?'merchant':'supplement',query,bodyChars:result.raw_content?text.length:0,snippetOnly:!result.raw_content,deadlineHit:result.retrieval?.deadlineHit===true}});
+          sources.push({id,url,title:String(result.title||url).slice(0,200),text,kind:result.raw_content?'page':'search-excerpt',retrievedAt:searchRetrievedAt(result),
+            retrieval:{engine:result.engine||'未记录',platform:merchantPlatform(url),sourceType:isMerchantProduct(url)?'merchant':'supplement',query,bodyChars:result.raw_content?text.length:0,snippetOnly:!result.raw_content,deadlineHit:result.retrieval?.deadlineHit===true,...searchCacheMetadata(result)}});
           added++;
         }
         progress(`${platform} · ${name}：本次新增 ${added} 个来源；价格和配置仍需检查`);

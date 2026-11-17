@@ -7,6 +7,7 @@ Reports are dated evidence. Read their scope and limitations; older counts and f
 | Report | Scope |
 | --- | --- |
 | [Verification log](VERIFICATION.md) | Local regression results and release gates, newest first |
+| [Redis search cache — 2026-11-17](REDIS-SEARCH-CACHE-2026-11-17.md) | Optional cache, real Redis integration, controlled repeated-query comparison and dependency-level BM25 clarification |
 | [GitHub preview preparation — 2026-11-17](GITHUB-READY-2026-11-17.md) | Complete staged source, Node 22/24 verification, publishing materials and container boundary |
 | [Project file preparation — 2026-11-17](PROJECT-FILES-2026-11-17.md) | Directory organization, complete-source packaging, clean-install checks and preservation audit |
 | [Autonomous research repair — 2026-11-15](AGENT-RESEARCH-REPAIR-2026-11-15.md) | Actual model/tofu/LangGraph rental tasks, failures and successful final runs |

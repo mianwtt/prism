@@ -10,6 +10,7 @@ Start with [setup](SETUP.md), then [using the workspace](WORKSPACE.md). The inte
 | [Workspace](WORKSPACE.md) | Conversation, What-if, evidence, saved decisions and deletion |
 | [Architecture](ARCHITECTURE.md) | Data flow, evaluator, persistence and trust boundaries |
 | [Agent](AGENT.md) | Current adaptive graph and research limits |
+| [Technical report](TECHNICAL-REPORT.md) | Search internals, Agent boundaries, optional Redis cache and reproducible evaluation |
 | [Project structure](PROJECT-STRUCTURE.md) | Source directories, local data and source packaging |
 | [Development](DEVELOPMENT.md) | Checks, isolated tests, live probes and Docker |
 | [Publishing](PUBLISHING.md) | Upload preparation, Git checks, repository setup and preview release |

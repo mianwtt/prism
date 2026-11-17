@@ -57,8 +57,13 @@ The UI stores provider settings in ignored `data/provider-settings.json`. Altern
 | `PORT`, `HOST` | Defaults: `4317`, `127.0.0.1` |
 | `PRISM_DATA_DIR` | Separate decision/configuration directory |
 | `TOFU_PYTHON` | Optional search-interpreter override |
+| `REDIS_URL` | Optional search cache; unset or `XXX` disables it |
+| `REDIS_SEARCH_TTL_SECONDS` | Search cache lifetime, 1–3600 seconds, default 300 |
+| `REDIS_CACHE_TIMEOUT_MS` | Cache connection/operation budget, 1–5000ms, default 300 |
 
 Provider settings are plaintext local files. Decisions, source snapshots, tasks and SQLite checkpoints stay in `data/` by default; search tooling and experiments stay in `work/`. Both directories and `.env` are ignored by Git. Exports contain decision content but omit provider configuration; inspect them before sharing.
+
+Redis is optional and configured through the startup environment or local `.env`, not the model settings dialog. It caches successful search results with their original acquisition time; independent page/price reads and citation rechecks remain uncached. A Redis failure falls back to the original search. See the [technical report](TECHNICAL-REPORT.md) for native/Compose setup, cache statistics and the separate real-Redis test.
 
 ## Diagnostics
 

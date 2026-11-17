@@ -22,6 +22,7 @@ import {
   agentInfo,
 } from "./research.mjs";
 import { loadSettings, publicSettings, saveSettings } from "./config.mjs";
+import { createSearchCache } from './search-cache.mjs';
 import packageInfo from "../package.json" with { type: "json" };
 const root = fileURLToPath(new URL("../", import.meta.url));
 async function body(req, limit = 100000) {
@@ -44,8 +45,10 @@ export function createApp({
 } = {}) {
   env = { ...env };
   loadSettings(configFile, env);
+  const searchCache = createSearchCache({ ...env, PRISM_DATA_DIR: directory });
+  const researchIO = () => io || providers(env, { searchCache });
   const store = new Store(directory),
-    jobs = new Jobs(directory, store, () => io || providers(env));
+    jobs = new Jobs(directory, store, researchIO);
   const server = createServer(async (req, res) => {
     const json = (status, value) => {
       res.writeHead(status, {
@@ -87,6 +90,7 @@ export function createApp({
           version: packageInfo.version,
           agent: { ...agentInfo, checkpointStorage: "sqlite" },
           searchProvider: publicSettings(env).searchProvider,
+          searchCache: searchCache.info(),
           capabilities:{scenarioResearch:true,spaceDeletion:true},
         });
       if (req.method === "GET" && path === "/api/agent")
@@ -114,7 +118,7 @@ export function createApp({
           const automaticResearch=input.autoResearch===true&&previous.mode!=='demo'&&asksForResearch(input.message||'');
           if(automaticResearch&&!liveConfigured(env)&&!io)return json(503,{error:'请先连接研究助手，再继续核对公开资料'});
           previous=adaptLegacyDecision(previous);
-          const next=await converse(previous,input,previous.mode==='demo'?null:io||providers(env));
+          const next=await converse(previous,input,previous.mode==='demo'?null:researchIO());
           const saved=await store.save(next,previous);
           if(automaticResearch){
             const job=jobs.start({type:'adapt',adaptive:true,parentId:saved.id,question:saved.question,change:next.pendingConversationResearch.request,scenarios:saved.scenarios,scenarioId:saved.activeScenarioId});
@@ -253,8 +257,8 @@ export function createApp({
     }
   });
   server.once("listening", () => jobs.recover());
-  server.once("error", () => jobs.close());
-  server.once("close", () => jobs.close());
+  server.once("error", () => { searchCache.close(); jobs.close(); });
+  server.once("close", () => { searchCache.close(); jobs.close(); });
   let shutdownPromise;
   server.shutdown = () => shutdownPromise ??= (async () => {
     await new Promise((r, reject) => {
@@ -264,6 +268,7 @@ export function createApp({
       server.closeAllConnections();
     });
     await jobs.close();
+    searchCache.close();
   })();
   return server;
 }

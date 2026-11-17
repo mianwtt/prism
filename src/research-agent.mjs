@@ -18,6 +18,7 @@ import {gatherCandidateSources} from './candidate-retrieval.mjs';
 import {enrichCandidatePrices} from './price-observations.mjs';
 import {buildComparisonData} from './product-data.mjs';
 import {createComparisonSpace} from './comparison-space.mjs';
+import {searchRetrievedAt,searchCacheMetadata} from './search-cache.mjs';
 
 export const agentInfo = Object.freeze({
   framework: "LangGraph",
@@ -254,9 +255,9 @@ export function createResearchGraph(
           url,
           title: String(result.title || url).slice(0, 200),
           text,
-          retrievedAt: new Date().toISOString(),
+          retrievedAt: searchRetrievedAt(result),
           kind: result.raw_content ? "page" : "search-excerpt",
-          retrieval: { engine:result.engine||"未记录",query:parsed.query,bodyChars:result.raw_content?text.length:0, snippetOnly:!result.raw_content, deadlineHit:result.retrieval?.deadlineHit===true },
+          retrieval: { engine:result.engine||"未记录",query:parsed.query,bodyChars:result.raw_content?text.length:0, snippetOnly:!result.raw_content, deadlineHit:result.retrieval?.deadlineHit===true,...searchCacheMetadata(result) },
         };
         sources.push(source);
         added.push(source);

@@ -144,6 +144,7 @@ flowchart LR
 | [安装与配置](docs/SETUP.md) | 本机启动、Ollama、搜索服务、配置与故障排查 |
 | [使用工作区](docs/WORKSPACE.md) | 对话、条件、资料依据、判断记录、导入与删除 |
 | [架构说明](docs/ARCHITECTURE.md) | Agent 图、计算、存储与信任边界 |
+| [技术实现报告](docs/TECHNICAL-REPORT.md) | 搜索与 BM25、Agent 执行、Redis 缓存、实现细节与测评 |
 | [开发指南](docs/DEVELOPMENT.md) | 隔离测试、真实研究验证与 Docker 状态 |
 | [GitHub 发布指南](docs/PUBLISHING.md) · [版本说明](docs/releases/v0.4.0.md) | 上传准备、仓库设置与公开预览版范围 |
 | [验证记录](docs/reports/VERIFICATION.md) · [路线图](docs/ROADMAP.md) | 已测结果与后续发布工作 |
@@ -156,7 +157,7 @@ flowchart LR
 npm run test:release
 ```
 
-最近一次本地验证：**161 项单元／HTTP 测试、55 项浏览器测试通过**。受控测试验证产品行为，独立的真实调用验证资料获取；Chrome／Chromium 设置和分项命令见[开发指南](docs/DEVELOPMENT.md)。
+最近一次本地验证：**173 项单元／HTTP 测试、55 项浏览器测试通过**；另有 **3 项真实 Redis 集成测试通过**。受控测试验证产品行为，独立的真实调用验证资料获取；Chrome／Chromium 设置和分项命令见[开发指南](docs/DEVELOPMENT.md)。
 
 `npm run check:project` 检查完整工作区源码；`npm run package:source` 生成排除本地配置、决策数据和实验目录的源码包。详见[项目结构与打包](docs/PROJECT-STRUCTURE.md)。
 

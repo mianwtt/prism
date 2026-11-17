@@ -5,6 +5,8 @@ import { safeUrl } from "./evidence.mjs";
 import {readPublicMerchantOffer} from './merchant-browser.mjs';
 import {discoverMerchantProducts} from './catalog-discovery.mjs';
 import {readPublicRentalPage,rentalDetailUrl,rentalCatalogUrl} from './public-rental-read.mjs';
+import { createSearchCache } from './search-cache.mjs';
+import { createHash } from 'node:crypto';
 async function postJson(url, body, headers = {}) {
   const r = await fetch(url, {
     method: "POST",
@@ -23,7 +25,7 @@ async function postJson(url, body, headers = {}) {
 export function liveConfigured(env = process.env) {
   return publicSettings(env).ready;
 }
-export function providers(env = process.env) {
+export function providers(env = process.env, { searchCache = createSearchCache(env) } = {}) {
   const base = env.LLM_BASE_URL || "https://api.openai.com/v1";
   const url = new URL(base);
   const isOllama =
@@ -68,19 +70,25 @@ export function providers(env = process.env) {
         throw new Error("模型没有返回 JSON 内容");
       return JSON.parse(content);
     },
-    async search(query) {
-      if (env.SEARCH_PROVIDER === "tofu") return searchWithTofu(query, env);
-      const result = await postJson(
-        "https://api.tavily.com/search",
-        {
-          query,
-          max_results: 4,
-          include_raw_content: true,
-          search_depth: "advanced",
-        },
-        { Authorization: "Bearer " + env.TAVILY_API_KEY },
-      );
-      return result.results ?? [];
+    async search(query, options = {}) {
+      const provider = env.SEARCH_PROVIDER === 'tofu' ? 'tofu' : 'tavily';
+      return searchCache.search({ provider, query, options: { max_results: 4, raw_content: true,
+        search_depth: provider === 'tavily' ? 'advanced' : null, readerVersion: 1,
+        account: createHash('sha256').update(JSON.stringify(provider === 'tavily' ? [env.TAVILY_API_KEY || '']
+          : [env.TOFU_PYTHON || 'default', env.TOFU_SEARCH_SEARXNG_URL || '', env.TOFU_SEARCH_SEARXNG_ENGINES || ''])).digest('hex') } }, async () => {
+        if (provider === "tofu") return searchWithTofu(query, env);
+        const result = await postJson(
+          "https://api.tavily.com/search",
+          {
+            query,
+            max_results: 4,
+            include_raw_content: true,
+            search_depth: "advanced",
+          },
+          { Authorization: "Bearer " + env.TAVILY_API_KEY },
+        );
+        return result.results ?? [];
+      }, options);
     },
     async fetchSource(rawUrl) {
       const url = safeUrl(rawUrl);
@@ -97,5 +105,5 @@ export function providers(env = process.env) {
       return page.raw_content;
     },
   };
-  return { ...adapter, extractFacts: adapter.model, searchCandidateSources: adapter.search };
+  return { ...adapter, extractFacts: adapter.model, searchCandidateSources: adapter.search, close: () => searchCache.close() };
 }

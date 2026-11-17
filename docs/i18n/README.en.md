@@ -146,7 +146,7 @@ Research graph: [general-research.mjs](../../src/general-research.mjs). Provider
 npm run test:release
 ```
 
-Latest local verification: **161 unit/HTTP tests and 55 browser tests passed**. Controlled tests check behavior; separate live runs check actual retrieval. See [development instructions](../DEVELOPMENT.md) for Chrome/Chromium setup and individual commands.
+Latest local verification: **173 unit/HTTP tests and 55 browser tests passed**, plus **3 real-Redis integration tests**. Controlled tests check behavior; separate live runs check actual retrieval. See [development instructions](../DEVELOPMENT.md) for Chrome/Chromium setup and individual commands.
 
 Use `npm run check:project` to check the complete working-tree source and `npm run package:source` to create an archive excluding local settings, decision data and experiments. See [project structure and packaging](../PROJECT-STRUCTURE.md).
 

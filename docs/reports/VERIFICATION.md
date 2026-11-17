@@ -1,3 +1,7 @@
+# Optional Redis search cache — 2026-11-17
+
+Local Node 24 verification passes **173 unit/HTTP tests**, **55 browser tests**, runtime/static-route smoke and Compose configuration. **Three real-Redis integration tests** pass against an isolated WSL Redis 7.2.11 runtime: cross-client TTL reuse, unreachable-server fallback and CLI lifecycle. Nine controlled repeated queries require nine external fixture loads without cache and three with Redis; this is not a live-search latency or accuracy benchmark. Actual model/search research was not rerun. The new CI Redis service job has not run remotely; private settings and user spaces were not changed. See [the complete cache report](REDIS-SEARCH-CACHE-2026-11-17.md).
+
 # Public upload and remote CI — 2026-11-17
 
 Prism is published at [mianwtt/prism](https://github.com/mianwtt/prism). The first source commit `f6cde28` passed [all seven Checks jobs](https://github.com/mianwtt/prism/actions/runs/44038301786): Windows/Linux Node 22/24 unit and runtime checks, browser regression, source packaging and the Docker build/runtime smoke. This resolves the earlier remote Linux/container distribution gates for those tested profiles. Real retrieval coverage and source truth remain separate from controlled CI.

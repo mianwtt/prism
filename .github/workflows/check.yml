@@ -81,7 +81,8 @@ jobs:
       - uses: actions/setup-node@v7.1.0
         with:
           node-version: "24"
-      - run: docker build --tag prism-ci .
+      - run: npm run docker:config
+      - run: docker build --file deploy/docker/Dockerfile --tag prism-ci .
       - run: docker run --detach --rm --name prism-ci --publish 127.0.0.1:4321:4317 prism-ci
       - run: npm run test:runtime -- --url http://127.0.0.1:4321
       - if: always()

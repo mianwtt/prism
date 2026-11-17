@@ -1,6 +1,8 @@
 import { defineConfig } from "@playwright/test";
+import { fileURLToPath } from "node:url";
+const root = fileURLToPath(new URL("../../", import.meta.url));
 export default defineConfig({
-  testDir: "./tests/browser",
+  testDir: ".",
   fullyParallel: false,
   workers: 1,
   use: {
@@ -10,6 +12,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
+    cwd: root,
     command: "node src/server.mjs",
     url: "http://127.0.0.1:4318/api/health",
     reuseExistingServer: false,

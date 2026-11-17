@@ -4,7 +4,7 @@ Prism connects agent research, saved evidence, interactive conditions and persis
 
 ## Local development
 
-Use Node.js 22.9+ (24 recommended), `npm ci`, then `npm start`. Reinstall dependencies when changing Node major versions because SQLite uses a native binary. Both fictional demos work without credentials. Optional model/search setup is documented in [README](README.md). Use a separate `PRISM_DATA_DIR` for experiments; never modify another person's saved snapshots.
+Use Node.js 22.9+ (24 recommended), `npm ci`, then `npm start`. Reinstall dependencies when changing Node major versions because SQLite uses a native binary. Both fictional demos work without credentials. Optional model/search setup is documented in [README](../README.md). Use a separate `PRISM_DATA_DIR` for experiments; never modify another person's saved snapshots.
 
 Before proposing changes, run:
 
@@ -15,7 +15,7 @@ npm run test:browser
 npm run test:runtime
 ```
 
-Browser tests default to installed Chrome. For Playwright Chromium, install it and set `PLAYWRIGHT_CHANNEL=chromium`. See [README](README.md#development-and-verification).
+Browser tests default to installed Chrome. For Playwright Chromium, install it and set `PLAYWRIGHT_CHANNEL=chromium`. See [README](../README.md#development-and-verification).
 
 Tests for behavior changes should exercise the actual evaluator, HTTP flow or graph when appropriate. Keep fixtures explicitly fictional; never turn captured merchant data into a claim of a live test. New dimensions must work through the shared typed schema. Do not allow model-generated JavaScript, HTML or arbitrary formulas to execute.
 
@@ -33,4 +33,4 @@ For bugs, describe steps, expected/actual behavior, OS, Node version and whether
 
 Explain why a change helps the user, what changed and how you verified it. Mention remaining limitations. Do not add an external dependency without explaining its need and license. Keep unrelated formatting and generated files out of the change.
 
-Contributions are provided under the repository's [MIT license](LICENSE). Third-party data and media must have appropriate redistribution rights.
+Contributions are provided under the repository's [MIT license](../LICENSE). Third-party data and media must have appropriate redistribution rights.

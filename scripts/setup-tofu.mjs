@@ -20,7 +20,7 @@ run([
   "--python",
   python,
   "-r",
-  resolve(projectRoot, "requirements-search.txt"),
+  resolve(projectRoot, "scripts/requirements-search.txt"),
 ]);
 console.log(
   "本机搜索环境已准备好；请选择 tofu-search，或设置 SEARCH_PROVIDER=tofu。",

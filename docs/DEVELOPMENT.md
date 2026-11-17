@@ -1,6 +1,6 @@
 # Development and verification
 
-[README](../README.md) · [Architecture](ARCHITECTURE.md) · [Contributing](../CONTRIBUTING.md)
+[README](../README.md) · [Architecture](ARCHITECTURE.md) · [Contributing](../.github/CONTRIBUTING.md)
 
 Use Node 24 for the checked native path. Run `npm ci` before development. The UI uses native browser modules without a build step.
 
@@ -100,8 +100,10 @@ npm run check:publish
 Native Windows/Linux checks and the container build/runtime smoke passed in [the first GitHub CI run](https://github.com/mianwtt/prism/actions/runs/44038301786). To run the container locally:
 
 ```sh
-docker compose up --build
+npm run docker:up
 ```
+
+Deployment configuration lives in `deploy/docker/`. `npm run docker:config` checks Compose configuration and `npm run docker:down` stops this Compose project without removing its named volume. Direct builds use `docker build --file deploy/docker/Dockerfile --tag prism .` from the project root. The adjacent `Dockerfile.dockerignore` excludes local settings, data and experiments from the build context.
 
 Compose binds to host loopback and persists data in `prism-data`. The Debian-based image builds the native SQLite dependency in a separate stage and runs the application as the `node` user with a health check. The Linux CI container job passed build, startup, all 24 static routes, demos, import/export and deletion. It does not bundle the optional tofu Python runtime; live research inside the container has not been separately evaluated. Docker Desktop still cannot start its engine on the development machine, so that local Desktop path is not claimed to have passed.
 

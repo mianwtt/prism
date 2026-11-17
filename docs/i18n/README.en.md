@@ -1,8 +1,8 @@
 <div align="center">
 
-[简体中文](README.md) · **English**
+[简体中文](../../README.md) · **English**
 
-<img src="public/favicon.svg" width="64" height="64" alt="Prism logo">
+<img src="../../public/favicon.svg" width="64" height="64" alt="Prism logo">
 
 # Prism
 
@@ -10,13 +10,13 @@
 
 Find the evidence. Explore the alternatives. Keep the reasoning behind your choice.
 
-[![Checks](https://github.com/mianwtt/prism/actions/workflows/check.yml/badge.svg)](https://github.com/mianwtt/prism/actions/workflows/check.yml) [![MIT license](https://img.shields.io/badge/License-MIT-246e64)](LICENSE) [![LangGraph](https://img.shields.io/badge/Agent-LangGraph-246e64)](docs/ARCHITECTURE.md) [![Local first](https://img.shields.io/badge/Storage-Local_first-526773)](SECURITY.md) [![Preview](https://img.shields.io/badge/Status-0.4_preview-526773)](docs/ROADMAP.md)
+[![Checks](https://github.com/mianwtt/prism/actions/workflows/check.yml/badge.svg)](https://github.com/mianwtt/prism/actions/workflows/check.yml) [![MIT license](https://img.shields.io/badge/License-MIT-246e64)](../../LICENSE) [![LangGraph](https://img.shields.io/badge/Agent-LangGraph-246e64)](../ARCHITECTURE.md) [![Local first](https://img.shields.io/badge/Storage-Local_first-526773)](../../.github/SECURITY.md) [![Preview](https://img.shields.io/badge/Status-0.4_preview-526773)](../ROADMAP.md)
 
 [Quick start](#quick-start) · [Features](#features) · [Examples](#examples) · [Agent architecture](#agent-architecture) · [Documentation](#documentation)
 
 </div>
 
-![Prism laptop decision canvas: budget, memory and weight create connected What-if branches](docs/assets/laptop-canvas.png)
+![Prism laptop decision canvas: budget, memory and weight create connected What-if branches](../assets/laptop-canvas.png)
 
 *Laptop canvas captured from Prism with historical Suning product observations and corresponding source images. Five display branches are curated hypotheses; saved prices are not live offers.*
 
@@ -47,7 +47,7 @@ Open **[localhost:4317](http://localhost:4317)** and choose a laptop or housing 
 3. Open **研究设置**, choose **tofu-search**, and connect your model. Native Ollama uses `http://localhost:11434/v1`, an installed model ID, and `ollama` in the key field.
 4. Ask your question. Continue from the canvas when you want to change a condition or research more options.
 
-[Setup, provider options and troubleshooting →](docs/SETUP.md)
+[Setup, provider options and troubleshooting →](../SETUP.md)
 
 ## Features
 
@@ -61,12 +61,12 @@ Open **[localhost:4317](http://localhost:4317)** and choose a laptop or housing 
 
 Expand the budget to ¥8,000, then compare a ¥5,000 path, at least 24 GB RAM, or a tighter weight limit. The canvas keeps all matching options on their paths. Open a branch comparison to see which products drop out and the quotations behind that result.
 
-![Prism laptop branch comparison: tightening the budget removes products with cited prices above the limit](docs/assets/branch-comparison-preview.png)
+![Prism laptop branch comparison: tightening the budget removes products with cited prices above the limit](../assets/branch-comparison-preview.png)
 
 *The captured comparison changes 8 eligible records to 3. Its product observations are historical; it is not a current cross-platform price check.*
 
 ### Housing: watch a condition change
-![A real Prism recording: changing one branch's budget updates its matching options while the original situation remains](docs/assets/what-if-demo.gif)
+![A real Prism recording: changing one branch's budget updates its matching options while the original situation remains](../assets/what-if-demo.gif)
 
 *Budget: ¥2,500 → ¥2,000 → ¥3,000. The selected branch changes from 4 → 1 → 5 matching records. This interaction recalculates saved evidence; it does not run a new search.*
 
@@ -80,9 +80,9 @@ Each question shapes the comparison model: price, RAM and weight for a laptop; r
 | “Compare whole-apartment rentals in Hangzhou under ¥4,000/month, at least 30 m², with source photos.” | “What if the budget is ¥2,500?” · “Show more spacious options.” |
 | An existing saved decision | “Keep this path and find more alternatives.” · “Recheck the evidence behind my choice.” |
 
-For a ready-made canvas without a model, import an [example decision](examples/README.md).
+For a ready-made canvas without a model, import an [example decision](../../examples/README.md).
 
-**Real research check:** fresh Hangzhou and Chengdu rental tasks each returned **6 eligible listings with corresponding source photographs**, using local `qwen3.5:9b`, tofu and LangGraph. No listing URLs were supplied. These are dated observations, primarily from Fang.com; see [the full runs and their limits](docs/reports/AGENT-RESEARCH-REPAIR-2026-11-15.md).
+**Real research check:** fresh Hangzhou and Chengdu rental tasks each returned **6 eligible listings with corresponding source photographs**, using local `qwen3.5:9b`, tofu and LangGraph. No listing URLs were supplied. These are dated observations, primarily from Fang.com; see [the full runs and their limits](../reports/AGENT-RESEARCH-REPAIR-2026-11-15.md).
 
 <a id="agent-architecture"></a>
 
@@ -122,23 +122,23 @@ flowchart LR
   understand --> search --> read --> extract --> corroborate --> recover --> complete --> analyze
 ```
 
-Research graph: [general-research.mjs](src/general-research.mjs). Providers: [research-providers.mjs](src/research-providers.mjs). Branch validation/evaluation: [decision-schema.mjs](src/decision-schema.mjs). Checkpoints: [jobs.mjs](src/jobs.mjs).
+Research graph: [general-research.mjs](../../src/general-research.mjs). Providers: [research-providers.mjs](../../src/research-providers.mjs). Branch validation/evaluation: [decision-schema.mjs](../../src/decision-schema.mjs). Checkpoints: [jobs.mjs](../../src/jobs.mjs).
 
 </details>
 
-[Architecture and trust boundaries →](docs/ARCHITECTURE.md)
+[Architecture and trust boundaries →](../ARCHITECTURE.md)
 
 ## Documentation
 
 | Guide | What you will find |
 | --- | --- |
-| [Documentation index](docs/README.md) | All guides, project structure, media provenance and historical reports |
-| [Setup](docs/SETUP.md) | Native installation, Ollama, search, configuration and troubleshooting |
-| [Using the workspace](docs/WORKSPACE.md) | Conversation, conditions, evidence, decision memory, import and deletion |
-| [Architecture](docs/ARCHITECTURE.md) | Agent graph, evaluator, persistence and trust boundaries |
-| [Development](docs/DEVELOPMENT.md) | Tests, isolated data, live probes and Docker status |
-| [Publishing](docs/PUBLISHING.md) · [Release notes](docs/releases/v0.4.0.md) | GitHub preparation and the public preview scope |
-| [Verification](docs/reports/VERIFICATION.md) · [Roadmap](docs/ROADMAP.md) | Measured results and remaining release work |
+| [Documentation index](../README.md) | All guides, project structure, media provenance and historical reports |
+| [Setup](../SETUP.md) | Native installation, Ollama, search, configuration and troubleshooting |
+| [Using the workspace](../WORKSPACE.md) | Conversation, conditions, evidence, decision memory, import and deletion |
+| [Architecture](../ARCHITECTURE.md) | Agent graph, evaluator, persistence and trust boundaries |
+| [Development](../DEVELOPMENT.md) | Tests, isolated data, live probes and Docker status |
+| [Publishing](../PUBLISHING.md) · [Release notes](../releases/v0.4.0.md) | GitHub preparation and the public preview scope |
+| [Verification](../reports/VERIFICATION.md) · [Roadmap](../ROADMAP.md) | Measured results and remaining release work |
 
 ## Development and verification
 
@@ -146,20 +146,20 @@ Research graph: [general-research.mjs](src/general-research.mjs). Providers: [re
 npm run test:release
 ```
 
-Latest local verification: **161 unit/HTTP tests and 55 browser tests passed**. Controlled tests check behavior; separate live runs check actual retrieval. See [development instructions](docs/DEVELOPMENT.md) for Chrome/Chromium setup and individual commands.
+Latest local verification: **161 unit/HTTP tests and 55 browser tests passed**. Controlled tests check behavior; separate live runs check actual retrieval. See [development instructions](../DEVELOPMENT.md) for Chrome/Chromium setup and individual commands.
 
-Use `npm run check:project` to check the complete working-tree source and `npm run package:source` to create an archive excluding local settings, decision data and experiments. See [project structure and packaging](docs/PROJECT-STRUCTURE.md).
+Use `npm run check:project` to check the complete working-tree source and `npm run package:source` to create an archive excluding local settings, decision data and experiments. See [project structure and packaging](../PROJECT-STRUCTURE.md).
 
 ## Project status
 
 Prism **0.4 is a development preview for local, single-user use**. Real research depends on the model, search engines and publicly readable sources. A saved citation records what a source said; it does not independently verify the publisher's claims.
 
-The current live checks cover two rental tasks. Broader retrieval evaluation and cross-platform coverage remain in progress. PDF/Word/Excel/image ingestion is not implemented. Native Windows installations pass on Node 22.23.5 and 24.19.0. The first [GitHub CI run](https://github.com/mianwtt/prism/actions/runs/44038301786) also passes Windows/Linux Node 22/24 checks, browser journeys, source packaging and the Docker build/runtime smoke. See [release gates](docs/ROADMAP.md).
+The current live checks cover two rental tasks. Broader retrieval evaluation and cross-platform coverage remain in progress. PDF/Word/Excel/image ingestion is not implemented. Native Windows installations pass on Node 22.23.5 and 24.19.0. The first [GitHub CI run](https://github.com/mianwtt/prism/actions/runs/44038301786) also passes Windows/Linux Node 22/24 checks, browser journeys, source packaging and the Docker build/runtime smoke. See [release gates](../ROADMAP.md).
 
-Questions and decision history are stored locally. External models, searches and source reads still receive the data needed for those requests. Read [security and privacy](SECURITY.md) before sharing exports or running with personal information.
+Questions and decision history are stored locally. External models, searches and source reads still receive the data needed for those requests. Read [security and privacy](../../.github/SECURITY.md) before sharing exports or running with personal information.
 
 ## Contributing
 
-Public-source adapters, reproducible data-quality cases and accessibility improvements are welcome. Start with [CONTRIBUTING](CONTRIBUTING.md).
+Public-source adapters, reproducible data-quality cases and accessibility improvements are welcome. Start with [CONTRIBUTING](../../.github/CONTRIBUTING.md).
 
-Source code is [MIT licensed](LICENSE). Third-party content and photographs retain their respective rights.
+Source code is [MIT licensed](../../LICENSE). Third-party content and photographs retain their respective rights.

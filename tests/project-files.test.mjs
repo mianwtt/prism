@@ -24,7 +24,7 @@ async function fixture(t) {
   await put('package.json', JSON.stringify(pkg));
   await put('package-lock.json', JSON.stringify({...pkg, lockfileVersion: 3, packages: {'': pkg}}));
   await put('README.md', '# Prism\n\n[Setup](docs/SETUP.md#install)\n');
-  await put('README.zh-CN.md', '# Prism 中文\n\n[English](README.md)\n');
+  await put('docs/i18n/README.en.md', '# Prism English\n\n[中文](../../README.md)\n');
   await put('LICENSE', 'MIT\n');
   await put('.env.example', 'LLM_BASE_URL=XXX\nLLM_MODEL=XXX\nLLM_API_KEY=XXX\nTAVILY_API_KEY=XXX\nSEARCH_PROVIDER=XXX\n');
   await put('src/server.mjs', "import './core.mjs';\nconst asset = 'public/index.html';\n");
@@ -102,11 +102,18 @@ test('source and archive checks reject redirected directories', async t => {
 
 test('source archive round-trips every checked byte and manifest hash while excluding local information', async t => {
   const {root, put} = await fixture(t);
+  await put('deploy/docker/Dockerfile', 'FROM node:24-bookworm-slim\n');
+  await put('deploy/docker/Dockerfile.dockerignore', '.env\ndata\nwork\n');
+  await put('deploy/docker/compose.yaml', 'name: prism\nservices: {}\n');
+  await put('scripts/requirements-search.txt', '# Optional search dependencies\n');
   await put('.env', 'PRIVATE_CANARY');
   await put('data/decision.json', 'PRIVATE_CANARY');
   await put('work/experiment.txt', 'PRIVATE_CANARY');
   await put('docs/fixture-image.png', Buffer.from([137, 80, 78, 71, 0, 255, 1, 2]));
   const expected = await auditProject(root);
+  for (const path of ['deploy/docker/Dockerfile', 'deploy/docker/Dockerfile.dockerignore', 'deploy/docker/compose.yaml', 'scripts/requirements-search.txt', 'docs/i18n/README.en.md']) {
+    assert.ok(expected.files.some(file => file.path === path), 'Distribution must include ' + path);
+  }
   // A second build checks safe replacement of an existing generated archive/checksum.
   await buildSourceArchive(root);
   const result = await buildSourceArchive(root);

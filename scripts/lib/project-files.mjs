@@ -6,8 +6,8 @@ import {init,parse} from 'es-module-lexer';
 
 await init();
 
-export const SOURCE_ENTRIES=['src','public','scripts','tests','examples','docs','.github','.githooks','package.json','package-lock.json','playwright.config.mjs','README.md','README.en.md','README.zh-CN.md','LICENSE','CONTRIBUTING.md','SECURITY.md','requirements-search.txt','Dockerfile','compose.yaml','.dockerignore','.gitignore','.gitattributes','.editorconfig','.nvmrc'];
-const REQUIRED=['package.json','package-lock.json','README.md','README.zh-CN.md','LICENSE','.env.example','src/server.mjs','public/index.html'];
+export const SOURCE_ENTRIES=['src','public','scripts','tests','examples','docs','deploy','.github','.githooks','package.json','package-lock.json','README.md','LICENSE','.gitignore','.gitattributes','.editorconfig','.nvmrc'];
+const REQUIRED=['package.json','package-lock.json','README.md','docs/i18n/README.en.md','LICENSE','.env.example','src/server.mjs','public/index.html'];
 const SKIP=new Set(['.git','node_modules','data','work','test-results','playwright-report','__pycache__','.DS_Store']);
 const binary=/\.(?:png|jpe?g|gif|webp|ico|pdf|zip|gz|woff2?|ttf)$/i;
 const secret=/\b(?:sk-[A-Za-z0-9_-]{16,}|tvly-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/;

@@ -1,6 +1,6 @@
 # Setup
 
-[中文首页](../README.md) · [English](../README.en.md) · [Workspace guide](WORKSPACE.md)
+[中文首页](../README.md) · [English](i18n/README.en.md) · [Workspace guide](WORKSPACE.md)
 
 ## Native installation
 
@@ -24,7 +24,7 @@ Open [localhost:4317](http://localhost:4317). The laptop and housing demos use e
    npm run setup:search
    ```
 
-   This creates the optional Python search environment under ignored `work/tofu-venv/` and installs [requirements-search.txt](../requirements-search.txt).
+   This creates the optional Python search environment under ignored `work/tofu-venv/` and installs [requirements-search.txt](../scripts/requirements-search.txt).
 
 3. Open **研究设置** and enter:
 
@@ -94,4 +94,4 @@ Different port, POSIX shell:
 PORT=4319 npm start
 ```
 
-Keep `HOST` bound to loopback. See [security](../SECURITY.md) and [Docker notes](DEVELOPMENT.md#docker) for deployment boundaries.
+Keep `HOST` bound to loopback. See [security](../.github/SECURITY.md) and [Docker notes](DEVELOPMENT.md#docker) for deployment boundaries.

@@ -1,6 +1,6 @@
 # Documentation
 
-[简体中文](../README.md) · [English](../README.en.md)
+[简体中文](../README.md) · [English](i18n/README.en.md)
 
 Start with [setup](SETUP.md), then [using the workspace](WORKSPACE.md). The interface currently uses Chinese.
 

@@ -3,7 +3,7 @@ description: Report a reproducible problem with fictional or sanitized data
 body:
   - type: markdown
     attributes:
-      value: "Never attach keys, provider settings, personal decisions or unredacted traces. Follow SECURITY.md for vulnerabilities."
+      value: "Never attach keys, provider settings, personal decisions or unredacted traces. Follow .github/SECURITY.md for vulnerabilities."
   - type: textarea
     id: steps
     attributes:

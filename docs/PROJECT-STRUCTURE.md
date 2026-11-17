@@ -8,19 +8,25 @@ Prism runs directly from its source files. The browser uses native JavaScript mo
 prism/
 ├── src/                  Local HTTP API, Agent, evaluator and storage
 ├── public/               Browser modules, styles and existing SVG assets
-├── scripts/              Diagnostics, tests, retrieval probes and packaging
+├── scripts/              Diagnostics, search setup, retrieval probes and packaging
 │   └── lib/              Source audit and archive helpers
 ├── tests/                Unit, HTTP and browser regression coverage
+│   └── browser/          Browser journeys and their Playwright configuration
 ├── examples/             Portable, explicitly fictional decisions
+├── deploy/
+│   └── docker/           Dockerfile, Compose and Dockerfile-specific context exclusions
 ├── docs/
 │   ├── assets/           README screenshots and actual interaction recording
+│   ├── i18n/             English README; Chinese remains the default root README
 │   ├── reports/          Dated verification and research evaluations
 │   ├── releases/         Public preview release notes
 │   └── legacy/           Historical implementation notes
-├── .github/              CI and contribution templates
+├── .github/              CI, contribution templates, contributing and security policies
 ├── .githooks/            Local publication credential guard
 ├── .env.example          Public configuration template using XXX placeholders
 ├── .nvmrc                Recommended Node major for native development
+├── README.md             Chinese product introduction with a visible English link
+├── LICENSE               MIT license
 ├── package.json          Runtime dependencies and commands
 └── package-lock.json     Locked dependency graph
 ```
@@ -38,6 +44,12 @@ prism/
 | Canvas, condition controls and detail modal | `public/branch-canvas.mjs`, `public/universal-view.mjs` |
 
 Older laptop modules stay available for saved snapshots. New research uses the adaptive model described in [the Agent guide](AGENT.md).
+
+## Repository front page
+
+The root contains nine tracked files: the README, license, package metadata and configuration files that tools expect at the root. Deployment files are in `deploy/docker/`, the browser configuration is beside the tests, search requirements are under `scripts/`, and GitHub community policies are in `.github/`. The English README is under `docs/i18n/`; the identical extra Chinese README was removed.
+
+Docker commands remain available from the project root as `npm run docker:up`, `npm run docker:down` and `npm run docker:config`. The Compose project name stays `prism`, preserving the existing named-volume identity.
 
 ## Local files stay local
 

@@ -1,6 +1,6 @@
 <div align="center">
 
-**简体中文** · [English](README.en.md)
+**简体中文** · [English](docs/i18n/README.en.md)
 
 <img src="public/favicon.svg" width="64" height="64" alt="Prism 标志">
 
@@ -10,7 +10,7 @@
 
 有来源的研究，可交互的 What-if，留得下的判断。
 
-[![自动检查](https://github.com/mianwtt/prism/actions/workflows/check.yml/badge.svg)](https://github.com/mianwtt/prism/actions/workflows/check.yml) [![MIT 许可证](https://img.shields.io/badge/License-MIT-246e64)](LICENSE) [![LangGraph](https://img.shields.io/badge/Agent-LangGraph-246e64)](docs/ARCHITECTURE.md) [![本地存储](https://img.shields.io/badge/Storage-Local_first-526773)](SECURITY.md) [![开发预览](https://img.shields.io/badge/Status-0.4_preview-526773)](docs/ROADMAP.md)
+[![自动检查](https://github.com/mianwtt/prism/actions/workflows/check.yml/badge.svg)](https://github.com/mianwtt/prism/actions/workflows/check.yml) [![MIT 许可证](https://img.shields.io/badge/License-MIT-246e64)](LICENSE) [![LangGraph](https://img.shields.io/badge/Agent-LangGraph-246e64)](docs/ARCHITECTURE.md) [![本地存储](https://img.shields.io/badge/Storage-Local_first-526773)](.github/SECURITY.md) [![开发预览](https://img.shields.io/badge/Status-0.4_preview-526773)](docs/ROADMAP.md)
 
 [开始体验](#quick-start) · [核心功能](#features) · [使用场景](#examples) · [Agent 框架](#agent-architecture) · [文档](#documentation)
 
@@ -166,10 +166,10 @@ Prism **0.4 是面向本机单用户的开发预览**。真实研究受模型、
 
 当前真实验证覆盖两个租房任务，更广泛的场景评测和跨平台覆盖仍在推进。尚不支持 PDF／Word／Excel／图片资料导入。Windows 下 Node 22.23.5 与 24.19.0 的独立安装和运行检查均通过。首次 [GitHub CI](https://github.com/mianwtt/prism/actions/runs/44038301786) 也已通过 Windows/Linux Node 22/24 检查、浏览器回归、源码打包及 Docker 构建和运行自检。详见[发布工作](docs/ROADMAP.md)。
 
-问题和决策历史保存在本机；外部模型、搜索和读页请求仍会传递相应数据。使用个人信息或分享导出文件前，请阅读[安全与隐私说明](SECURITY.md)。
+问题和决策历史保存在本机；外部模型、搜索和读页请求仍会传递相应数据。使用个人信息或分享导出文件前，请阅读[安全与隐私说明](.github/SECURITY.md)。
 
 ## 参与贡献
 
-欢迎公开来源适配、可复现的数据质量案例与无障碍改进。请从 [CONTRIBUTING](CONTRIBUTING.md) 开始。
+欢迎公开来源适配、可复现的数据质量案例与无障碍改进。请从 [CONTRIBUTING](.github/CONTRIBUTING.md) 开始。
 
 项目源码采用 [MIT](LICENSE)；第三方内容和照片保留其原有权利。

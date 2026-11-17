@@ -14,7 +14,7 @@ Prism turns research into a decision you can explore and revisit. The intended d
 - No-key fictional laptop and housing demos, portable multi-branch examples, setup diagnosis and native local setup.
 - MIT license, English/Chinese README, contribution/security guidance and CI definitions for Windows/Linux Node 22/24 plus browser tests.
 
-Automated graph/UI integration uses controlled providers. CI definitions are present; remote GitHub jobs are not claimed to have run. Native local verification is separate from Docker verification.
+Automated graph/UI integration uses controlled providers. The [first public GitHub CI run](https://github.com/mianwtt/prism/actions/runs/44038301786) passed all seven native, browser, packaging and container jobs. Live retrieval quality is assessed separately.
 
 ## Gates before claiming a mature V1
 
@@ -25,8 +25,8 @@ Automated graph/UI integration uses controlled providers. CI definitions are pre
 | Broader scenarios | Fresh Hangzhou/Chengdu rental tasks now each produce six comparable source-backed records/photos; a broader labeled task set is still missing | Repeated fresh tasks across locations and domains, assessed separately from fixtures and supplied-URL replays; include failures and platform limitations |
 | Ingestion | JSON decision import works; PDF/Word/Excel/image ingestion does not | Bounded parsers, provenance, failure behavior and isolated processing |
 | Usability | Desktop/mobile browser regressions exist; no full accessibility or user study | Keyboard/screen-reader audit, observed first-use completion, clear recovery from empty evidence |
-| Distribution | Clean Windows Node 22/24 installations, 161 unit/HTTP tests and runtime smoke pass; Docker/Linux not yet verified | Actual CI results on Linux and a passing container smoke |
-| GitHub release | Public preview material, actual recording, complete-source checks and release notes prepared | Reviewed staged tree, owner repository, passing remote CI and a prerelease tag; see [publishing](PUBLISHING.md) |
+| Distribution | Windows/Linux Node 22/24 checks, 161 unit/HTTP tests, browser regression and container build/runtime smoke pass | Further target-platform and live-provider coverage beyond the checked profiles |
+| GitHub release | [Public repository](https://github.com/mianwtt/prism), actual recordings, complete-source checks and first remote CI run are published | A reviewed prerelease tag; see [publishing](PUBLISHING.md) |
 
 ## Acceptance tasks
 

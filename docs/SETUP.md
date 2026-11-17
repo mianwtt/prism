@@ -1,6 +1,6 @@
 # Setup
 
-[README](../README.md) · [中文首页](../README.zh-CN.md) · [Workspace guide](WORKSPACE.md)
+[中文首页](../README.md) · [English](../README.en.md) · [Workspace guide](WORKSPACE.md)
 
 ## Native installation
 

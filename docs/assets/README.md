@@ -4,6 +4,7 @@
 
 | File | Provenance |
 | --- | --- |
+| [laptop-canvas.png](laptop-canvas.png) | Actual Prism canvas using nine historical Suning product observations and corresponding source images. Five display hypotheses were curated. Baseline: two matching records; branches: 8, 3, 2, 2 and 1. Every displayed image loaded successfully; no photograph was generated. |
 | [workspace-preview.png](workspace-preview.png) | Actual Prism canvas using six saved public rental observations collected on 2026-11-15. Three display branches were curated hypotheses. Photos are bound to their respective source pages. |
 | [what-if-demo.gif](what-if-demo.gif) | Actual screen recording: changing one branch's budget from ¥2,500 to ¥2,000 to ¥3,000 changes matches from 4 to 1 to 5. The six-record baseline stays intact. This recalculates saved evidence without new searches. |
 | [branch-comparison-preview.png](branch-comparison-preview.png) | Actual laptop comparison using historical saved Suning observations; not a current cross-platform price check. |

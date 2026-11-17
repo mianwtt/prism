@@ -1,6 +1,6 @@
 # Documentation
 
-[Prism](../README.md) · [简体中文](../README.zh-CN.md)
+[简体中文](../README.md) · [English](../README.en.md)
 
 Start with [setup](SETUP.md), then [using the workspace](WORKSPACE.md). The interface currently uses Chinese.
 

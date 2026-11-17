@@ -97,13 +97,13 @@ npm run check:publish
 
 ## Docker
 
-The native path is the verified installation. For contributors evaluating the container definition:
+Native Windows/Linux checks and the container build/runtime smoke passed in [the first GitHub CI run](https://github.com/mianwtt/prism/actions/runs/44038301786). To run the container locally:
 
 ```sh
 docker compose up --build
 ```
 
-Compose binds to host loopback and persists data in `prism-data`. The Debian-based image builds the native SQLite dependency in a separate stage and runs the application as the `node` user with a health check. It supports the demo and a compatible model plus Tavily configuration; it does not bundle the optional tofu Python runtime. Docker Desktop currently cannot start its engine in this environment, so local container acceptance remains unverified. A separate CI job builds and exercises a disposable container; its remote result is not yet available.
+Compose binds to host loopback and persists data in `prism-data`. The Debian-based image builds the native SQLite dependency in a separate stage and runs the application as the `node` user with a health check. The Linux CI container job passed build, startup, all 24 static routes, demos, import/export and deletion. It does not bundle the optional tofu Python runtime; live research inside the container has not been separately evaluated. Docker Desktop still cannot start its engine on the development machine, so that local Desktop path is not claimed to have passed.
 
 Inside a container, `localhost` refers to that container, not the host Ollama. Model endpoints must be reachable from the container.
 
@@ -115,4 +115,4 @@ The laptop comparison screenshot uses saved historical Suning observations, not 
 
 ## Remaining release gates
 
-Docker, Linux and remote GitHub CI acceptance remain unverified. Native Windows Node 22/24 installation and runtime checks have passed. See [publishing](PUBLISHING.md), [roadmap](ROADMAP.md) and the historical [release audit](reports/RELEASE-AUDIT-2026-11-10.md).
+Windows/Linux Node 22/24, browser regression, source packaging and the basic container smoke passed remote CI. Broader live-research evaluation, document ingestion and usability work remain in the [roadmap](ROADMAP.md). See [publishing](PUBLISHING.md) and the historical [release audit](reports/RELEASE-AUDIT-2026-11-10.md) for the respective scopes.

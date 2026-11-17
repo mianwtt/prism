@@ -1,5 +1,7 @@
 <div align="center">
 
+**简体中文** · [English](README.en.md)
+
 <img src="public/favicon.svg" width="64" height="64" alt="Prism 标志">
 
 # Prism
@@ -10,13 +12,13 @@
 
 [![自动检查](https://github.com/mianwtt/prism/actions/workflows/check.yml/badge.svg)](https://github.com/mianwtt/prism/actions/workflows/check.yml) [![MIT 许可证](https://img.shields.io/badge/License-MIT-246e64)](LICENSE) [![LangGraph](https://img.shields.io/badge/Agent-LangGraph-246e64)](docs/ARCHITECTURE.md) [![本地存储](https://img.shields.io/badge/Storage-Local_first-526773)](SECURITY.md) [![开发预览](https://img.shields.io/badge/Status-0.4_preview-526773)](docs/ROADMAP.md)
 
-[开始体验](#quick-start) · [核心功能](#features) · [使用场景](#examples) · [文档](#documentation) · [English](README.md)
+[开始体验](#quick-start) · [核心功能](#features) · [使用场景](#examples) · [Agent 框架](#agent-architecture) · [文档](#documentation)
 
 </div>
 
-![Prism：六套有来源的房源，在预算、面积与组合条件下形成不同选择分支](docs/assets/workspace-preview.png)
+![Prism 电脑决策画布：预算、内存与重量形成可继续探索的 What-if 分支](docs/assets/laptop-canvas.png)
 
-*画面使用公开房源的采集记录，三条分支为展示设置的假设，照片来自各自的房源原页。首次启动内置的是另一组虚构演示数据。*
+*电脑画面来自 Prism 的实际运行，使用历史苏宁商品观察及对应来源图片。五条分支是为展示设置的条件假设，保存的价格并非实时行情。*
 
 预算变了，多了一个要求，或者你想知道某个方案为什么被排除。Prism 把 Agent 的研究结果放进一张 **What-if 画布**，让你沿着不同条件比较选择，也能接着对话、补充资料，保留原来的判断依据。
 
@@ -59,8 +61,15 @@ npm start
 - **比较条件随问题生成。** Agent 从需求中提出数值、是非或分类维度。笔记本与住房使用同一张画布，各自呈现相应条件。
 - **记住当时为什么这样选。** 保存选择、理由与原始条件；之后重新核对来源、比较版本，也能以 JSON 导出和导入决策。
 
-### 看看条件如何改变选择
+### 选电脑：要求变了，看看哪些方案还能留下
 
+先把预算放宽到 8,000 元，再比较「预算收紧到 5,000 元」「内存至少 24GB」「重量更轻」等路径。每条路径展示满足条件的全部方案；打开分支对比，可以看到哪些电脑退出，以及对应的价格原文。
+
+![电脑分支对比：收紧预算后，哪些电脑退出可选，为什么退出](docs/assets/branch-comparison-preview.png)
+
+*图中的对比将 8 个可选方案收紧到 3 个。商品资料为历史采集记录，不代表当前跨平台实时价格。*
+
+### 选住房：月租变了，方案跟着变化
 ![Prism 实际操作录屏：修改一条分支的租金上限，方案随之变化，原始情况保留](docs/assets/what-if-demo.gif)
 
 *预算从 2,500 → 2,000 → 3,000 元，选定分支的匹配方案从 4 → 1 → 5 个变化。此处使用已保存依据实时重算，不会因为每次拖动而重新搜索。*
@@ -68,6 +77,8 @@ npm start
 <a id="examples"></a>
 
 ## 可以从这些问题开始
+
+比较维度随问题生成：电脑可以关注价格、内存和重量，住房可以关注月租与面积。两类问题共用同一个 Agent、证据模型和 What-if 画布。
 
 | 起点 | 继续探索 |
 | --- | --- |
@@ -79,13 +90,49 @@ npm start
 
 **真实研究记录：** 使用本机 `qwen3.5:9b`、tofu 和 LangGraph，杭州与成都的新租房任务分别取得了 **6 套符合条件、带对应原页照片的房源**，输入没有房源链接。这些是有采集时间的网页观察，主要来自房天下；[完整记录](docs/reports/AGENT-RESEARCH-REPAIR-2026-11-15.md)包含中间失败和验证范围。
 
-## 它如何工作
+<a id="agent-architecture"></a>
 
-**提出问题 → Agent 查找资料 → 有引文的方案 → What-if 分支 → 保存判断**
+## Agent 框架
 
-LangGraph 组织规划、搜索、读页与补查；类型和引文校验约束提取值；确定性计算负责分支重算。SQLite 保存研究检查点，不可变 JSON 版本保存你的决策与历史。
+研究 Agent 由 LangGraph 编排：模型理解需求、提出比较维度，调用搜索与读页，提取、补查并整理有引文的方案。What-if 直接使用这份决策模型重算分支；明确要求继续研究时，再由 Agent 扩充资料。
 
-[架构与来源边界 →](docs/ARCHITECTURE.md)
+```mermaid
+flowchart TB
+  Question["提出问题 / 继续对话"] --> Agent["LangGraph StateGraph<br/>规划 · 研究 · 补查 · 分析"]
+  Model["模型适配<br/>ChatOllama / Chat Completions"] <--> Agent
+  Tools["搜索与公开页面<br/>tofu-search / Tavily"] <--> Agent
+  Agent --> Evidence["经过校验的决策模型<br/>字段 · 原文 · 来源配图"]
+  Agent -.-> Checkpoints["SQLite 检查点<br/>恢复研究进度"]
+  Evidence --> Canvas["What-if 画布<br/>保留原始情况 · 按分支重算"]
+  Conditions["修改一个条件"] --> Canvas
+  Canvas --> Memory["不可变 JSON 版本<br/>选择 · 理由 · 证据"]
+  Canvas -->|明确要求继续研究| Agent
+  classDef agent fill:#eaf6f1,stroke:#2b8a78,color:#173d36;
+  classDef store fill:#f2f4f8,stroke:#94a3b8,color:#334155;
+  class Agent,Evidence,Canvas agent;
+  class Checkpoints,Memory store;
+```
+
+| 层次 | 实现 | 职责 |
+| --- | --- | --- |
+| 研究编排 | LangGraph `StateGraph` | 理解问题、调用工具、补齐依据、分析方案 |
+| 模型与工具 | ChatOllama / 兼容 HTTP；tofu-search / Tavily | 连接本机或远程模型与可公开读取的资料 |
+| 证据校验 | Zod 与来源／引文校验器 | 核对字段类型、单位、原文和对应图片 |
+| 交互与记忆 | 确定性评估器、SQLite、JSON 版本 | 重算条件、恢复任务、保留判断上下文 |
+
+<details>
+<summary>展开真实 LangGraph 节点与代码入口</summary>
+
+```mermaid
+flowchart LR
+  understand --> search --> read --> extract --> corroborate --> recover --> complete --> analyze
+```
+
+研究图：[general-research.mjs](src/general-research.mjs)。模型与搜索适配：[research-providers.mjs](src/research-providers.mjs)。分支校验与计算：[decision-schema.mjs](src/decision-schema.mjs)。检查点：[jobs.mjs](src/jobs.mjs)。
+
+</details>
+
+[完整架构与信任边界 →](docs/ARCHITECTURE.md)
 
 <a id="documentation"></a>
 
@@ -101,6 +148,8 @@ LangGraph 组织规划、搜索、读页与补查；类型和引文校验约束�
 | [GitHub 发布指南](docs/PUBLISHING.md) · [版本说明](docs/releases/v0.4.0.md) | 上传准备、仓库设置与公开预览版范围 |
 | [验证记录](docs/reports/VERIFICATION.md) · [路线图](docs/ROADMAP.md) | 已测结果与后续发布工作 |
 
+<a id="development-and-verification"></a>
+
 ## 开发与验证
 
 ```sh
@@ -115,7 +164,7 @@ npm run test:release
 
 Prism **0.4 是面向本机单用户的开发预览**。真实研究受模型、搜索引擎和公开网页可读性影响；保存引文表示可追溯到来源，不等于独立核实了发布者的说法。
 
-当前真实验证覆盖两个租房任务，更广泛的场景评测和跨平台覆盖仍在推进。尚不支持 PDF／Word／Excel／图片资料导入。Windows 下 Node 22.23.5 与 24.19.0 的独立安装和运行检查均通过。Docker 与远程 CI 验收未完成，容器分发仍属实验支持。详见[发布工作](docs/ROADMAP.md)。
+当前真实验证覆盖两个租房任务，更广泛的场景评测和跨平台覆盖仍在推进。尚不支持 PDF／Word／Excel／图片资料导入。Windows 下 Node 22.23.5 与 24.19.0 的独立安装和运行检查均通过。首次 [GitHub CI](https://github.com/mianwtt/prism/actions/runs/44038301786) 也已通过 Windows/Linux Node 22/24 检查、浏览器回归、源码打包及 Docker 构建和运行自检。详见[发布工作](docs/ROADMAP.md)。
 
 问题和决策历史保存在本机；外部模型、搜索和读页请求仍会传递相应数据。使用个人信息或分享导出文件前，请阅读[安全与隐私说明](SECURITY.md)。
 

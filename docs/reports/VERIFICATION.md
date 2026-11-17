@@ -1,3 +1,9 @@
+# Public upload and remote CI — 2026-11-17
+
+Prism is published at [mianwtt/prism](https://github.com/mianwtt/prism). The first source commit `f6cde28` passed [all seven Checks jobs](https://github.com/mianwtt/prism/actions/runs/44038301786): Windows/Linux Node 22/24 unit and runtime checks, browser regression, source packaging and the Docker build/runtime smoke. This resolves the earlier remote Linux/container distribution gates for those tested profiles. Real retrieval coverage and source truth remain separate from controlled CI.
+
+The README follow-up makes Chinese the default, adds a prominent English entry, a real laptop canvas and laptop branch comparison alongside the housing recording, and explains the Agent with architecture and compiled-node Mermaid diagrams. The new laptop capture uses nine historical source records, two baseline matches and five curated paths with 8/3/2/2/1 matches. All displayed source photographs loaded and no page errors occurred. Source data and user conversations are not bundled with the screenshot.
+
 # GitHub public preview candidate — 2026-11-17 (follow-up)
 
 The earlier incomplete-staging gate is resolved: complete reviewed source is staged, executable local guards are present, and `npm run check:publish` passes. A backup retains the prior index and staged patch. Local configuration and decision data stay excluded.

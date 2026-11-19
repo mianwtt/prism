@@ -1,0 +1,121 @@
+{
+  "kind": "reviewed-fixed-live-acceptance",
+  "runId": "2026-11-18T03-44-24-418Z",
+  "status": "complete",
+  "reviewedAt": "2026-11-18T03:54:17.891Z",
+  "runtimeHash": "6fbd8ccc2ae251917b503dae8cc98231d329be0245688296ce9a9bd9365b13bb",
+  "suiteSha256": "f8463b876734944f81abce99cc756e62933394a1568faf07b96995766d5e763c",
+  "reviewerSha256": "f8c2ecf1b5e92ff4fbb50cafb2a4b61a10b98263d4ce46eade8038974b8a5a24",
+  "taskIds": [
+    "C02",
+    "C03",
+    "C05",
+    "R04"
+  ],
+  "passed": 2,
+  "total": 4,
+  "originalPassed": 2,
+  "meaning": "Offline review of retained real-run outputs; stricter application-eligibility gate added after a false positive was found. Original logs and original summary remain unchanged. This does not rerun web/model calls or establish independently labeled field truth.",
+  "trials": [
+    {
+      "id": "C02",
+      "domain": "computer",
+      "pass": false,
+      "seconds": 126.149,
+      "candidates": 3,
+      "originalRecordedQualified": 0,
+      "applicationEligible": 0,
+      "qualified": 0,
+      "sourceImagesLoaded": 0,
+      "supportedFields": 3,
+      "totalRequestedFields": 6,
+      "schemaCoverage": 2,
+      "calls": {
+        "model": 12,
+        "search": 2,
+        "read": 11,
+        "images": 0,
+        "offers": 0,
+        "catalogs": 1
+      },
+      "timedOut": false,
+      "runtimeStable": true,
+      "errorType": null
+    },
+    {
+      "id": "C03",
+      "domain": "computer",
+      "pass": false,
+      "seconds": 227.851,
+      "candidates": 9,
+      "originalRecordedQualified": 0,
+      "applicationEligible": 0,
+      "qualified": 0,
+      "sourceImagesLoaded": 0,
+      "supportedFields": 18,
+      "totalRequestedFields": 27,
+      "schemaCoverage": 3,
+      "calls": {
+        "model": 12,
+        "search": 4,
+        "read": 21,
+        "images": 0,
+        "offers": 0,
+        "catalogs": 1
+      },
+      "timedOut": false,
+      "runtimeStable": true,
+      "errorType": null
+    },
+    {
+      "id": "C05",
+      "domain": "computer",
+      "pass": true,
+      "seconds": 67.311,
+      "candidates": 6,
+      "originalRecordedQualified": 5,
+      "applicationEligible": 5,
+      "qualified": 5,
+      "sourceImagesLoaded": 5,
+      "supportedFields": 18,
+      "totalRequestedFields": 18,
+      "schemaCoverage": 3,
+      "calls": {
+        "model": 4,
+        "search": 0,
+        "read": 7,
+        "images": 0,
+        "offers": 0,
+        "catalogs": 1
+      },
+      "timedOut": false,
+      "runtimeStable": true,
+      "errorType": null
+    },
+    {
+      "id": "R04",
+      "domain": "rental",
+      "pass": true,
+      "seconds": 77.265,
+      "candidates": 6,
+      "originalRecordedQualified": 4,
+      "applicationEligible": 4,
+      "qualified": 4,
+      "sourceImagesLoaded": 4,
+      "supportedFields": 12,
+      "totalRequestedFields": 12,
+      "schemaCoverage": 2,
+      "calls": {
+        "model": 7,
+        "search": 2,
+        "read": 12,
+        "images": 0,
+        "offers": 0,
+        "catalogs": 0
+      },
+      "timedOut": false,
+      "runtimeStable": true,
+      "errorType": null
+    }
+  ]
+}

@@ -16,7 +16,7 @@ test('each scenario displays all eligible options; clicking a photo only opens d
   await page.locator('[data-flow-condition="scenario-commute"] > [data-tree-condition]').click();
   await expect(page.locator('.tree-inspector .u-option')).toHaveCount(0);
   await expect(page.getByRole('group',{name:'预算上限',exact:true})).toBeVisible();
-  await page.locator('.board-controlbar [data-live-condition=price][data-live-value="6000"]').click();
+  await page.locator('[data-live-input=price]').fill('6000');await page.locator('[data-live-input=price]').dispatchEvent('change');
   await page.locator('.board-controlbar [data-live-condition=weight][data-live-value="2"]').click();
   const choices=page.locator('[data-tree-node="scenario-commute"] > .tree-candidates > .tree-choice');
   await expect(choices).toHaveCount(2);

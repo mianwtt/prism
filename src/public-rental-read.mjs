@@ -1,10 +1,20 @@
 import {request} from 'node:https';
 import * as tls from 'node:tls';
 import {gunzipSync,inflateSync,brotliDecompressSync} from 'node:zlib';
+import {isMonthlyAmountField,convertQuantity} from './decision-evidence.mjs';
 
 const decode=s=>String(s||'').replace(/&#(x[0-9a-f]+|\d+);/gi,(_,n)=>{const value=n[0].toLowerCase()==='x'?parseInt(n.slice(1),16):Number(n);return value>0&&value<=0x10ffff?String.fromCodePoint(value):'';}).replace(/&(?:amp|quot|apos|lt|gt|nbsp);/g,s=>({'&amp;':'&','&quot;':'"','&apos;':"'",'&lt;':'<','&gt;':'>','&nbsp;':' '}[s]));
 const text=html=>decode(String(html||'').replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>|<style\b[^>]*>[\s\S]*?<\/style\s*>/gi,' ').replace(/<[^>]+>/g,' ')).replace(/\s+/g,' ').trim();
 const attr=(tag,key)=>decode(new RegExp('(?:^|\\s)'+key+'\\s*=\\s*["\']([^"\']*)["\']','i').exec(tag)?.[1]||'');
+export const rentalCityIndexURL='https://m.fang.com/city/hotcity.jsp?burl=/zf';
+export function parseRentalCities(html){
+ const cities=[];
+ for(const a of html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi))try{
+  const name=text(a[2]),url=rentalCatalogUrl(new URL(attr(a[1],'href'),rentalCityIndexURL).href);
+  if(name&&name.length<=20&&url&&/^https:\/\/m\.fang\.com\/zf\/[a-z]{2,12}\/$/.test(url)&&!cities.some(c=>c.name===name))cities.push({name,url});
+ }catch{}
+ return cities;
+}
 function divBlock(html,className){
  const opening=new RegExp('<div\\b[^>]*class=["\'][^"\']*\\b'+className+'\\b[^"\']*["\'][^>]*>','i').exec(html);if(!opening)return '';
  const tags=/<\/?div\b[^>]*>/gi;tags.lastIndex=opening.index+opening[0].length;let depth=1,m;
@@ -21,9 +31,10 @@ export function rentalDetailUrl(raw){
 }
 export function rentalCatalogUrl(raw){
  try{const u=new URL(raw);if(u.protocol!=='https:'||u.username||u.password||u.port)return null;
-  if(u.hostname==='zu.fang.com'&&/^\/[a-z]{2,12}\/(?:house\/[a-zA-Z0-9_-]+\/?)?$/.test(u.pathname))return u.origin+u.pathname;
+  if(u.hostname==='zu.fang.com'&&/^\/[a-z]{2,12}\/(?:(?:house\/[a-zA-Z0-9_-]+\/?|houses\/zf_\d+[a-z]{2,12}\/))?$/.test(u.pathname))return u.origin+u.pathname;
   if(/^[a-z]{2,12}\.zu\.fang\.com$/.test(u.hostname)&&/^\/(?:house\/[a-zA-Z0-9_-]+\/?)?$/.test(u.pathname))return 'https://zu.fang.com/'+u.hostname.split('.')[0]+u.pathname;
-  if(u.hostname==='m.fang.com'&&/^\/zf\/[a-z]{2,12}\/$/.test(u.pathname))return u.origin+u.pathname;
+  if(u.hostname==='m.fang.com'&&/^\/zf\/[a-z]{2,12}\/(?:(?:[a-z]\d{1,6}){1,8}\/)?$/.test(u.pathname))return u.origin+u.pathname;
+  if(u.hostname==='www.fang.com'&&/^\/houses\/zf_\d+[a-z]{2,12}\/$/.test(u.pathname))return u.origin+u.pathname;
   return null;
  }catch{return null;}
 }
@@ -39,8 +50,13 @@ export function parseRentalCatalog(html,rawUrl){
   if(link&&!observedLinks.some(l=>l.url===link.url))observedLinks.push(link);
   if(observedLinks.length>=24)break;
  }
- if(!observedLinks.length)return null;
- return {url,title,observedLinks,text:[title,...observedLinks.map(l=>l.summary+'\n'+l.url)].join('\n\n')};
+ const observedCatalogLinks=[],city=raw=>{const u=new URL(raw);return u.hostname==='m.fang.com'?u.pathname.split('/')[2]:u.pathname.split('/')[1];};
+ for(const a of html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi))try{
+  const target=rentalCatalogUrl(new URL(attr(a[1],'href'),url).href),label=text(a[2]);
+  if(target&&target!==url&&city(target)===city(url)&&label&&label.length<=80&&label!=='不限'&&!observedCatalogLinks.some(l=>l.url===target))observedCatalogLinks.push({url:target,title:label,kind:'catalog'});
+ }catch{}
+ if(!observedLinks.length&&!observedCatalogLinks.length)return null;
+ return {url,title,observedLinks,observedCatalogLinks:observedCatalogLinks.slice(0,30),text:[title,...observedCatalogLinks.slice(0,30).map(l=>'目录筛选：'+l.title+'\n'+l.url),...observedLinks.map(l=>l.summary+'\n'+l.url)].join('\n\n')};
 }
 export function parseRentalPage(html,rawUrl){
  const url=rentalDetailUrl(rawUrl);if(!url)return null;
@@ -130,13 +146,21 @@ export async function readPublicRentalPage(rawUrl){
  const observation=parseRentalPage(response.html,response.url);if(!observation)throw new Error('房源主信息未能与详情页对应，未填入猜测值');
  return {url:observation.url,requestedUrl:url,text:observation.text,title:observation.title,pageIdentity:{name:observation.name},rentalObservation:observation,observedAt:new Date().toISOString()};
 }
+export async function discoverPublicRentalCatalog(location){
+ if(typeof location!=='string'||!location.trim()||location.length>30)throw new Error('无效的租房城市');
+ const index=await readHtml(rentalCityIndexURL),cities=parseRentalCities(index.html),name=location.trim().replace(/市$/,'');
+ const city=cities.find(c=>c.name.replace(/市$/,'')===name);if(!city)throw new Error('公开城市目录未找到这个城市，未猜测城市代码');
+ const page=await readPublicRentalPage(city.url);
+ if(!String(page.title||'').includes(city.name.replace(/市$/,'')))throw new Error('目录标题与所选城市不符，未采用其他城市的结果');
+ return {...page,cityObservation:{name:city.name,url:city.url,sourceURL:rentalCityIndexURL}};
+}
 export function attachRentalPage(source,page){
  const requested=rentalDetailUrl(source.url)||rentalCatalogUrl(source.url),effective=rentalDetailUrl(page?.url)||rentalCatalogUrl(page?.url);
  if(requested&&effective&&requested!==effective&&page.requestedUrl===requested){
   const oldId=listingIdentity(requested),newId=listingIdentity(effective);
   if(oldId===newId){source.retrieval={...source.retrieval,redirectedFrom:source.url};source.url=effective;}
  }
- if(page?.observedLinks&&rentalCatalogUrl(source.url)===page.url){source.observedLinks=page.observedLinks.filter(l=>rentalDetailUrl(l.url)).slice(0,24);source.title=page.title;}
+ if(page?.observedLinks&&rentalCatalogUrl(source.url)===page.url){source.observedLinks=page.observedLinks.filter(l=>rentalDetailUrl(l.url)).slice(0,24);source.observedCatalogLinks=(page.observedCatalogLinks||[]).filter(l=>rentalCatalogUrl(l.url)).slice(0,30);source.title=page.title;if(page.cityObservation)source.retrieval={...source.retrieval,cityObservation:structuredClone(page.cityObservation)};}
  const o=page?.rentalObservation;
  if(!o||rentalDetailUrl(source.url)!==o.url||o.name!==page.pageIdentity?.name)return;
  source.title=o.title;source.pageIdentity={name:o.name};source.rentalObservation=structuredClone(o);
@@ -157,10 +181,11 @@ export function rentalRawCandidate(source,schema){
  const facts={};
  for(const f of schema.fields){
   const label=f.label+' '+(f.aliases||[]).join(' ');let value,quote;
-  if(f.unit==='元/月'&&/租金|月租|租价|租赁|预算/.test(label)){value=o.price;quote=o.priceQuote;}
-  else if(/^(㎡|平米|平方米|m²|m2)$/.test(f.unit)&&/面积/.test(label)){value=o.area;quote=o.areaQuote;}
+  if(isMonthlyAmountField(f)&&/租金|月租|租价|租赁|预算/.test(label)){value=o.price;quote=o.priceQuote;}
+  else if(convertQuantity(1,f.unit,'㎡')===1&&/面积/.test(label)){value=o.area;quote=o.areaQuote;}
   else if(f.unit==='米'&&/地铁/.test(label)&&Number.isFinite(o.metro)){value=o.metro;quote=o.metroQuote;}
-  else if(f.type==='enum'&&/(?:租赁|出租|租住|租房)(?:方式|类型)|整租|合租/.test(label)&&f.options.includes(o.rentalType)){value=o.rentalType;quote=o.rentalTypeQuote||o.rentalType+' 出租方式';}
+  else if(f.type==='enum'&&/(?:租赁|出租|租住|租房|房源)(?:方式|类型)|整租|合租/.test(label)&&f.options.includes(o.rentalType)){value=o.rentalType;quote=o.rentalTypeQuote||o.rentalType+' 出租方式';}
+  else if(f.type==='boolean'&&/(?:是否)?整租/.test(label)&&o.rentalType==='整租'){value=true;quote=o.rentalTypeQuote||o.rentalType+' 出租方式';}
   if(value!==undefined)facts[f.key]={value,quote,sourceId:source.id};
  }
  return {name:o.name,sourceId:source.id,facts};

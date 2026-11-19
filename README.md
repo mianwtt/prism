@@ -157,7 +157,7 @@ flowchart LR
 npm run test:release
 ```
 
-最近一次本地验证：**173 项单元／HTTP 测试、55 项浏览器测试通过**；另有 **3 项真实 Redis 集成测试通过**。受控测试验证产品行为，独立的真实调用验证资料获取；Chrome／Chromium 设置和分项命令见[开发指南](docs/DEVELOPMENT.md)。
+本轮本地验证：**235 项单元／HTTP 测试、56 项 Edge 浏览器测试通过**；此前另有 **3 项真实 Redis 集成测试记录**。受控测试验证产品行为，独立的真实调用验证资料获取；完整批次及版本范围见[质量报告](docs/reports/PREVIEW-QUALITY-2026-11-18.md)，Chrome／Chromium 设置和分项命令见[开发指南](docs/DEVELOPMENT.md)。
 
 `npm run check:project` 检查完整工作区源码；`npm run package:source` 生成排除本地配置、决策数据和实验目录的源码包。详见[项目结构与打包](docs/PROJECT-STRUCTURE.md)。
 
@@ -165,7 +165,7 @@ npm run test:release
 
 Prism **0.4 是面向本机单用户的开发预览**。真实研究受模型、搜索引擎和公开网页可读性影响；保存引文表示可追溯到来源，不等于独立核实了发布者的说法。
 
-当前真实验证覆盖两个租房任务，更广泛的场景评测和跨平台覆盖仍在推进。尚不支持 PDF／Word／Excel／图片资料导入。Windows 下 Node 22.23.5 与 24.19.0 的独立安装和运行检查均通过。首次 [GitHub CI](https://github.com/mianwtt/prism/actions/runs/44038301786) 也已通过 Windows/Linux Node 22/24 检查、浏览器回归、源码打包及 Docker 构建和运行自检。详见[发布工作](docs/ROADMAP.md)。
+已增加电脑、手机与不同城市租房的真实任务检查，[质量报告](docs/reports/PREVIEW-QUALITY-2026-11-18.md)按版本保留成功、失败及配置多样性边界；它们不是独立标注的泛化准确率。尚不支持 PDF／Word／Excel／图片资料导入。此前的 Windows Node 22/24 安装和 [GitHub CI 记录](https://github.com/mianwtt/prism/actions/runs/44038301786)属于对应历史版本，本轮代码仍需提交后重新通过远程 CI。Docker 的基础运行与完整真实研究能力分别验收，不能用旧构建记录代替。详见[发布工作](docs/ROADMAP.md)。
 
 问题和决策历史保存在本机；外部模型、搜索和读页请求仍会传递相应数据。使用个人信息或分享导出文件前，请阅读[安全与隐私说明](.github/SECURITY.md)。
 

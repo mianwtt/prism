@@ -269,7 +269,7 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
     if(e.target.closest('#u-record')&&e.target.name==='rationale'){decisionDraft.rationale=e.target.value;return;}
     if(e.target.id==='conversation-message'){chatDraft=e.target.value;sizePrompt(e.target);return;}
     const key=e.target.dataset.liveRange||e.target.dataset.liveInput;if(!key)return;
-    try{const value=e.target.value===''?null:Number(e.target.value);applyLive(key,value,active,true);const label=root.querySelector('[data-live-input="'+key+'"]');if(label&&e.target.dataset.liveRange)label.value=value??'';for(const button of root.querySelectorAll('.board-controlbar [data-live-condition="'+key+'"]')){const selected=JSON.parse(button.dataset.liveValue)===value;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));}}
+    try{const value=e.target.value===''?null:Number(e.target.value);applyLive(key,value,active,true);const label=root.querySelector('[data-live-input="'+key+'"]');if(label&&e.target.dataset.liveRange)label.value=value??'';const range=root.querySelector('[data-live-range="'+key+'"]');if(range&&e.target.dataset.liveInput){if(value!==null){range.min=Math.min(Number(range.min),value);range.max=Math.max(Number(range.max),value);}range.value=value??range.min;}for(const button of root.querySelectorAll('.board-controlbar [data-live-condition="'+key+'"]')){const selected=JSON.parse(button.dataset.liveValue)===value;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));}}
     catch(error){toast(error.message);}
   };
   root.onchange=e=>{
@@ -277,7 +277,17 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
 
     if(e.target.matches('[data-workflow-scenario]')){active=e.target.value;showPath(active);render();return;}
     if(e.target.closest('#u-record')&&e.target.name==='candidateId'){decisionDraft.candidateId=e.target.value;return;}
-    if(e.target.matches('[data-live-range],[data-live-input]')){editSession=null;if(e.target.matches('[data-live-range]'))render('live');return;}
+    if(e.target.matches('[data-live-range],[data-live-input]')){
+      editSession=null;
+      if(e.target.matches('[data-live-range]'))render('live');
+      else{
+        // Preserve pending pointer targets when a number input blurs. Rebuilding
+        // the deck or controls here would swallow the next option/preset click.
+        const key=e.target.dataset.liveInput,value=current().settings.limits[key],buttons=[...root.querySelectorAll('[data-live-condition="'+key+'"]')];
+        if(!buttons.some(b=>JSON.parse(b.dataset.liveValue)===value)&&buttons.length){const button=buttons[0].cloneNode(true);button.dataset.liveValue=JSON.stringify(value);button.dataset.liveScenario=active;button.textContent=value===null?'不限':Number(value).toLocaleString('zh-CN');button.classList.add('selected');button.setAttribute('aria-pressed','true');buttons[0].parentNode.append(button);}
+      }
+      return;
+    }
 
     if(e.target.matches('[data-board-scenario]')){active=e.target.value;showPath(active);panel=false;render();return;}
     if(!e.target.dataset.uWeight)return;

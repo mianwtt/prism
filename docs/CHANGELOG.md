@@ -1,3 +1,37 @@
+## Configuration diversity and preview verification — 2026-11-19
+
+- Group only source-supported matching configurations; retain other colour/merchant observations without mixing quotations or changing the baseline and sibling scopes. Explicit different-configuration requirements also gate research completion.
+- Distinguish phone RAM from storage, normalize enum option representation and identity metadata, and recognize source-photo requirements without inserting made-up facts.
+- Run the existing explicit-priority filter before schema validation; an unsolicited invalid dimension no longer rejects valid requested thresholds. Retain anchored fields and do not manufacture enum options.
+- Retry transient initial catalog reads once, allow three observed rental-filter steps, and feed fresh exclusions, rejected duplicate requests and observed specifications back into bounded Agent recovery. Recovery shares two additional discoveries and four rewrite/repair turns.
+- Generate match/unresolved counts from the deterministic evaluator rather than free-text model claims. Keep source-bound interpretation separate.
+- Suggest condition values from acquired facts and saved hypotheses; preserve free numeric input, live sliders and the next click after input blur. Keep the approved canvas layout.
+- Pass 235 unit/HTTP tests and 56 Microsoft Edge browser regressions. Current live cohorts, retained failures and clean-source verification are documented separately in the [quality report](reports/PREVIEW-QUALITY-2026-11-18.md); do not combine task results across graph versions or substitute a successful replay for autonomous research.
+
+## Observed discovery and plan normalization — 2026-11-18
+
+- Discover rental cities through the observed public city index; let the Agent follow two consecutive same-city catalog filters. Apply validated product price ceilings through real platform controls and retain the observed filtered URL.
+- Isolate ordinary main prices from final/coupon prices, support the explicit 易购价 layout, reject deposits and conflicting price observations, and keep parameter/gallery binding on the same product identity.
+- Restore whitespace-equivalent request quotes, derive only unambiguous supported quantities, accept equivalent square-metre units, and separate process/identity metadata from decision criteria. Keep original thresholds and source quotations.
+- Feed exclusion reasons and observed ranges back into bounded recovery; web searches and native catalog discoveries share a two-call discovery cap. Do not reject unread details merely because their catalog summaries omit parameters.
+- Preserve complete 3/10 and 7/10 fixed-task cohorts; the final frozen graph-version-13 cohort passes 10/10 with 51 qualifying source records and 51 loaded source images. This is regression acceptance after debugging, not holdout accuracy. Same-model colour variants still limit candidate diversity; do not equate record counts with distinct hardware-model counts. See [the discovery report](reports/AGENT-DISCOVERY-2026-11-18.md).
+- Verify 217 unit/HTTP tests, 55 browser tests, 35 controlled quotation cases, isolated runtime smoke, syntax and working-tree source checks. Docker and remote CI are not newly verified.
+
+## Public merchant reading and fixed-task acceptance — 2026-11-18
+
+- Add an Agent-selected public merchant catalog tool and same-product price/specification/gallery reader, without seeding brands or imposing the legacy laptop schema. Reuse structured reads during initial collection and recovery; withdraw stale merchant observations on source refresh.
+- Separate source-link/photo metadata from decision criteria, support explicit rental-type labels and repair omitted/overlong catalog selections with one bounded model turn.
+- Add ten predefined live tasks with an independent requirement checker, process/time budgets, runtime fingerprints and source-image loading checks. Preserve diagnostics and the original ten-task batch; stricter review passes 2/10 after finding an omitted application-eligibility gate. A later four-task rerun passes the 1TB computer and Beijing rental tasks (2/4), with five and four usable source-photo records respectively.
+- Retain outstanding low-budget/high-memory computer and Shanghai/Shenzhen discovery failures. See [the full protocol and results](reports/LIVE-ACCEPTANCE-2026-11-18.md); this is not a mature-release acceptance pass.
+- Final local regression passes 201 unit/HTTP tests (serial rerun after one Windows `ENOBUFS` failure), 55 browser tests and syntax/source checks. The final primary-price DOM compatibility change has a known-page probe, not a new full live cohort.
+
+## Evidence recovery and rental discovery — 2026-11-18
+
+- Reuse observed same-origin catalog links, including relative Markdown targets, before searching again. Batch detail extraction, bound retries across catalogs and save recovery diagnostics without adding a process panel.
+- Recognize public mobile rental filters and topic catalogs while preserving redirect/identity restrictions. Bind explicit monthly-rent fields with currency-only display units without accepting annual, weekly or unspecified amounts.
+- Add paired recovery replay tooling and thirteen recovery regressions, plus catalog/monthly-unit regressions. Local verification passes 188 unit/HTTP tests, 55 browser tests and the 35-case evidence corpus.
+- Preserve two failed live attempts and a final 76.986-second Hangzhou task with six eligible records, twelve cited fields and six loaded source-bound photographs. See [recovery evidence](reports/AGENT-RECOVERY-2026-11-18.md); the controlled cases and limited live runs are not a general Agent success rate.
+
 ## GitHub public preview candidate — 2026-11-17
 
 - Prepare the complete reviewed Git index, preserving its earlier selection in an ignored backup; add executable commit/push guards and resolve the incomplete-publication-source gate.

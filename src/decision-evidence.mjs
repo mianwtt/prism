@@ -1,9 +1,14 @@
 // Shared, data-only evidence checks. A quote match establishes provenance, not truth.
 const normalize = value => String(value ?? '').normalize('NFKC').replace(/\s+/g, ' ').trim();
 const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+export function isMonthlyAmountField(field){
+  const unit=normalize(field?.unit).replace(/\s/g,'');
+  return unit==='元/月'||/^(?:元|CNY|人民币)$/i.test(unit)&&/月租|月费|每月(?:租金|费用|价格|成本)|monthly\s+(?:rent|cost|price|fee)/i.test([field?.label,...(field?.aliases||[])].filter(Boolean).join(' '));
+}
 const quantities={kg:['mass',1000],千克:['mass',1000],公斤:['mass',1000],g:['mass',1],克:['mass',1],分钟:['time',1],min:['time',1],小时:['time',60],h:['time',60],gb:['capacity',1],tb:['capacity',1024],元:['money',1],cny:['money',1],万元:['money',10000],万:['money',10000],'㎡':['area',1],m2:['area',1],'m²':['area',1],平米:['area',1],平方米:['area',1]};
+const quantityUnit=raw=>{const unit=String(raw).normalize('NFKC').replace(/[\s.]/g,'').toLowerCase();return /^(?:sqm|squaremet(?:er|re)s?|m\^2)$/.test(unit)?'m2':unit;};
 export function convertQuantity(value,from,to){
-  const a=quantities[String(from).toLowerCase()],b=quantities[String(to).toLowerCase()];
+  const a=quantities[quantityUnit(from)],b=quantities[quantityUnit(to)];
   return a&&b&&a[0]===b[0]?value*a[1]/b[1]:null;
 }
 export function constraintNumberSupported(value,quote,unit){
@@ -40,10 +45,10 @@ export function observationIssue(field, observation, source) {
   const token = `(?<![\\d.])${number}(?![\\d.])`;
   const unit = normalize(field.unit || '');
   let pattern;
-  if (unit === '元/月') pattern = `(?:${token}\\s*(?:元\\s*[/／]\\s*月|元每月)|[¥￥]\\s*${token}\\s*[/／]\\s*月|月租\\s*[:：]?\\s*[¥￥]?\\s*${token}\\s*元?)`;
+  if (isMonthlyAmountField(field)) pattern = `(?:${token}\\s*(?:元\\s*[/／]\\s*月|元每月)|[¥￥]\\s*${token}\\s*[/／]\\s*月|(?:月租金?|月费|每月(?:租金|费用|价格|成本))\\s*[:：]?\\s*[¥￥]?\\s*${token}\\s*元?)`;
   else if (/^(?:元|CNY|人民币)$/i.test(unit)) pattern = `(?:${token}\\s*(?:元|CNY)|[¥￥]\\s*${token}|(?:CNY|人民币)\\s*${token})`;
   else {
-    const units = /^(?:㎡|m2|m²|平米|平方米)$/.test(unit) ? '(?:㎡|m2|m²|平方米|平米)' : unit === '分钟' ? '(?:分钟|minutes?\\b|min\\b)' : unit.toLowerCase()==='kg'?'(?:kg|千克|公斤)':escape(unit);
+    const units = quantities[quantityUnit(unit)]?.[0]==='area' ? '(?:㎡|m2|m²|m\\^2|平方米|平米|sq\\.?\\s?m\\.?|square\\s?met(?:er|re)s?)' : unit === '分钟' ? '(?:分钟|minutes?\\b|min\\b)' : unit.toLowerCase()==='kg'?'(?:kg|千克|公斤)':escape(unit);
     pattern = `${token}\\s*${units}(?![\\w.])`;
   }
   if (!new RegExp(pattern, 'i').test(numeric)&&!observationConversion(field,observation)) return '引文中的数值或单位不匹配';
@@ -51,7 +56,7 @@ export function observationIssue(field, observation, source) {
   if (/内存|\bRAM\b/i.test(field.label) && !/最大|扩展/.test(field.label) && /最大支持|可选|可扩展|最高支持/.test(quote)) return '可选或最大扩展容量不能作为已安装内存';
   if (/重量|净重|机身重/.test(field.label) && /包装|毛重|shipping\s*weight/i.test(quote) && !/净重|机身重/.test(quote)) return '包装重量不能作为机身重量';
   if (/元|CNY|人民币/.test(unit)) {
-    if (unit==='元/月' && /[/／]\s*(?:年|天|日)|每年|每天/.test(quote)) return '报价周期与月租单位不一致';
+    if (isMonthlyAmountField(field) && /[/／]\s*(?:年|天|日|周|晚)|每年|每天|每日|每周|每晚/.test(quote)) return '报价周期与月租单位不一致';
     if (/\d\s*[-~–至到]\s*\d/.test(quote)) return '区间报价不能作为单一配置的标价';
     if (/起售|起价|起步价|参考价|参考报价|最低价|价格区间|券后|补贴后|国补后|会员价|以旧换新|领券|(?:元|[\d])\s*起(?:[，,。\s]|$)/.test(quote)) return '起价、参考价或有条件的价格，不能作为公开标价';
     if (/发布会|上市新闻|首发报道|新闻/.test(source.title || '')) return '新闻中的价格不能作为当前公开标价';

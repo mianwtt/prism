@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseRentalPage,parseRentalCatalog,rentalDetailUrl,rentalRedirectUrl,decodeRentalHtml,attachRentalPage,rentalRawCandidate,bindRentalImages} from '../src/public-rental-read.mjs';
+import {parseRentalPage,parseRentalCatalog,rentalDetailUrl,rentalCatalogUrl,rentalRedirectUrl,decodeRentalHtml,attachRentalPage,rentalRawCandidate,bindRentalImages} from '../src/public-rental-read.mjs';
 import {checkDecisionCandidates,runGeneralResearch,planDecision,normalizeResearchPlan} from '../src/general-research.mjs';
 import {validateDecisionSchema} from '../src/decision-schema.mjs';
 import {refreshGeneralEvidence} from '../src/general-refresh.mjs';
@@ -64,7 +64,7 @@ test('a detail page cannot borrow another listing identity or indoor images from
  const conflicting=extended.replace('</head>','<script type="application/ld+json">{"@type":"Product","offers":{"price":9999}}</script></head>');assert.equal(parseRentalPage(conflicting,rentalUrl),null);
 });
 test('image provenance instructions cannot become an extra eligibility dimension',async()=>{
- for(const label of ['有原页图片','有室内图','有原图','是否提供照片']){let calls=0;const broken=structuredClone(rentalPlan);broken.schema.fields.push({key:'photoPresent',label,type:'boolean',direction:1});
+ for(const label of ['有原页图片','有室内图','有原图','是否提供照片','来源图片','原图已验证','原图已读取','图片已获取']){let calls=0;const broken=structuredClone(rentalPlan);broken.schema.fields.push({key:'photoPresent',label,type:'boolean',direction:1});
   const result=await planDecision('月租不超过4000元/月，面积至少30㎡，另比较地铁站距离。价格和原页图片需要对应。',{async model(){return ++calls===1?broken:rentalPlan;}});
   assert.equal(calls,1);assert.equal(result.schema.fields.some(f=>f.key==='photoPresent'),false);assert.equal(result.evidenceRequirements.sourcePhotos,true);
  }
@@ -72,13 +72,18 @@ test('image provenance instructions cannot become an extra eligibility dimension
 test('an explicitly requested rental-type enum is extracted from the same detail page',()=>{
  const schema=validateDecisionSchema({fields:[{key:'wayToRent',label:'租赁方式',type:'enum',options:['整租','合租'],direction:1}]}),o=parseRentalPage(rentalHtml,rentalUrl),source={id:'s1',url:rentalUrl,title:o.title,text:o.text,kind:'page'};attachRentalPage(source,{pageIdentity:{name:o.name},rentalObservation:o});
  const {candidates}=checkDecisionCandidates([rentalRawCandidate(source,schema)],[source],schema);assert.equal(candidates[0].facts.wayToRent.value,'整租');assert.equal(candidates[0].facts.wayToRent.status,'cited');
+ const booleanSchema=validateDecisionSchema({fields:[{key:'whole',label:'是否整租',type:'boolean',direction:1}]});
+ const bool=checkDecisionCandidates([rentalRawCandidate(source,booleanSchema)],[source],booleanSchema).candidates[0];assert.equal(bool.facts.whole.status,'cited');assert.equal(bool.facts.whole.value,true);
+ const labelSchema=validateDecisionSchema({fields:[{key:'type',label:'房源类型',type:'enum',options:['整租','合租'],direction:1}]});
+ assert.equal(checkDecisionCandidates([rentalRawCandidate(source,labelSchema)],[source],labelSchema).candidates[0].facts.type.value,'整租');
 });
 
 test('equivalent square-metre spellings never turn real quoted areas into missing facts',()=>{
  const o=parseRentalPage(rentalHtml,rentalUrl),source={id:'area',url:rentalUrl,title:o.title,text:o.text,kind:'page'};attachRentalPage(source,{pageIdentity:{name:o.name},rentalObservation:o});
- for(const unit of ['㎡','平方米','平米','m²','m2']){
+ for(const unit of ['㎡','平方米','平米','m²','m2','sqm','sq m','sq.m','sq.m.','m^2','square meters','square metres']){
   const schema=validateDecisionSchema({fields:[{key:'area',label:'建筑面积',unit,direction:1}]});const c=checkDecisionCandidates([rentalRawCandidate(source,schema)],[source],schema).candidates[0];assert.equal(c.facts.area.status,'cited',unit);assert.equal(c.facts.area.value,40);
  }
+ const unsupported=validateDecisionSchema({fields:[{key:'area',label:'建筑面积',unit:'sqft',direction:1}]});assert.equal(rentalRawCandidate(source,unsupported).facts.area,undefined);
 });
 
 test('a nested model plan preserves quoted constraints while separating image requirements without another model turn',async()=>{
@@ -169,4 +174,32 @@ test('incomplete candidates do not suppress recovery; the graph fills its pool f
  });
  // One initial search plus the existing targeted missing-fact check; catalog recovery needs no further search.
  assert.equal(searches,2);assert.equal(read.length,5);assert.equal(space.candidates.length,4);assert.equal(space.candidates.filter(c=>c.media?.kind==='listing-photo').length,3);assert(space.trace.some(e=>e.node==='recover'));assert(!read.some(url=>url.includes('fabricated')));
+});
+
+test('observed mobile filters and topic catalogs reach the public reader without admitting arbitrary site paths',()=>{
+ const filtered='https://m.fang.com/zf/hz/m0/?zttype=hpnm';
+ assert.equal(rentalCatalogUrl(filtered),'https://m.fang.com/zf/hz/m0/');
+ assert.equal(rentalCatalogUrl('https://m.fang.com/zf/hz/p0m0/'),'https://m.fang.com/zf/hz/p0m0/');
+ const topic='https://www.fang.com/houses/zf_122429hz/',target='https://zu.fang.com/hz/houses/zf_122429hz/';
+ assert.equal(rentalCatalogUrl(topic),topic);assert.equal(rentalCatalogUrl(target),target);
+ assert.equal(rentalRedirectUrl(topic,target),target);
+ const page=parseRentalCatalog(`<title>筛选目录</title><li><a href="${mobileUrl}">软件测试公寓</a>整租 56.54㎡ 1800元/月</li>`,filtered);
+ assert.equal(page.observedLinks[0].url,mobileUrl);
+ for(const url of ['https://m.fang.com/zf/hz/login/','https://www.fang.com/login','https://www.fang.com/houses/other/','https://m.fang.com/zf/hz/m0/private','http://m.fang.com/zf/hz/m0/','https://evil.org/zf/hz/m0/'])assert.equal(rentalCatalogUrl(url),null);
+ assert.equal(rentalRedirectUrl(topic,'https://www.fang.com/login'),null);
+ assert.equal(rentalRedirectUrl(topic,'https://evil.org/hz/houses/zf_122429hz/'),null);
+});
+
+test('a monthly rent label with currency-only units binds an explicit monthly quote but never an annual or unspecified amount',()=>{
+ const schema=validateDecisionSchema({fields:[{key:'monthlyRent',label:'月租金',unit:'元',direction:-1}]}),o=parseRentalPage(rentalHtml,rentalUrl);
+ const source={id:'monthly',url:rentalUrl,title:o.title,text:o.text,kind:'page'};attachRentalPage(source,{text:o.text,pageIdentity:{name:o.name},rentalObservation:o});
+ const raw=rentalRawCandidate(source,schema),checked=checkDecisionCandidates([raw],[source],schema);
+ assert.equal(checked.candidates[0].facts.monthlyRent.value,o.price);
+ for(const quote of ['3200元/年','3200元/周','租金3200元']){
+  const other={id:'other',url:'https://example.org/offer',title:'测试住处',text:'测试住处 '+quote};
+  const result=checkDecisionCandidates([{name:'测试住处',sourceId:other.id,facts:{monthlyRent:{value:3200,quote,sourceId:other.id}}}],[other],schema);
+  assert.equal(result.candidates.length,0,'An explicit monthly field needs monthly support');
+ }
+ const ambiguous=validateDecisionSchema({fields:[{key:'deposit',label:'押金',unit:'元',direction:-1}]});
+ assert.deepEqual(rentalRawCandidate(source,ambiguous).facts,{},'Monthly rent must not fill a deposit or an unrelated currency field');
 });

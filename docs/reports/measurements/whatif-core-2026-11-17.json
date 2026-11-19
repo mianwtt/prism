@@ -1,0 +1,148 @@
+{
+  "kind": "controlled-synthetic-whatif-core-measurement",
+  "date": "2026-11-17",
+  "sourceCommit": "0aa305f03ceab83815d5d82da4da7e6c997e7e6d",
+  "environment": {
+    "node": "v24.19.0",
+    "platform": "win32",
+    "arch": "x64",
+    "cpuModel": "Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz"
+  },
+  "method": {
+    "seed": 20261117,
+    "warmupChangesPerSize": 80,
+    "rounds": 5,
+    "changesPerRound": 200,
+    "timed": "inheritance change, candidate-scope mapping, evaluating and sorting all 7 scenarios",
+    "excluded": "fixture construction, independent assertions, DOM/SVG/layout/paint, persistence, model inference, search and network",
+    "limitations": "One host, synthetic complete fields, fixed 3-field/7-scenario shape. No browser SLA or superiority over a measured LLM baseline."
+  },
+  "results": [
+    {
+      "candidates": 9,
+      "fields": 3,
+      "scenariosIncludingBaseline": 7,
+      "measuredChanges": 1000,
+      "independentEligibilityChecks": 7000,
+      "p50Ms": 0.29199999999997317,
+      "p95Ms": 0.6612999999999829,
+      "maxMs": 2.023300000000006,
+      "rounds": [
+        {
+          "round": 1,
+          "p50Ms": 0.3158999999999992,
+          "p95Ms": 0.6908999999999992,
+          "maxMs": 1.1526000000000067
+        },
+        {
+          "round": 2,
+          "p50Ms": 0.28659999999999286,
+          "p95Ms": 0.47040000000001214,
+          "maxMs": 0.6646000000000072
+        },
+        {
+          "round": 3,
+          "p50Ms": 0.29570000000001073,
+          "p95Ms": 0.5750000000000455,
+          "maxMs": 1.336400000000026
+        },
+        {
+          "round": 4,
+          "p50Ms": 0.4411000000000058,
+          "p95Ms": 0.8375999999999522,
+          "maxMs": 2.023300000000006
+        },
+        {
+          "round": 5,
+          "p50Ms": 0.2798000000000229,
+          "p95Ms": 0.4574999999999818,
+          "maxMs": 0.6637999999999806
+        }
+      ]
+    },
+    {
+      "candidates": 100,
+      "fields": 3,
+      "scenariosIncludingBaseline": 7,
+      "measuredChanges": 1000,
+      "independentEligibilityChecks": 7000,
+      "p50Ms": 1.4299999999998363,
+      "p95Ms": 2.7526000000000295,
+      "maxMs": 6.307800000000043,
+      "rounds": [
+        {
+          "round": 1,
+          "p50Ms": 1.3336000000000467,
+          "p95Ms": 2.4077000000000908,
+          "maxMs": 4.3781999999999925
+        },
+        {
+          "round": 2,
+          "p50Ms": 1.5453999999999724,
+          "p95Ms": 3.3674999999998363,
+          "maxMs": 6.307800000000043
+        },
+        {
+          "round": 3,
+          "p50Ms": 1.5236999999999625,
+          "p95Ms": 2.599100000000135,
+          "maxMs": 3.5166999999999007
+        },
+        {
+          "round": 4,
+          "p50Ms": 1.464100000000144,
+          "p95Ms": 2.4924999999998363,
+          "maxMs": 3.9021999999999935
+        },
+        {
+          "round": 5,
+          "p50Ms": 1.3899999999998727,
+          "p95Ms": 2.302900000000136,
+          "maxMs": 2.699800000000323
+        }
+      ]
+    },
+    {
+      "candidates": 1000,
+      "fields": 3,
+      "scenariosIncludingBaseline": 7,
+      "measuredChanges": 1000,
+      "independentEligibilityChecks": 7000,
+      "p50Ms": 15.691600000001927,
+      "p95Ms": 28.91820000000007,
+      "maxMs": 39.458700000001045,
+      "rounds": [
+        {
+          "round": 1,
+          "p50Ms": 14.770399999999427,
+          "p95Ms": 26.41899999999987,
+          "maxMs": 33.03829999999925
+        },
+        {
+          "round": 2,
+          "p50Ms": 16.24709999999868,
+          "p95Ms": 29.115300000001298,
+          "maxMs": 39.458700000001045
+        },
+        {
+          "round": 3,
+          "p50Ms": 16.261599999999817,
+          "p95Ms": 29.304900000001,
+          "maxMs": 35.970400000000154
+        },
+        {
+          "round": 4,
+          "p50Ms": 16.134000000001834,
+          "p95Ms": 29.745199999999386,
+          "maxMs": 35.29749999999876
+        },
+        {
+          "round": 5,
+          "p50Ms": 15.46809999999823,
+          "p95Ms": 27.362300000000687,
+          "maxMs": 34.16690000000017
+        }
+      ]
+    }
+  ]
+}

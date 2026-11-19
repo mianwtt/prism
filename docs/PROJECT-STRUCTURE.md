@@ -36,7 +36,7 @@ prism/
 | Responsibility | Entry points |
 | --- | --- |
 | Local server and API | `src/server.mjs` |
-| Adaptive research and public source reading | `src/general-research.mjs`, `src/general-retrieval.mjs`, `src/public-rental-read.mjs` |
+| Adaptive research and public source reading | `src/general-research.mjs`, `src/plan-constraints.mjs`, `src/candidate-diversity.mjs`, `src/general-retrieval.mjs`, `src/catalog-navigation.mjs`, `src/research-recovery.mjs`, `src/public-rental-read.mjs`, `src/public-merchant-read.mjs`, `src/merchant-page-dom.mjs` |
 | Model and search adapters | `src/research-providers.mjs` |
 | Typed conditions and deterministic evaluation | `src/decision-schema.mjs` |
 | Conversation and decision memory | `src/decision-workflow.mjs` |

@@ -1,0 +1,44 @@
+{
+  "kind": "recorded-live-acceptance",
+  "runId": "2026-11-18T12-06-35-614Z",
+  "status": "complete",
+  "usableAsCompleteBatch": true,
+  "suiteName": "original",
+  "suiteSha256": "f8463b876734944f81abce99cc756e62933394a1568faf07b96995766d5e763c",
+  "runtimeHash": "1f549c132a2d80de47c58476269c209794eaaee14d2c4fb6da8fa01378bda770",
+  "at": "2026-11-18T12:06:35.617Z",
+  "taskIds": [
+    "C04"
+  ],
+  "completed": 1,
+  "passed": 0,
+  "total": 1,
+  "meaning": "Whitelisted summary of the original frozen real run and its original image-load checks; no offline regrading, field filling, or merging across versions. Recorded-source acceptance is not independently labeled field truth. An interrupted run is not a complete acceptance cohort.",
+  "trials": [
+    {
+      "id": "C04",
+      "domain": "computer",
+      "pass": false,
+      "seconds": 118.568,
+      "candidates": 6,
+      "qualified": 2,
+      "sourceImagesLoaded": 2,
+      "supportedFields": 17,
+      "totalRequestedFields": 18,
+      "schemaCoverage": 3,
+      "requiredFields": 3,
+      "calls": {
+        "model": 9,
+        "search": 1,
+        "read": 7,
+        "images": 0,
+        "offers": 0,
+        "catalogs": 2
+      },
+      "timedOut": false,
+      "runtimeStable": true,
+      "errorType": null,
+      "graphVersion": 21
+    }
+  ]
+}

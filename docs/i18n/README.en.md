@@ -146,7 +146,7 @@ Research graph: [general-research.mjs](../../src/general-research.mjs). Provider
 npm run test:release
 ```
 
-Latest local verification: **173 unit/HTTP tests and 55 browser tests passed**, plus **3 real-Redis integration tests**. Controlled tests check behavior; separate live runs check actual retrieval. See [development instructions](../DEVELOPMENT.md) for Chrome/Chromium setup and individual commands.
+Current local verification: **235 unit/HTTP tests and 56 Edge browser tests passed**; earlier verification also records **3 real-Redis integration tests**. Controlled tests check behavior; separate live runs check actual retrieval. See the [quality report](../reports/PREVIEW-QUALITY-2026-11-18.md) for batch/version scope and [development instructions](../DEVELOPMENT.md) for Chrome/Chromium setup and individual commands.
 
 Use `npm run check:project` to check the complete working-tree source and `npm run package:source` to create an archive excluding local settings, decision data and experiments. See [project structure and packaging](../PROJECT-STRUCTURE.md).
 
@@ -154,7 +154,7 @@ Use `npm run check:project` to check the complete working-tree source and `npm r
 
 Prism **0.4 is a development preview for local, single-user use**. Real research depends on the model, search engines and publicly readable sources. A saved citation records what a source said; it does not independently verify the publisher's claims.
 
-The current live checks cover two rental tasks. Broader retrieval evaluation and cross-platform coverage remain in progress. PDF/Word/Excel/image ingestion is not implemented. Native Windows installations pass on Node 22.23.5 and 24.19.0. The first [GitHub CI run](https://github.com/mianwtt/prism/actions/runs/44038301786) also passes Windows/Linux Node 22/24 checks, browser journeys, source packaging and the Docker build/runtime smoke. See [release gates](../ROADMAP.md).
+Additional live checks cover computers, phones and rentals in different cities. The [quality report](../reports/PREVIEW-QUALITY-2026-11-18.md) retains per-version successes, failures and configuration-diversity limits; these are not independently labeled generalization accuracy. PDF/Word/Excel/image ingestion is not implemented. Earlier Windows Node 22/24 installation checks and the [historical GitHub CI run](https://github.com/mianwtt/prism/actions/runs/44038301786) apply to their respective revisions; the current changes need a new remote CI run after submission. Container startup and complete live research require separate acceptance. See [release gates](../ROADMAP.md).
 
 Questions and decision history are stored locally. External models, searches and source reads still receive the data needed for those requests. Read [security and privacy](../../.github/SECURITY.md) before sharing exports or running with personal information.
 

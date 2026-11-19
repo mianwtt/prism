@@ -1,0 +1,49 @@
+{
+  "clientDate": "2026-11-18",
+  "summary": {
+    "status": "completed",
+    "seconds": 76.986,
+    "counts": {
+      "model": 6,
+      "search": 2,
+      "read": 12,
+      "images": 0
+    },
+    "sources": 14,
+    "sourceSites": [
+      "fang.com",
+      "gov.cn",
+      "anjuke.com",
+      "58.com"
+    ],
+    "candidates": 6,
+    "eligible": 6,
+    "citedFields": 12,
+    "conflictingFields": 0,
+    "photos": 6,
+    "explicitIdentities": 0,
+    "meaning": "One live availability/extraction run. Fields and identity bindings still require manual checking; not an accuracy score."
+  },
+  "acceptance": {
+    "kind": "live-output-acceptance-check",
+    "sourceHashesMatchCurrent": true,
+    "candidates": 6,
+    "eligible": 6,
+    "allObservedConstraints": true,
+    "sourceBoundImages": 6,
+    "loadedImages": 6,
+    "meaning": "Checks stored platform observations, URL bindings and actual image loads; not an independent on-site or publisher-truth verification."
+  },
+  "manifest": {
+    "kind": "live-research",
+    "sourceHashes": {
+      "src/general-research.mjs": "7b8d3d7c0eb7a84dbca7c62f86442a52e5d774ee00eb5c4ec359300096e8fcc3",
+      "src/research-recovery.mjs": "9faf3b9d5b97088458ed954991a878cd494cd3c5881658e22fa4117e609a7fc3",
+      "src/public-rental-read.mjs": "9ada34e6625605aab077353a72457be8e41bec3351e188f085367add0b9d98ed",
+      "src/decision-evidence.mjs": "af02b31df56cb63f38171ce108ef6846aebbc63035669e08c1e82dea5cd1c0aa",
+      "src/research-providers.mjs": "4025588020e13512591d0d041d6b3d7b49140104389a5f4f386596b4f0f32778"
+    },
+    "provider": "tofu",
+    "node": "v24.19.0"
+  }
+}

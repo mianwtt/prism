@@ -1,3 +1,9 @@
+# Local preview quality — 2026-11-19
+
+Graph version 24 passes **235 unit/HTTP tests and 56 Microsoft Edge browser tests**, plus isolated runtime smoke and clean-source installation. The final source code matches the tested clean copy across 190 non-document files. A real phone-source replay checks image loads, modal facts, targeted condition edits and baseline preservation.
+
+Frozen live cohorts remain **9/10 original tasks and 3/5 extended tasks**; C03/E01 configuration recall and Guangzhou E05 catalog selection still fail. Earlier successes are retained separately and are not substituted. This remains a development preview, with full no-key research Docker unverified. No staging, commit or push was performed during local verification; the subsequent GitHub synchronization is separate, and remote Checks must be read for the actual published commit. See the [quality report](PREVIEW-QUALITY-2026-11-18.md) for all task rows, source boundaries and retained failures.
+
 # Optional Redis search cache — 2026-11-17
 
 Local Node 24 verification passes **173 unit/HTTP tests**, **55 browser tests**, runtime/static-route smoke and Compose configuration. **Three real-Redis integration tests** pass against an isolated WSL Redis 7.2.11 runtime: cross-client TTL reuse, unreachable-server fallback and CLI lifecycle. Nine controlled repeated queries require nine external fixture loads without cache and three with Redis; this is not a live-search latency or accuracy benchmark. Actual model/search research was not rerun. The new CI Redis service job has not run remotely; private settings and user spaces were not changed. See [the complete cache report](REDIS-SEARCH-CACHE-2026-11-17.md).

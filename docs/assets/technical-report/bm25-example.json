@@ -1,0 +1,15 @@
+{
+  "query": "java 32gb",
+  "documents": [
+    "java development laptop memory 32gb light",
+    "java development laptop memory 16gb light",
+    "gaming laptop memory 16gb gpu"
+  ],
+  "coreScores": [
+    1.413418853775178,
+    0.4578831918153298,
+    0
+  ],
+  "k1": 1.5,
+  "b": 0.75
+}

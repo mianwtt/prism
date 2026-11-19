@@ -1,0 +1,693 @@
+{
+  "kind": "controlled-recovery-regression-replay",
+  "at": "2026-11-18T02:36:39.846Z",
+  "baseline": {
+    "revision": "0aa305f03ceab83815d5d82da4da7e6c997e7e6d",
+    "scope": "baseline graph with current shared modules, dependencies and fixtures",
+    "graphSha256": "2e6ee5b98f4894b08b50bc73e772a8c584ae7a6c1d2aa7b7a1e3520904c1d330"
+  },
+  "sourceHashes": {
+    "src/general-research.mjs": "7b8d3d7c0eb7a84dbca7c62f86442a52e5d774ee00eb5c4ec359300096e8fcc3",
+    "src/research-recovery.mjs": "9faf3b9d5b97088458ed954991a878cd494cd3c5881658e22fa4117e609a7fc3",
+    "src/public-rental-read.mjs": "9ada34e6625605aab077353a72457be8e41bec3351e188f085367add0b9d98ed",
+    "src/decision-evidence.mjs": "af02b31df56cb63f38171ce108ef6846aebbc63035669e08c1e82dea5cd1c0aa",
+    "tests/fixtures/recovery-cases.mjs": "929b462e374edad8a277735a89e3a35a3a84c37df1cef885eaeb10db04f24c7f"
+  },
+  "summary": [
+    {
+      "variant": "baseline",
+      "passed": 3,
+      "total": 10,
+      "recoveryTargetsMet": 0,
+      "recoveryCases": 7,
+      "modelCalls": 49,
+      "searchCalls": 18,
+      "pageReads": 40,
+      "repeatedPageReads": 0
+    },
+    {
+      "variant": "current",
+      "passed": 10,
+      "total": 10,
+      "recoveryTargetsMet": 7,
+      "recoveryCases": 7,
+      "modelCalls": 60,
+      "searchCalls": 15,
+      "pageReads": 43,
+      "repeatedPageReads": 0
+    }
+  ],
+  "trials": [
+    {
+      "case": "generic-catalog-links",
+      "domain": "computer",
+      "kind": "recovery",
+      "variant": "baseline",
+      "eligible": 1,
+      "candidates": 1,
+      "pass": false,
+      "calls": {
+        "model": 5,
+        "search": 1,
+        "read": 2,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 1
+      },
+      "repeatedPageReads": 0,
+      "recovery": null,
+      "elapsedMs": 69.065
+    },
+    {
+      "case": "generic-catalog-links",
+      "domain": "computer",
+      "kind": "recovery",
+      "variant": "current",
+      "eligible": 3,
+      "candidates": 3,
+      "pass": true,
+      "calls": {
+        "model": 6,
+        "search": 1,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 1,
+        "extract": 2
+      },
+      "repeatedPageReads": 0,
+      "recovery": {
+        "strategy": "observed-first-v1",
+        "target": 3,
+        "before": {
+          "comparable": 1,
+          "candidates": 1,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "after": {
+          "comparable": 3,
+          "candidates": 3,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "calls": {
+          "selection": 1,
+          "rewrite": 0,
+          "search": 0,
+          "read": 2,
+          "extract": 1
+        },
+        "stopReason": "target-reached"
+      },
+      "elapsedMs": 47.988
+    },
+    {
+      "case": "observed-details-rewrite-error",
+      "domain": "rental",
+      "kind": "recovery",
+      "variant": "baseline",
+      "eligible": 1,
+      "candidates": 1,
+      "pass": false,
+      "calls": {
+        "model": 6,
+        "search": 1,
+        "read": 7,
+        "invalidReads": 0,
+        "selection": 1,
+        "extract": 1
+      },
+      "repeatedPageReads": 0,
+      "recovery": null,
+      "elapsedMs": 32.11
+    },
+    {
+      "case": "observed-details-rewrite-error",
+      "domain": "rental",
+      "kind": "recovery",
+      "variant": "current",
+      "eligible": 3,
+      "candidates": 3,
+      "pass": true,
+      "calls": {
+        "model": 6,
+        "search": 1,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 1,
+        "extract": 2
+      },
+      "repeatedPageReads": 0,
+      "recovery": {
+        "strategy": "observed-first-v1",
+        "target": 3,
+        "before": {
+          "comparable": 1,
+          "candidates": 1,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "after": {
+          "comparable": 3,
+          "candidates": 3,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "calls": {
+          "selection": 1,
+          "rewrite": 0,
+          "search": 0,
+          "read": 2,
+          "extract": 1
+        },
+        "stopReason": "target-reached"
+      },
+      "elapsedMs": 32.186
+    },
+    {
+      "case": "transient-selection",
+      "domain": "rental",
+      "kind": "recovery",
+      "variant": "baseline",
+      "eligible": 1,
+      "candidates": 1,
+      "pass": false,
+      "calls": {
+        "model": 5,
+        "search": 1,
+        "read": 2,
+        "invalidReads": 0,
+        "selection": 1,
+        "extract": 1
+      },
+      "repeatedPageReads": 0,
+      "recovery": null,
+      "elapsedMs": 15.898
+    },
+    {
+      "case": "transient-selection",
+      "domain": "rental",
+      "kind": "recovery",
+      "variant": "current",
+      "eligible": 3,
+      "candidates": 3,
+      "pass": true,
+      "calls": {
+        "model": 7,
+        "search": 1,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 2,
+        "extract": 2
+      },
+      "repeatedPageReads": 0,
+      "recovery": {
+        "strategy": "observed-first-v1",
+        "target": 3,
+        "before": {
+          "comparable": 1,
+          "candidates": 1,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "after": {
+          "comparable": 3,
+          "candidates": 3,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "calls": {
+          "selection": 2,
+          "rewrite": 0,
+          "search": 0,
+          "read": 2,
+          "extract": 1
+        },
+        "stopReason": "target-reached"
+      },
+      "elapsedMs": 17.517
+    },
+    {
+      "case": "unobserved-selection",
+      "domain": "rental",
+      "kind": "recovery",
+      "variant": "baseline",
+      "eligible": 1,
+      "candidates": 1,
+      "pass": false,
+      "calls": {
+        "model": 6,
+        "search": 1,
+        "read": 2,
+        "invalidReads": 0,
+        "selection": 1,
+        "extract": 1
+      },
+      "repeatedPageReads": 0,
+      "recovery": null,
+      "elapsedMs": 21.292
+    },
+    {
+      "case": "unobserved-selection",
+      "domain": "rental",
+      "kind": "recovery",
+      "variant": "current",
+      "eligible": 3,
+      "candidates": 3,
+      "pass": true,
+      "calls": {
+        "model": 7,
+        "search": 1,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 2,
+        "extract": 2
+      },
+      "repeatedPageReads": 0,
+      "recovery": {
+        "strategy": "observed-first-v1",
+        "target": 3,
+        "before": {
+          "comparable": 1,
+          "candidates": 1,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "after": {
+          "comparable": 3,
+          "candidates": 3,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "calls": {
+          "selection": 2,
+          "rewrite": 0,
+          "search": 0,
+          "read": 2,
+          "extract": 1
+        },
+        "stopReason": "target-reached"
+      },
+      "elapsedMs": 18.461
+    },
+    {
+      "case": "search-detail-batches",
+      "domain": "computer",
+      "kind": "recovery",
+      "variant": "baseline",
+      "eligible": 2,
+      "candidates": 2,
+      "pass": false,
+      "calls": {
+        "model": 5,
+        "search": 3,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 1
+      },
+      "repeatedPageReads": 0,
+      "recovery": null,
+      "elapsedMs": 19.9
+    },
+    {
+      "case": "search-detail-batches",
+      "domain": "computer",
+      "kind": "recovery",
+      "variant": "current",
+      "eligible": 4,
+      "candidates": 4,
+      "pass": true,
+      "calls": {
+        "model": 6,
+        "search": 2,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 2
+      },
+      "repeatedPageReads": 0,
+      "recovery": {
+        "strategy": "observed-first-v1",
+        "target": 3,
+        "before": {
+          "comparable": 0,
+          "candidates": 0,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "after": {
+          "comparable": 4,
+          "candidates": 4,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "calls": {
+          "selection": 0,
+          "rewrite": 1,
+          "search": 1,
+          "read": 4,
+          "extract": 2
+        },
+        "stopReason": "target-reached"
+      },
+      "elapsedMs": 17.575
+    },
+    {
+      "case": "failed-extraction-batch",
+      "domain": "rental",
+      "kind": "recovery",
+      "variant": "baseline",
+      "eligible": 0,
+      "candidates": 0,
+      "pass": false,
+      "calls": {
+        "model": 4,
+        "search": 3,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 1
+      },
+      "repeatedPageReads": 0,
+      "recovery": null,
+      "elapsedMs": 13.658
+    },
+    {
+      "case": "failed-extraction-batch",
+      "domain": "rental",
+      "kind": "recovery",
+      "variant": "current",
+      "eligible": 4,
+      "candidates": 4,
+      "pass": true,
+      "calls": {
+        "model": 7,
+        "search": 2,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 3
+      },
+      "repeatedPageReads": 0,
+      "recovery": {
+        "strategy": "observed-first-v1",
+        "target": 3,
+        "before": {
+          "comparable": 0,
+          "candidates": 0,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "after": {
+          "comparable": 4,
+          "candidates": 4,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "calls": {
+          "selection": 0,
+          "rewrite": 1,
+          "search": 1,
+          "read": 4,
+          "extract": 3
+        },
+        "stopReason": "target-reached"
+      },
+      "elapsedMs": 22.715
+    },
+    {
+      "case": "duplicate-recovery-queries",
+      "domain": "computer",
+      "kind": "recovery",
+      "variant": "baseline",
+      "eligible": 2,
+      "candidates": 2,
+      "pass": false,
+      "calls": {
+        "model": 5,
+        "search": 3,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 1
+      },
+      "repeatedPageReads": 0,
+      "recovery": null,
+      "elapsedMs": 29.871
+    },
+    {
+      "case": "duplicate-recovery-queries",
+      "domain": "computer",
+      "kind": "recovery",
+      "variant": "current",
+      "eligible": 4,
+      "candidates": 4,
+      "pass": true,
+      "calls": {
+        "model": 6,
+        "search": 2,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 2
+      },
+      "repeatedPageReads": 0,
+      "recovery": {
+        "strategy": "observed-first-v1",
+        "target": 3,
+        "before": {
+          "comparable": 0,
+          "candidates": 0,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "after": {
+          "comparable": 4,
+          "candidates": 4,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "calls": {
+          "selection": 0,
+          "rewrite": 1,
+          "search": 1,
+          "read": 4,
+          "extract": 2
+        },
+        "stopReason": "target-reached"
+      },
+      "elapsedMs": 19.558
+    },
+    {
+      "case": "already-comparable",
+      "domain": "rental",
+      "kind": "sufficient",
+      "variant": "baseline",
+      "eligible": 3,
+      "candidates": 3,
+      "pass": true,
+      "calls": {
+        "model": 5,
+        "search": 1,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 2
+      },
+      "repeatedPageReads": 0,
+      "recovery": null,
+      "elapsedMs": 15.122
+    },
+    {
+      "case": "already-comparable",
+      "domain": "rental",
+      "kind": "sufficient",
+      "variant": "current",
+      "eligible": 3,
+      "candidates": 3,
+      "pass": true,
+      "calls": {
+        "model": 5,
+        "search": 1,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 2
+      },
+      "repeatedPageReads": 0,
+      "recovery": {
+        "strategy": "observed-first-v1",
+        "target": 3,
+        "before": {
+          "comparable": 3,
+          "candidates": 3,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "after": {
+          "comparable": 3,
+          "candidates": 3,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "calls": {
+          "selection": 0,
+          "rewrite": 0,
+          "search": 0,
+          "read": 0,
+          "extract": 0
+        },
+        "stopReason": "not-needed"
+      },
+      "elapsedMs": 14.53
+    },
+    {
+      "case": "unsupported-facts",
+      "domain": "computer",
+      "kind": "reject",
+      "variant": "baseline",
+      "eligible": 0,
+      "candidates": 0,
+      "pass": true,
+      "calls": {
+        "model": 4,
+        "search": 3,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 1
+      },
+      "repeatedPageReads": 0,
+      "recovery": null,
+      "elapsedMs": 15.565
+    },
+    {
+      "case": "unsupported-facts",
+      "domain": "computer",
+      "kind": "reject",
+      "variant": "current",
+      "eligible": 0,
+      "candidates": 0,
+      "pass": true,
+      "calls": {
+        "model": 6,
+        "search": 3,
+        "read": 4,
+        "invalidReads": 0,
+        "selection": 0,
+        "extract": 3
+      },
+      "repeatedPageReads": 0,
+      "recovery": {
+        "strategy": "observed-first-v1",
+        "target": 3,
+        "before": {
+          "comparable": 0,
+          "candidates": 0,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "after": {
+          "comparable": 0,
+          "candidates": 0,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "calls": {
+          "selection": 0,
+          "rewrite": 1,
+          "search": 2,
+          "read": 4,
+          "extract": 3
+        },
+        "stopReason": "budget-exhausted"
+      },
+      "elapsedMs": 21.492
+    },
+    {
+      "case": "unreadable-details",
+      "domain": "rental",
+      "kind": "reject",
+      "variant": "baseline",
+      "eligible": 0,
+      "candidates": 0,
+      "pass": true,
+      "calls": {
+        "model": 4,
+        "search": 1,
+        "read": 7,
+        "invalidReads": 0,
+        "selection": 1,
+        "extract": 0
+      },
+      "repeatedPageReads": 0,
+      "recovery": null,
+      "elapsedMs": 20.653
+    },
+    {
+      "case": "unreadable-details",
+      "domain": "rental",
+      "kind": "reject",
+      "variant": "current",
+      "eligible": 0,
+      "candidates": 0,
+      "pass": true,
+      "calls": {
+        "model": 4,
+        "search": 1,
+        "read": 7,
+        "invalidReads": 0,
+        "selection": 1,
+        "extract": 0
+      },
+      "repeatedPageReads": 0,
+      "recovery": {
+        "strategy": "observed-first-v1",
+        "target": 3,
+        "before": {
+          "comparable": 0,
+          "candidates": 0,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "after": {
+          "comparable": 0,
+          "candidates": 0,
+          "missingFields": [],
+          "excluded": 0,
+          "missingSourcePhotos": 0
+        },
+        "calls": {
+          "selection": 1,
+          "rewrite": 1,
+          "search": 0,
+          "read": 6,
+          "extract": 0
+        },
+        "stopReason": "sources-exhausted"
+      },
+      "elapsedMs": 30.599
+    }
+  ],
+  "meaning": "Constructed fixtures reproduce specific recovery defects. These are not live tasks, a held-out quality benchmark, or a general Agent success rate."
+}

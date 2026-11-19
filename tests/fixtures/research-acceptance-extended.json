@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "kind": "extended-live-acceptance-tasks",
+  "minimumQualifiedCandidates": 3,
+  "meaning": "Additional scene and configuration-diversity acceptance. Frozen before first execution; this is not independently labeled accuracy or a paired benchmark against the earlier ten tasks. Product tasks require source-supported technical configurations; colour alone is not a distinct configuration.",
+  "tasks": [
+    {"id":"E01","domain":"computer","question":"帮我比较笔记本电脑，内存至少32GB、重量不超过2kg、公开标价不超过10000元。至少找3种有来源参数和原页图片的不同硬件配置，仅配色不同不算，库存不用考虑。","criteria":[{"kind":"price","unit":"元","maximum":10000},{"kind":"memory","unit":"GB","minimum":32},{"kind":"weight","unit":"kg","maximum":2}],"sourceImages":true,"distinctConfigurations":true},
+    {"id":"E02","domain":"computer","question":"想选一台笔记本，内存至少16GB，固态硬盘至少1TB，价格不超过6000元。请找至少3种不同硬件配置及对应商品原图，只看公开标价，不考虑库存或优惠资格。","criteria":[{"kind":"price","unit":"元","maximum":6000},{"kind":"memory","unit":"GB","minimum":16},{"kind":"storage","unit":"GB","minimum":1024}],"sourceImages":true,"distinctConfigurations":true},
+    {"id":"E03","domain":"phone","question":"帮我比较智能手机，预算不超过3000元、运行内存至少8GB、存储容量至少256GB。需要至少3种不同配置，有公开商品标价、原页参数和图片，不用考虑库存，不用新闻发布价。","criteria":[{"kind":"price","unit":"元","maximum":3000},{"kind":"memory","unit":"GB","minimum":8},{"kind":"storage","unit":"GB","minimum":256}],"sourceImages":true,"distinctConfigurations":true},
+    {"id":"E04","domain":"rental","question":"南京整租房子有哪些选择？每月租金最多2800元，面积不少于30平方米。希望至少3套不同房源，有各自原页照片和参数，不要估算通勤。","criteria":[{"kind":"rent","unit":"元/月","maximum":2800},{"kind":"area","unit":"㎡","minimum":30}],"rentalType":"整租","cityCodes":["nj","nanjing"],"sourceImages":true},
+    {"id":"E05","domain":"rental","question":"在广州比较整租房源，月租上限3000元、面积至少25平方米。请给至少3套来自公开详情页的不同房源和它们自己的图片，不推测通勤时间。","criteria":[{"kind":"rent","unit":"元/月","maximum":3000},{"kind":"area","unit":"㎡","minimum":25}],"rentalType":"整租","cityCodes":["gz","guangzhou"],"sourceImages":true}
+  ]
+}

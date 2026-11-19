@@ -8,7 +8,7 @@ test('16 to 32 updates descendants, removes empty continuation arrows, marks rec
  const root=page.locator('.universal-root'),parent=page.locator('[data-tree-node=expanded]');
  await expect(parent.locator('.tree-choice')).toHaveCount(3);
  const zoom=await root.getAttribute('data-flow-zoom');
- await page.locator('.canvas-inspector [data-live-condition=memory][data-live-value="32"]').click();
+ await page.locator('[data-live-input=memory]').fill('32');await page.locator('[data-live-input=memory]').dispatchEvent('change');
  await expect(parent.locator('.tree-choice')).toHaveCount(0);
  await expect(page.locator('[data-flow-row=budget]')).toHaveCount(0);await expect(page.locator('[data-flow-row=light]')).toHaveCount(0);
  await expect(page.locator('[data-flow-edge=budget]')).toHaveCount(0);await expect(page.locator('[data-flow-edge=light]')).toHaveCount(0);
@@ -21,7 +21,7 @@ test('16 to 32 updates descendants, removes empty continuation arrows, marks rec
  await page.getByRole('button',{name:'撤销',exact:true}).click();
  await expect(parent.locator('.tree-choice')).toHaveCount(3);await expect(page.locator('[data-flow-row=budget]')).toHaveCount(1);await expect(page.locator('[data-flow-row=light]')).toHaveCount(1);
  await expect(page.locator('[data-tree-node=budget] .tree-choice')).toHaveCount(1);
- await page.locator('[data-live-condition=memory][data-live-value="32"]').click();
+ await page.locator('[data-live-input=memory]').fill('32');await page.locator('[data-live-input=memory]').dispatchEvent('change');
  await page.locator('.space-menu>summary').click();await page.locator('[data-u-save]').click();
  await expect.poll(()=>page.evaluate(()=>location.hash.slice(1))).not.toBe(data.id);
  const saved=await(await request.get('/api/spaces/'+await page.evaluate(()=>location.hash.slice(1)))).json();

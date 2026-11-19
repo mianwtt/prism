@@ -11,7 +11,7 @@ test('rental showcase keeps fictional fixtures explicitly labeled without fabric
  await page.locator('[data-flow-condition=rental-more-budget] [data-tree-condition]').click();
  await expect(page.locator('.board-controlbar')).toContainText('月租');await expect(page.locator('.board-controlbar')).toContainText('面积');await expect(page.locator('.board-controlbar')).toContainText('通勤');await expect(page.locator('.universal-root')).not.toContainText('内存');
  await page.locator('[data-live-condition=price][data-live-value="4000"]').click();await expect(page.locator('[data-tree-node=rental-more-budget] .tree-choice')).toHaveCount(2);await expect(page.locator('[data-tree-node=rental-close-work] .tree-choice')).toHaveCount(0);
- await page.locator('[data-live-condition=price][data-live-value="5000"]').click();await expect(page.locator('[data-tree-node=rental-close-work] .tree-choice')).toHaveCount(1);
+ await page.locator('[data-live-input=price]').fill('5000');await page.locator('[data-live-input=price]').dispatchEvent('change');await expect(page.locator('[data-tree-node=rental-close-work] .tree-choice')).toHaveCount(1);
  await page.locator('[data-tree-node=rental-more-budget] [data-tree-candidate=housing-2]').click();const dialog=page.getByRole('dialog',{name:'方案详情'});
  await expect(dialog).toContainText('4,600元/月');await expect(dialog).toContainText('58㎡');await expect(dialog).toContainText('15分钟');await expect(dialog.locator('img')).toHaveCount(0);
  await dialog.getByRole('button',{name:'来源依据',exact:true}).click();await expect(dialog).toContainText('虚构示例');await page.keyboard.press('Escape');

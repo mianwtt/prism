@@ -24,11 +24,11 @@ test('one condition click immediately changes only its branch and explains the e
   await page.locator('.inspector-impact').getByRole('button',{name:'撤销',exact:true}).click();await expect(choices).toHaveCount(2);
   expect(researchCalls).toBe(0);
 });
-test('clicking a condition in a branch exposes targeted choices; selecting one immediately recomputes every matching image',async({page,request})=>{
+test('clicking a branch exposes its conditions; entering a new threshold immediately recomputes every matching image',async({page,request})=>{
   await openFixture(page,request);const branch=page.locator('[data-tree-node="scenario-commute"]');
   const condition=page.locator('[data-flow-condition="scenario-commute"]');await condition.locator('[data-tree-condition]').click();
   await expect(page.locator('.canvas-inspector [data-live-input=memory]')).toBeVisible();
-  await page.locator('.canvas-inspector [data-live-condition=memory][data-live-value="32"]').click();
+  await page.locator('[data-live-input=memory]').fill('32');await page.locator('[data-live-input=memory]').dispatchEvent('change');
   await expect(branch.locator(':scope > .tree-candidates > .tree-choice')).toHaveCount(0);
   await expect(page.locator('.inspector-impact .live-impact')).toContainText('2 个退出');
   await expect(page.locator('.inspector-references .live-exits')).toContainText('内存低于下限');

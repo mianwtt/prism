@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "kind": "fixed-live-acceptance-tasks",
+  "minimumQualifiedCandidates": 3,
+  "meaning": "Requirements are frozen before execution and are not inferred from the Agent's output. These are acceptance tasks, not independently labeled field-accuracy benchmarks.",
+  "tasks": [
+    {"id":"C01","domain":"computer","question":"帮我比较用于Java开发的笔记本，预算不超过7000元，内存至少16GB，重量不超过2kg。需要至少3个不同的具体配置、公开商品标价和来源图片，不考虑库存，不要使用新闻首发价。","criteria":[{"kind":"price","unit":"元","maximum":7000},{"kind":"memory","unit":"GB","minimum":16},{"kind":"weight","unit":"kg","maximum":2}],"sourceImages":true},
+    {"id":"C02","domain":"computer","question":"比较日常办公用的笔记本电脑，预算不超过5000元，内存至少16GB。需要至少3个不同的具体配置、公开商品标价和来源图片，不考虑库存，不要用起价或补贴后价格。","criteria":[{"kind":"price","unit":"元","maximum":5000},{"kind":"memory","unit":"GB","minimum":16}],"sourceImages":true},
+    {"id":"C03","domain":"computer","question":"比较用于运行多个开发工具的笔记本，预算不超过10000元，内存至少32GB，重量不超过2kg。需要至少3个不同的具体配置、公开商品标价和来源图片，不考虑库存。","criteria":[{"kind":"price","unit":"元","maximum":10000},{"kind":"memory","unit":"GB","minimum":32},{"kind":"weight","unit":"kg","maximum":2}],"sourceImages":true},
+    {"id":"C04","domain":"computer","question":"比较适合经常携带的笔记本，预算不超过8000元，内存至少24GB，重量不超过1.6kg。需要至少3个不同的具体配置、公开商品标价和来源图片，不考虑库存。","criteria":[{"kind":"price","unit":"元","maximum":8000},{"kind":"memory","unit":"GB","minimum":24},{"kind":"weight","unit":"kg","maximum":1.6}],"sourceImages":true},
+    {"id":"C05","domain":"computer","question":"比较需要保存较多开发资料的笔记本，预算不超过6500元，内存至少16GB，固态硬盘容量至少1TB。需要至少3个不同的具体配置、公开商品标价和来源图片，不考虑库存。","criteria":[{"kind":"price","unit":"元","maximum":6500},{"kind":"memory","unit":"GB","minimum":16},{"kind":"storage","unit":"GB","minimum":1024}],"sourceImages":true},
+    {"id":"R01","domain":"rental","question":"在杭州找整租房源，月租不超过4000元，面积至少30平方米。需要至少3套不同房源及各自原页图片，不要推测通勤。","criteria":[{"kind":"rent","unit":"元/月","maximum":4000},{"kind":"area","unit":"㎡","minimum":30}],"rentalType":"整租","cityCodes":["hz","hangzhou"],"sourceImages":true},
+    {"id":"R02","domain":"rental","question":"在成都找整租房源，月租不超过3000元，面积至少30平方米。需要至少3套不同房源及各自原页图片，不要推测通勤。","criteria":[{"kind":"rent","unit":"元/月","maximum":3000},{"kind":"area","unit":"㎡","minimum":30}],"rentalType":"整租","cityCodes":["cd","chengdu"],"sourceImages":true},
+    {"id":"R03","domain":"rental","question":"在上海找整租房源，月租不超过4500元，面积至少25平方米。需要至少3套不同房源及各自原页图片，不要推测通勤。","criteria":[{"kind":"rent","unit":"元/月","maximum":4500},{"kind":"area","unit":"㎡","minimum":25}],"rentalType":"整租","cityCodes":["sh","shanghai"],"sourceImages":true},
+    {"id":"R04","domain":"rental","question":"在北京找整租房源，月租不超过4500元，面积至少25平方米。需要至少3套不同房源及各自原页图片，不要推测通勤。","criteria":[{"kind":"rent","unit":"元/月","maximum":4500},{"kind":"area","unit":"㎡","minimum":25}],"rentalType":"整租","cityCodes":["bj","beijing"],"sourceImages":true},
+    {"id":"R05","domain":"rental","question":"在深圳找整租房源，月租不超过3500元，面积至少25平方米。需要至少3套不同房源及各自原页图片，不要推测通勤。","criteria":[{"kind":"rent","unit":"元/月","maximum":3500},{"kind":"area","unit":"㎡","minimum":25}],"rentalType":"整租","cityCodes":["sz","shenzhen"],"sourceImages":true}
+  ]
+}

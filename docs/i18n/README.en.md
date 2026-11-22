@@ -12,7 +12,7 @@ Research with specialist agents. Explore the alternatives. Keep the reasoning be
 
 [![Checks](https://github.com/mianwtt/prism/actions/workflows/check.yml/badge.svg)](https://github.com/mianwtt/prism/actions/workflows/check.yml) [![MIT license](https://img.shields.io/badge/License-MIT-246e64)](../../LICENSE) [![Multi-agent](https://img.shields.io/badge/Multi--Agent-LangGraph-246e64)](../MULTI-AGENT.md) [![Local first](https://img.shields.io/badge/Storage-Local_first-526773)](../../.github/SECURITY.md) [![Preview](https://img.shields.io/badge/Status-0.4_preview-526773)](../ROADMAP.md)
 
-[Quick start](#quick-start) · [Features](#features) · [Examples](#examples) · [Agent architecture](#agent-architecture) · [Documentation](#documentation)
+[Quick start](#quick-start) · [Features](#features) · [Examples](#examples) · [System architecture](#system-architecture) · [Documentation](#documentation)
 
 </div>
 
@@ -84,9 +84,39 @@ For a ready-made canvas without a model, import an [example decision](../../exam
 
 **Real research check:** fresh Hangzhou and Chengdu rental tasks each returned **6 eligible listings with corresponding source photographs**, using local `qwen3.5:9b`, tofu and LangGraph. No listing URLs were supplied. These are dated observations, primarily from Fang.com; see [the full runs and their limits](../reports/AGENT-RESEARCH-REPAIR-2026-11-15.md).
 
+<a id="system-architecture"></a>
+
+## System architecture
+
+Prism has four main parts: **the decision workspace, decision service, models and sources, and local data and caching**. Specialist agents research the evidence; a deterministic evaluator handles What-if changes. Together they support decisions that can be explained and revisited.
+
+![Prism system architecture: the workspace connects to a decision service over HTTP; the service combines specialist research, evidence checks and What-if evaluation, with model/source access and local persistence](../assets/system-architecture.en.svg)
+
+Known condition edits reuse saved evidence; requests for new evidence return to research.
+
+<details>
+<summary>View module responsibilities and data boundaries</summary>
+
+| Layer | Components and responsibilities |
+| --- | --- |
+| Browser workspace | JavaScript / SVG canvas, unified conversation, evidence dialogs and decision memory; localStorage retains unsaved drafts |
+| Local service | Node.js HTTP API for request routing, research-job status, versions, import/export and deletion |
+| Application and decisions | Conversation context, four LangGraph specialists, evidence/schema validation and the shared What-if evaluator |
+| Models and source access | Ollama / compatible Chat Completions; tofu-search / Tavily; public catalogs, detail pages and source photographs |
+| Persistence and caching | JSON business versions and job records, SQLite stage checkpoints, optional Redis search-result reuse |
+
+**Known condition edits recalculate in the browser.** Browser and server share the same deterministic evaluator. Requests for new evidence create research jobs. Redis is neither conversation memory nor a task queue; SQLite checkpoints do not replace JSON decision versions.
+
+</details>
+
 <a id="agent-architecture"></a>
 
-## Multi-agent architecture
+### Multi-agent collaboration
+
+Four specialist subgraphs handle planning, collection, evidence review and tradeoff analysis. The parent graph controls execution order, handoffs and repair budgets; program rules decide eligibility. [Implementation and source entry points →](../MULTI-AGENT.md)
+
+<details>
+<summary>View specialist responsibilities, internal flow and execution boundaries</summary>
 
 Prism uses **four specialist roles: coordinator, researcher, reviewer and analyst**, each implemented as a compiled LangGraph subgraph. Scoped task contexts, adapter permissions and structured artifacts define their handoffs. They execute sequentially using the configured model service: four roles do not mean four models or a fixed number of model calls.
 
@@ -102,6 +132,8 @@ Prism uses **four specialist roles: coordinator, researcher, reviewer and analys
 For a laptop request, the coordinator establishes a ¥7,000 budget and at least 16 GB RAM. The researcher reads product details; the reviewer checks whether the price requires a coupon and whether specifications belong to the same configuration. Program rules evaluate eligibility before the analyst explains the alternatives. Evidence gaps may trigger **at most one feedback-driven repair round and two model reviews**; one round can contain multiple bounded tool calls. Unavailable review is explicitly recorded, not counted as completed review. No controlled comparison currently establishes that four roles outperform a single agent.
 
 **Why four roles?** These are the current responsibility boundaries—define the task, collect observations, challenge evidence, explain choices—not a universal agent count. What-if evaluation and caching are program components, not extra agents.
+
+</details>
 
 ### How conversation and the canvas connect
 
@@ -133,14 +165,6 @@ These are application routes, not three independent Agents.
 </details>
 
 **A condition change is not another search.** A ¥5,000 budget is first evaluated against the current branch's saved evidence. Asking for more alternatives or new evidence starts research. Zero matches describe the acquired records, not the entire market.
-
-| Layer | Implementation | Responsibility |
-| --- | --- | --- |
-| Research orchestration | LangGraph `StateGraph` and isolated subgraphs | Contract-based handoffs between coordinator, researcher, reviewer and analyst |
-| Models and tools | ChatOllama / compatible HTTP; tofu-search / Tavily; native public-page readers | Called when needed for research and conversation understanding |
-| Evidence validation | Zod and source/quotation validators | Check field types, units, excerpts and corresponding photographs |
-| What-if evaluation | Deterministic evaluator | Validate conditions, recalculate choices and preserve the baseline |
-| Persistence | SQLite; JSON versions; browser drafts; optional Redis | Resume research, retain business snapshots and unsaved work, and cache searches respectively |
 
 <details>
 <summary>View execution stages and source entry points</summary>
@@ -185,7 +209,7 @@ Use `npm run check:project` to check the complete working-tree source and `npm r
 
 Prism **0.4 is a development preview for local, single-user use**. Real research depends on the model, search engines and publicly readable sources. A saved citation records what a source said; it does not independently verify the publisher's claims.
 
-Additional live checks cover computers, phones and rentals in different cities. The [quality report](../reports/PREVIEW-QUALITY-2026-11-18.md) retains per-version successes, failures and configuration-diversity limits; these are not independently labeled generalization accuracy. PDF/Word/Excel/image ingestion is not implemented. Earlier Windows Node 22/24 installation checks and the [historical GitHub CI run](https://github.com/mianwtt/prism/actions/runs/44038301786) apply to their respective revisions; the current changes need a new remote CI run after submission. Container startup and complete live research require separate acceptance. See [release gates](../ROADMAP.md).
+Additional live checks cover computers, phones and rentals in different cities. The [quality report](../reports/PREVIEW-QUALITY-2026-11-18.md) retains per-version successes, failures and configuration-diversity limits; these are not independently labeled generalization accuracy. PDF/Word/Excel/image ingestion is not implemented. Multi-agent implementation revision `95b3e4b` passed [GitHub CI](https://github.com/mianwtt/prism/actions/runs/45001301886), covering Node.js 22/24 on multiple platforms, browser tests, source packaging, Redis and basic container startup. Container startup and complete live research require separate acceptance. See [release gates](../ROADMAP.md).
 
 Questions and decision history are stored locally. External models, searches and source reads still receive the data needed for those requests. Read [security and privacy](../../.github/SECURITY.md) before sharing exports or running with personal information.
 

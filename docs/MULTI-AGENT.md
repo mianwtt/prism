@@ -1,5 +1,7 @@
 # Prism 多 Agent：实现、交接与验证
 
+本页描述整体系统中的研究子模块。前端工作区、Node.js API、条件计算、模型检索与存储之间的完整关系，见 [README 整体架构](../README.md#system-architecture)及[架构说明](ARCHITECTURE.md#system-overview)。
+
 Prism 的通用研究链路现在使用四个独立 LangGraph 子图：协调、资料研究、证据审查和决策分析。它们共用当前配置的模型服务，通过结构化任务与结果交接；调度顺序、补查预算和最终数据校验由应用控制。普通解释对话、已有条件的 What-if 计算沿用原有路径。
 
 ## 四个角色怎样分工

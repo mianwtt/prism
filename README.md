@@ -12,7 +12,7 @@
 
 [![自动检查](https://github.com/mianwtt/prism/actions/workflows/check.yml/badge.svg)](https://github.com/mianwtt/prism/actions/workflows/check.yml) [![MIT 许可证](https://img.shields.io/badge/License-MIT-246e64)](LICENSE) [![多 Agent](https://img.shields.io/badge/Multi--Agent-LangGraph-246e64)](docs/MULTI-AGENT.md) [![本地存储](https://img.shields.io/badge/Storage-Local_first-526773)](.github/SECURITY.md) [![开发预览](https://img.shields.io/badge/Status-0.4_preview-526773)](docs/ROADMAP.md)
 
-[开始体验](#quick-start) · [核心功能](#features) · [使用场景](#examples) · [Agent 框架](#agent-architecture) · [文档](#documentation)
+[开始体验](#quick-start) · [核心功能](#features) · [使用场景](#examples) · [整体架构](#system-architecture) · [文档](#documentation)
 
 </div>
 
@@ -90,9 +90,39 @@ npm start
 
 **真实研究记录：** 使用本机 `qwen3.5:9b`、tofu 和 LangGraph，杭州与成都的新租房任务分别取得了 **6 套符合条件、带对应原页照片的房源**，输入没有房源链接。这些是有采集时间的网页观察，主要来自房天下；[完整记录](docs/reports/AGENT-RESEARCH-REPAIR-2026-11-15.md)包含中间失败和验证范围。
 
+<a id="system-architecture"></a>
+
+## 整体架构
+
+Prism 由四部分组成：**决策工作区、决策服务、模型与资料、本地数据与缓存**。多 Agent 负责研究资料，确定性内核负责条件推演，两者共同支撑有依据、可回溯的决策。
+
+![Prism 整体架构：决策工作区通过 HTTP 连接决策服务；服务组合多 Agent 研究、证据校验和 What-if 计算，接入模型与资料，并保存本地数据与缓存](docs/assets/system-architecture.svg)
+
+改已知条件，直接复用已有依据重算；需要新资料，再由 Agent 继续研究。
+
+<details>
+<summary>展开模块职责与数据边界</summary>
+
+| 层次 | 组成与职责 |
+| --- | --- |
+| 浏览器工作区 | JavaScript / SVG 画布、统一对话、依据浮窗与决策记忆；localStorage 保留未提交草稿 |
+| 本地服务 | Node.js HTTP API，管理请求分流、研究任务状态、版本读写、导入导出与删除 |
+| 应用与决策 | 持续对话与上下文、LangGraph 四角色研究、证据与结构校验、共享 What-if 计算内核 |
+| 模型与资料接入 | Ollama / 兼容 Chat Completions；tofu-search / Tavily；公开目录、详情页和原页图片读取 |
+| 持久化与缓存 | JSON 保存决策版本与任务记录，SQLite 保存阶段检查点，可选 Redis 复用搜索结果 |
+
+**已有条件在浏览器直接重算。** 浏览器与服务端复用同一个确定性计算内核；要求查找新资料时才创建研究任务。Redis 不作为会话记忆或任务队列，SQLite 检查点也不代替 JSON 决策版本。
+
+</details>
+
 <a id="agent-architecture"></a>
 
-## 多 Agent 框架
+### 多 Agent 协作
+
+研究子模块以四个专职子图完成需求规划、资料采集、证据审查和取舍分析。父图控制执行顺序、任务交接与补查预算，最终资格仍由程序规则决定。[实现与代码入口 →](docs/MULTI-AGENT.md)
+
+<details>
+<summary>展开四角色分工、内部流程与执行边界</summary>
 
 Prism 将一次研究拆为 **协调、资料研究、证据审查、决策分析 4 种职责**，分别由独立的 LangGraph 子图承接。各角色只接收本轮所需的上下文和工具权限，通过结构化任务与结果交接。它们共用配置的模型服务、顺序执行；“4 类”指职责种类，不是 4 个模型，也不是固定的调用次数。
 
@@ -108,6 +138,8 @@ Prism 将一次研究拆为 **协调、资料研究、证据审查、决策分�
 例如选电脑时，协调角色确认“预算 7,000 元、内存至少 16GB”；研究角色查找商品详情；审查角色检查报价是否需要领券、参数是否属于同一配置；程序据此评估资格，分析角色再解释可选方案的取舍。证据不足时按预算补查，**最多一轮反馈驱动补查、两次模型审查**；“一轮”不等于只搜索一次。审查不可用时明确记录降级，不能称为已完成独立审查。当前没有对照实验能够证明四角色必然优于单 Agent。
 
 **为什么是四类？** 这是当前实现按“明确任务 → 采集事实 → 质疑证据 → 解释选择”划分的职责边界，不是 Agent 项目的固定标准。最终资格由程序规则决定；What-if 计算和缓存不是额外的 Agent。
+
+</details>
 
 ### 对话与画布如何衔接
 
@@ -139,14 +171,6 @@ flowchart LR
 </details>
 
 **改条件不等于重新搜索。** 例如把预算改为 5,000 元，会先用当前分支已收集的资料重算；要求“继续找其他方案”或补充新的比较依据时，再进入研究。没有匹配结果，只表示现有资料中没有符合条件的选择。
-
-| 层次 | 实现 | 职责 |
-| --- | --- | --- |
-| 研究编排 | LangGraph `StateGraph` 与独立子图 | 协调、研究、审查、分析四个角色按契约交接 |
-| 模型与工具 | ChatOllama / 兼容 HTTP；tofu-search / Tavily；原生公开页读取器 | 研究和必要的对话理解按需调用，不是用户操作的串行步骤 |
-| 证据校验 | Zod 与来源／引文校验器 | 核对字段类型、单位、原文和对应图片 |
-| 条件推演 | 确定性评估器 | 校验条件、重算候选、解释分支变化，保留原始情况 |
-| 持久化 | SQLite、JSON 版本、浏览器草稿；可选 Redis | 分别恢复研究进度、保存业务快照、保留未提交操作和缓存搜索结果 |
 
 <details>
 <summary>展开真实 LangGraph 阶段与代码入口</summary>
@@ -196,7 +220,7 @@ npm run test:release
 
 Prism **0.4 是面向本机单用户的开发预览**。真实研究受模型、搜索引擎和公开网页可读性影响；保存引文表示可追溯到来源，不等于独立核实了发布者的说法。
 
-已增加电脑、手机与不同城市租房的真实任务检查，[质量报告](docs/reports/PREVIEW-QUALITY-2026-11-18.md)按版本保留成功、失败及配置多样性边界；它们不是独立标注的泛化准确率。尚不支持 PDF／Word／Excel／图片资料导入。此前的 Windows Node 22/24 安装和 [GitHub CI 记录](https://github.com/mianwtt/prism/actions/runs/44038301786)属于对应历史版本，本轮代码仍需提交后重新通过远程 CI。Docker 的基础运行与完整真实研究能力分别验收，不能用旧构建记录代替。详见[发布工作](docs/ROADMAP.md)。
+已增加电脑、手机与不同城市租房的真实任务检查，[质量报告](docs/reports/PREVIEW-QUALITY-2026-11-18.md)按版本保留成功、失败及配置多样性边界；它们不是独立标注的泛化准确率。尚不支持 PDF／Word／Excel／图片资料导入。多 Agent 实现版本 `95b3e4b` 已通过 [GitHub CI](https://github.com/mianwtt/prism/actions/runs/45001301886)，包含 Node.js 22/24 多平台测试、浏览器、源码打包、Redis 和容器基础运行检查。Docker 的基础运行与完整真实研究能力分别验收。详见[发布工作](docs/ROADMAP.md)。
 
 问题和决策历史保存在本机；外部模型、搜索和读页请求仍会传递相应数据。使用个人信息或分享导出文件前，请阅读[安全与隐私说明](.github/SECURITY.md)。
 

@@ -1,3 +1,10 @@
+## System architecture overview — 2026-11-22
+
+- Make the main Chinese and English README diagram a compact system overview with four groups: workspace, decision service, models/sources and local data/cache. Keep Node.js, specialist research, evidence checks and What-if inside their owning component.
+- Keep the specialist workflow as an expandable subsystem detail rather than presenting it as the entire system architecture. Add the same overview to the architecture guide and retain existing section anchors.
+- Clarify browser-local What-if evaluation, browser drafts, JSON business/job records, SQLite research checkpoints and search-only optional Redis caching.
+- Review the original AutoGen, AgentScope and OpenHands framework figures for presentation references; retain detailed component tables and specialist diagrams in expandable sections.
+
 ## Multi-agent README and architecture presentation — 2026-11-22
 
 - Expose all four implemented specialist roles in the Chinese and English README with matching vector architecture diagrams, concrete laptop handoffs and links to source contracts.

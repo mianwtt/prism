@@ -2,6 +2,12 @@
 
 Prism's useful unit is a decision space, not a chat answer. A space contains a question, typed model, source snapshots, candidate facts, branch scopes, conversation and a versioned personal decision.
 
+## System overview
+
+![Prism system architecture: the browser workspace, local API, application services, multi-agent research, model/source adapters and separate local stores](assets/system-architecture.en.svg)
+
+The native JavaScript/SVG browser workspace uses the HTTP API in `src/server.mjs` for research, conversation and version operations. Application services combine the LangGraph research subsystem, conversation context, source/schema validation and a deterministic evaluator shared with the browser. Model and source adapters are dependencies of those services. Local JSON snapshots/job records, SQLite checkpoints, optional Redis search entries and browser drafts have separate ownership; the arrows show component dependencies rather than requiring every edit to pass through research.
+
 ## Interaction routes come before research
 
 The UI and API separate three operations. They are not three Agents, and not every conversation turn invokes the research graph.

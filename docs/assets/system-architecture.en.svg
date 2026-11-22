@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="712" viewBox="0 0 1280 712" role="img" aria-labelledby="title desc" lang="en" font-family="Segoe UI, Microsoft YaHei, Arial, sans-serif" font-style="normal"><title id="title">Prism system architecture</title><desc id="desc">One workspace for source-backed research, What-if exploration and decision memory. Condition edits reuse saved evidence; requests for new evidence return to research.</desc><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#648b82"/></marker></defs><rect width="1280" height="712" rx="16" fill="#fff"/>
+<text x="32" y="33" fill="#247260" font-size="13" font-weight="600" letter-spacing="1.6">PRISM / SYSTEM OVERVIEW</text>
+<text x="32" y="77" fill="#183e37" font-size="34" font-weight="650" >Prism system architecture</text>
+<text x="32" y="112" fill="#526773" font-size="21" font-weight="400" >One workspace for source-backed research, What-if exploration and decision memory.</text>
+<rect x="32" y="176" width="280" height="272" rx="14" fill="#f5f8fb" stroke="#d5e2e8"/>
+<text x="52" y="218" fill="#183e37" font-size="26" font-weight="650" >Decision workspace</text>
+<text x="52" y="251" fill="#526773" font-size="18" font-weight="400" >JavaScript / SVG</text>
+<text x="52" y="297" fill="#526773" font-size="19" font-weight="400" >Canvas · Chat · Evidence</text>
+<text x="52" y="334" fill="#526773" font-size="17" font-weight="400" >Decision memory and versions</text>
+<text x="52" y="410" fill="#246e5e" font-size="16" font-weight="500" >Known edits recalculate locally</text>
+<rect x="368" y="148" width="544" height="340" rx="16" fill="#f0f7f3" stroke="#b8d7c8"/>
+<text x="388" y="185" fill="#183e37" font-size="26" font-weight="650" >Decision service</text>
+<text x="892" y="184" fill="#526773" font-size="16" font-weight="400" text-anchor="end">Node.js / HTTP</text>
+<rect x="388" y="204" width="504" height="132" rx="14" fill="#fff" stroke="#c5ded3"/>
+<text x="408" y="239" fill="#246e5e" font-size="24" font-weight="600" >Multi-agent research · LangGraph</text>
+<text x="408" y="278" fill="#183e37" font-size="20" font-weight="500" >Coordinate → Research → Review → Analyze</text>
+<text x="408" y="313" fill="#526773" font-size="18" font-weight="400" >Source research and grounded interpretation</text>
+<rect x="388" y="356" width="240" height="76" rx="14" fill="#fff" stroke="#d5e2e8"/>
+<text x="408" y="386" fill="#183e37" font-size="22" font-weight="600" >Evidence checks</text>
+<text x="408" y="415" fill="#526773" font-size="16" font-weight="400" >Schema · Quotes · Sources</text>
+<rect x="652" y="356" width="240" height="76" rx="14" fill="#fff" stroke="#d5e2e8"/>
+<text x="672" y="386" fill="#183e37" font-size="22" font-weight="600" >What-if evaluator</text>
+<text x="672" y="415" fill="#526773" font-size="16" font-weight="400" >Inheritance · Recalculation</text>
+<text x="388" y="465" fill="#526773" font-size="17" font-weight="400" >Shared evaluator in browser and server</text>
+<rect x="968" y="176" width="280" height="272" rx="14" fill="#fbfaf7" stroke="#dfdfd3"/>
+<text x="988" y="218" fill="#183e37" font-size="25" font-weight="650" >Models and sources</text>
+<text x="988" y="256" fill="#526773" font-size="16" font-weight="500" >Model adapters</text>
+<text x="988" y="282" fill="#183e37" font-size="17" font-weight="400" >Ollama / Chat Completions</text>
+<text x="988" y="330" fill="#526773" font-size="16" font-weight="500" >Search and public sources</text>
+<text x="988" y="357" fill="#183e37" font-size="19" font-weight="400" >tofu-search / Tavily</text>
+<text x="988" y="389" fill="#526773" font-size="17" font-weight="400" >Public catalogs · Detail pages</text>
+<path d="M 312 314 L 368 314" fill="none" stroke="#648b82" stroke-width="2.2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="340" y="298" fill="#526773" font-size="14" font-weight="500" text-anchor="middle">HTTP</text>
+<path d="M 912 314 L 968 314" fill="none" stroke="#648b82" stroke-width="2.2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="940" y="298" fill="#526773" font-size="14" font-weight="500" text-anchor="middle">Use</text>
+<path d="M 640 488 L 640 548" fill="none" stroke="#648b82" stroke-width="2.2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="656" y="525" fill="#526773" font-size="17" font-weight="400" >Save / Resume</text>
+<rect x="368" y="548" width="544" height="116" rx="14" fill="#f5f8fb" stroke="#d5e2e8"/>
+<text x="388" y="582" fill="#183e37" font-size="23" font-weight="600" >Local data and caching</text>
+<rect x="388" y="597" width="152" height="49" rx="9" fill="#fff" stroke="#dce6eb"/>
+<text x="464" y="618" fill="#183e37" font-size="16" font-weight="600" text-anchor="middle">JSON</text>
+<text x="464" y="638" fill="#526773" font-size="14" font-weight="400" text-anchor="middle">Versions / Chat</text>
+<rect x="556" y="597" width="152" height="49" rx="9" fill="#fff" stroke="#dce6eb"/>
+<text x="632" y="618" fill="#183e37" font-size="16" font-weight="600" text-anchor="middle">SQLite</text>
+<text x="632" y="638" fill="#526773" font-size="14" font-weight="400" text-anchor="middle">Research checkpoints</text>
+<rect x="724" y="597" width="152" height="49" rx="9" fill="#fff" stroke="#dce6eb"/>
+<text x="800" y="618" fill="#183e37" font-size="16" font-weight="600" text-anchor="middle">Redis (optional)</text>
+<text x="800" y="638" fill="#526773" font-size="14" font-weight="400" text-anchor="middle">Search cache</text>
+<text x="32" y="698" fill="#526773" font-size="18" font-weight="400" >Condition edits reuse saved evidence; requests for new evidence return to research.</text>
+</svg>

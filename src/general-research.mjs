@@ -1,8 +1,10 @@
 import {StateGraph,StateSchema,START,END,MemorySaver} from '@langchain/langgraph';
 import {z} from 'zod';
-import {randomUUID} from 'node:crypto';
+import {randomUUID,createHash} from 'node:crypto';
+import {createSpecialist,specialistTask,specialistPolicies} from './agents/specialist.mjs';
+import {reviewEvidence,applyReviewHolds} from './agents/evidence-review.mjs';
 import {safeUrl,quoteContainsNumber} from './evidence.mjs';
-import {validateDecisionSchema,validateDecisionSettings,decisionScenarios,parseDecisionChange,hasDecisionValue,evaluateDecision} from './decision-schema.mjs';
+import {validateDecisionSchema,validateDecisionSettings,decisionScenarios,parseDecisionChange,hasDecisionValue,evaluateDecision,rememberConditionAlias} from './decision-schema.mjs';
 import {observationIssue,entityQuoteIssue,sourceSite,constraintNumberSupported} from './decision-evidence.mjs';
 import {validatedIdentity,reconcileCandidates,candidateIdentityKey,combineCandidate} from './source-reconciliation.mjs';
 import {isMerchantProduct,isNewsSource} from './source-types.mjs';
@@ -16,6 +18,9 @@ import {attachMerchantPage,merchantRawCandidate,bindMerchantImages} from './publ
 import {refineObservedCatalogs,catalogRequestForConditions,readCatalogWithRetry} from './catalog-navigation.mjs';
 import {repairPlanConstraints,normalizeCatalogRequests,pruneUnrequestedDimensions} from './plan-constraints.mjs';
 import {selectDiverseCandidates,observedConfigurationKey} from './candidate-diversity.mjs';
+import {bindRentalScope,explicitRentalRegion} from './rental-scope.mjs';
+
+export const adaptiveAgentInfo=Object.freeze({framework:'LangGraph',architecture:'bounded-specialist-subgraphs',graphVersion:26,roles:Object.entries(specialistPolicies).map(([id,p])=>({id,label:p.label,tools:p.tools})),limits:{reviewPasses:2,recoveryRounds:1},execution:'sequential'});
 
 // Repair representational mistakes without changing a user's actual preferences.
 // Evidence collection requirements must never turn into unknown eligibility facts.
@@ -89,7 +94,7 @@ Choose 2–4 dimensions appropriate to the user's EXPLICIT priorities, including
     const f=schema.fields.find(f=>f.key===item.field),quote=typeof item.quote==='string'?item.quote:'';
     if(!f||!quote||(adaptation||question).includes(quote)===false||!hasDecisionValue(item.value,f))continue;
     const numericOK=(f.type||'number')!=='number'||constraintNumberSupported(item.value,quote,f.unit);
-    if(numericOK){settings.limits[f.key]=item.value;if(!previous?.schema.fields.some(old=>old.key===f.key))settings.weights[f.key]=1;}
+    if(numericOK){settings.limits[f.key]=item.value;rememberConditionAlias(schema,f.key,quote);if(!previous?.schema.fields.some(old=>old.key===f.key))settings.weights[f.key]=1;}
   }
   settings=validateDecisionSettings(settings,schema);
   const queries=(Array.isArray(answer.queries)?answer.queries:[]).filter(q=>typeof q==='string'&&q.trim()&&q.length<=500).slice(0,3);
@@ -117,13 +122,14 @@ Choose 2–4 dimensions appropriate to the user's EXPLICIT priorities, including
   // Local models may omit optional fields in a large schema response. Ask one small,
   // bounded tool-selection question instead of guessing a category from domain code.
   let proposedCatalogs=answer.catalogRequests;
-  if((!normalizeCatalogRequests(proposedCatalogs,io.publicCatalogs).length||proposedCatalogs.some(r=>typeof r?.keywords==='string'&&r.keywords.length>12))&&io.publicCatalogs?.length&&typeof io.searchCatalog==='function')try{
+  if((!normalizeCatalogRequests(proposedCatalogs,io.publicCatalogs).length||proposedCatalogs.some(r=>typeof r?.keywords==='string'&&r.keywords.length>12))&&io.publicCatalogs?.length&&(io.supportsCatalogs??typeof io.searchCatalog==='function'))try{
     const selected=await io.model([{role:'system',content:'Choose whether a public catalog tool is relevant. 只返回JSON {"catalogRequests":[]}，通常选择一个适用平台，不要把全部示例照抄进数组。请求格式示例：'+JSON.stringify(io.publicCatalogs.map(p=>({platform:p.platform,[p.input||'keywords']:p.input==='location'?'用户城市名':'简短商品类别'})))+'。商品keywords可带明确配置词，不超过12字符，不放用途、预算、重量、图片要求，不猜品牌。location只写用户城市名，不放面积租金。最多2项，没有适用平台则空数组，不生成URL或候选数据。'},{role:'user',content:JSON.stringify({question,change:adaptation,availableCatalogs:io.publicCatalogs})}]);
     proposedCatalogs=selected.catalogRequests;
   }catch{}
   const catalogRequests=normalizeCatalogRequests(proposedCatalogs,io.publicCatalogs);
   const distinctConfigurations=Boolean(previous?.evidenceRequirements?.distinctConfigurations||/不同(?:的)?(?:具体|硬件)?配置/.test(adaptation||question)&&catalogRequests.some(r=>io.publicCatalogs?.find(p=>p.platform===r.platform)?.capabilities?.includes('configuration-attributes')));
-  return {question:adaptation||question,schema,settings,queries,whatifs,catalogRequests,planRepairs:answer.planRepairs,evidenceRequirements:{sourcePhotos,...(distinctConfigurations?{distinctConfigurations:true}:{})}};
+  const unresolvedRentalRegion=!previous?.evidenceRequirements?.rentalScope&&catalogRequests.filter(r=>io.publicCatalogs?.find(p=>p.platform===r.platform)?.capabilities?.includes('geographic-scope')).map(r=>explicitRentalRegion(question,r.location)||{city:r.location,requested:'',quote:r.location}).find(Boolean);
+  return {question:adaptation||question,schema,settings,queries,whatifs,catalogRequests,planRepairs:answer.planRepairs,evidenceRequirements:{sourcePhotos,...(previous?.evidenceRequirements?.rentalScope?{rentalScope:structuredClone(previous.evidenceRequirements.rentalScope)}:{}),...(unresolvedRentalRegion?{unresolvedRentalRegion}:{}),...(distinctConfigurations?{distinctConfigurations:true}:{})}};
 }
 
 const clean=s=>String(s||'').replace(/\s+/g,' ').trim();
@@ -140,13 +146,14 @@ export function checkDecisionCandidates(raw,sources,schema) {
     const facts={};
     for(const f of schema.fields){
       let fact=item.facts?.[f.key];
-      if((!fact||fact.value===null)&&identity.publicPrice&&/价格|售价|标价|单价|报价|price|cost/i.test(f.label)&&/^(?:元|CNY|人民币)$/i.test(f.unit))fact={value:identity.publicPrice.value,quote:identity.publicPrice.quote,sourceId:identity.id};
+      if(!fact?.reviewHold&&(!fact||fact.value===null)&&identity.publicPrice&&/价格|售价|标价|单价|报价|price|cost/i.test(f.label)&&/^(?:元|CNY|人民币)$/i.test(f.unit))fact={value:identity.publicPrice.value,quote:identity.publicPrice.quote,sourceId:identity.id};
       const source=sources.find(s=>s.id===fact?.sourceId);let quote=typeof fact?.quote==='string'?fact.quote.trim().slice(0,1500):'';
       let recovered=false;
       if(source&&quote&&!clean(source.text).includes(clean(quote))){const exact=locateSourceText(source.text,quote)||recoverNumericPassage(f,fact,source)?.quote;if(exact){quote=exact;recovered=true;}}
       const value=fact?.value;
       const sameProduct=source&&suningMobileUrl(source.url)&&suningMobileUrl(source.url)===suningMobileUrl(identity.url);
       let issue=source?.id!==identity.id&&!sameProduct?'引文不属于这个方案的来源':observationIssue(f,{...fact,quote},source)||entityQuoteIssue(name,quote,sameProduct?{...source,pageIdentity:{name}}:source,raw.filter(x=>x?.sourceId===item.sourceId&&typeof x.name==='string').map(x=>x.name));
+      if(fact?.reviewHold)issue='独立审查暂缓采用：'+String(fact.reviewHold).slice(0,240);
       if(!issue&&/元|CNY|人民币/.test(f.unit)&&isNewsSource(source))issue='新闻或评测中的价格不能作为当前公开标价';
       facts[f.key]=!issue?{value,status:'cited',sourceId:source.id,quote,...(recovered?{quoteRecovery:'同一详情页中的原始数值片段'}:{})}:{value:null,status:'unknown',sourceId:null,quote:'',...(fact?{reviewReason:issue,rejectedEvidence:{value:value??null,sourceId:source?.id||null,quote}}:{})};
     }
@@ -156,11 +163,11 @@ export function checkDecisionCandidates(raw,sources,schema) {
   }
   return {...reconcileCandidates(candidates,sources,schema),drafts};
 }
-const researchState=new StateSchema({question:z.string(),adaptation:z.string().nullable().default(null),contract:z.unknown().nullable().default(null),sources:z.array(z.unknown()).default(()=>[]),raw:z.unknown().nullable().default(null),trace:z.array(z.unknown()).default(()=>[]),result:z.unknown().nullable().default(null),previous:z.unknown().nullable().default(null),scenario:z.unknown().nullable().default(null),scenarios:z.unknown().nullable().default(null),recovery:z.unknown().nullable().default(null)});
+const researchState=new StateSchema({question:z.string(),adaptation:z.string().nullable().default(null),contract:z.unknown().nullable().default(null),sources:z.array(z.unknown()).default(()=>[]),raw:z.unknown().nullable().default(null),trace:z.array(z.unknown()).default(()=>[]),result:z.unknown().nullable().default(null),previous:z.unknown().nullable().default(null),scenario:z.unknown().nullable().default(null),scenarios:z.unknown().nullable().default(null),recovery:z.unknown().nullable().default(null),agentRuns:z.array(z.unknown()).default(()=>[]),agentReviews:z.array(z.unknown()).default(()=>[]),evidenceReview:z.unknown().nullable().default(null)});
 function assessResearch(raw,sources,contract){
  const {candidates}=checkDecisionCandidates(raw,sources,contract.schema),rows=evaluateDecision(candidates,contract.settings,contract.schema);
  const eligible=new Set(rows.filter(row=>row.status==='eligible').map(row=>row.id));
- const supported=candidates.filter(c=>eligible.has(c.id)&&(!contract.evidenceRequirements?.sourcePhotos||c.media?.url||sources.find(source=>source.id===c.sourceId)?.rentalObservation?.images?.length||sources.find(source=>source.id===c.sourceId)?.merchantObservation?.images?.length));
+ const supported=candidates.filter(c=>!contract.evidenceRequirements?.unresolvedRentalRegion&&eligible.has(c.id)&&(!contract.evidenceRequirements?.sourcePhotos||c.media?.url||sources.find(source=>source.id===c.sourceId)?.rentalObservation?.images?.length||sources.find(source=>source.id===c.sourceId)?.merchantObservation?.images?.length));
  const verified=contract.evidenceRequirements?.distinctConfigurations?supported.filter(c=>observedConfigurationKey(c,sources,contract.schema,{question:contract.question||''})):supported;
  const diverse=selectDiverseCandidates(verified,sources,contract.schema,contract.settings,{question:contract.question||''});
  const comparable=diverse.candidates.length;
@@ -173,24 +180,28 @@ function assessResearch(raw,sources,contract){
 }
 export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=new MemorySaver()}={}){
   const event=(node,message)=>{const e={node,type:node==='complete'?'complete':'thinking',message,at:new Date().toISOString()};onProgress(e);return e;};
-  const graph=new StateGraph(researchState)
-    .addNode('understand',async s=>{
+  const stages={
+    understand:async(s,io)=>{
       let contract;
       contract=await planDecision(s.previous?.question||s.question,io,{previous:s.previous,scenario:s.scenario,adaptation:s.adaptation});
       return {contract,trace:[event('understand',`这次比较${contract.schema.optionLabel}，先查找${contract.schema.fields.map(f=>f.label).join('、')}的公开依据。`)]};
-    })
-    .addNode('search',async s=>{
+    },
+    search:async(s,io)=>{
       const queries=s.contract.queries;
-      const sources=[],trace=[...s.trace];let catalogRetries=0;
+      const sources=[],trace=[...s.trace];let catalogRetries=0,contract=s.contract;
       for(const request of s.contract.catalogRequests||[]){
         if(typeof io.searchCatalog!=='function')break;
         trace.push(event('search','正在查找公开目录：'+(request.keywords||request.location)));
-        try{const page=await readCatalogWithRetry(catalogRequestForConditions(request,s.contract,io.publicCatalogs),io,{attempts:catalogRetries<1?2:1,onRetry:()=>{catalogRetries++;trace.push(event('search','公开目录暂时连接超时，在本轮预算内重试一次。'));}});if(page?.url&&page?.text){
+        try{const page=await readCatalogWithRetry(catalogRequestForConditions(request,contract,io.publicCatalogs),io,{attempts:catalogRetries<1?2:1,onRetry:()=>{catalogRetries++;trace.push(event('search','公开目录暂时连接超时，在本轮预算内重试一次。'));}});if(page?.url&&page?.text){
+          contract=bindRentalScope(contract,page);
           const source={id:'source-'+randomUUID().slice(0,12),url:page.url,title:page.title||'公开目录',text:page.text.slice(0,30000),kind:'page',retrievedAt:page.observedAt||new Date().toISOString(),retrieval:{catalogRequest:request}};
           attachRentalPage(source,page);attachMerchantPage(source,page);sources.push(source);
+          for(const seed of page.seedPages||[])if(seed.rentalObservation&&seed.text&&!sources.some(s=>s.url===seed.url)){
+            const detail={id:'source-'+randomUUID().slice(0,12),url:seed.url,title:seed.title,text:seed.text,kind:'page',retrievedAt:seed.observedAt};attachRentalPage(detail,seed);sources.push(detail);
+          }
         }}catch{trace.push(event('search','本次公开目录未能读取，继续使用搜索来源。'));}
       }
-      if(sources.some(source=>source.observedLinks?.length>=4))return {sources,trace};
+      if(sources.some(source=>source.observedLinks?.length>=4))return {contract,sources,trace};
       for(const q of queries){
         trace.push(event('search',`正在查找：${q.slice(0,160)}`));
         try{
@@ -214,9 +225,9 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
           }
         }catch{}
       }
-      return {sources,trace};
-    })
-    .addNode('read',async s=>{
+      return {contract,sources,trace};
+    },
+    read:async(s,io)=>{
       const sources=structuredClone(s.sources),trace=[...s.trace];
       let priceReads=0;const priceUrls=new Set();
       const selectedSources=prioritizeSources(sources,s.contract.schema);
@@ -244,8 +255,8 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
         }catch{trace.push(event('read','暂未选出更多可读详情，继续整理已取得的资料。'));}
       }
       return {sources,trace};
-    })
-    .addNode('extract',async s=>{
+    },
+    extract:async(s,io)=>{
       if(!s.sources.length)return {raw:[],trace:[...s.trace,event('extract','尚未取得公开来源，保留你的条件，暂不生成方案。')]};
       const raw=s.sources.filter(source=>source.rentalObservation||source.merchantObservation).map(source=>source.merchantObservation?merchantRawCandidate(source,s.contract.schema):rentalRawCandidate(source,s.contract.schema)).filter(Boolean),trace=[...s.trace];
       const chosen=prioritizeSources(s.sources.filter(source=>!source.rentalObservation&&!source.merchantObservation&&!source.observedLinks?.length),s.contract.schema);
@@ -259,8 +270,8 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
         }
       }
       return {raw,trace:[...trace,event('extract','正在把具体方案和原文中的信息一一对应。')]};
-    })
-    .addNode('corroborate',async s=>{
+    },
+    corroborate:async(s,io)=>{
       const checked=checkDecisionCandidates(s.raw||[],s.sources,s.contract.schema),sources=structuredClone(s.sources),raw=[...(s.raw||[])],trace=[...s.trace];
       const targets=checked.candidates.filter(c=>{
         const missing=s.contract.schema.fields.some(f=>(s.contract.settings.limits[f.key]!==null||s.contract.settings.weights[f.key]>0)&&c.facts[f.key]?.value===null);
@@ -292,9 +303,12 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
         }catch{trace.push(event('corroborate','补查页面未能可靠提取，保留原文，不填入猜测值。'));}
       }
       return {sources,raw,trace};
-    })
-    .addNode('recover',s=>recoverResearch(s,io,{event,assess:assessResearch}))
-    .addNode('complete',async s=>{
+    },
+    recover:async(s,io)=>{
+      const output=await recoverResearch(s,io,{event,assess:(raw,sources,contract)=>assessResearch(applyReviewHolds(raw,s.agentReviews),sources,contract)});
+      return {...output,raw:applyReviewHolds(output.raw||s.raw,s.agentReviews)};
+    },
+    complete:async(s,io)=>{
       const schema=structuredClone(s.contract.schema);
       const {candidates,drafts,warnings}=checkDecisionCandidates(s.raw,s.sources,schema);
       bindRentalImages(candidates,s.sources);
@@ -308,6 +322,10 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
         }catch{warnings.push('来源页配图暂未取得，文字依据保留。');}
       }
       if(s.contract.evidenceRequirements?.sourcePhotos)for(let i=candidates.length-1;i>=0;i--)if(!candidates[i].media?.url){drafts.push({name:candidates[i].name,sourceId:candidates[i].sourceId,reason:'已取得文字依据，但尚未取得与该方案对应的原页图片'});candidates.splice(i,1);}
+      if(s.contract.evidenceRequirements?.unresolvedRentalRegion){
+        drafts.push(...candidates.map(c=>({name:c.name,sourceId:c.sourceId,reason:'尚未核对用户指定区域，不能当作符合区域要求的房源'})));candidates.splice(0);
+        warnings.push('这轮尚未核对指定区域，资料已保留，暂不推荐全市房源作为替代。');
+      }
       if(s.contract.evidenceRequirements?.distinctConfigurations)for(let i=candidates.length-1;i>=0;i--)if(!observedConfigurationKey(candidates[i],s.sources,schema,{question:s.previous?.question||s.question})){drafts.push({name:candidates[i].name,sourceId:candidates[i].sourceId,reason:'原页参数尚不足以支持区分配置；资料保留，不计入不同配置数量'});candidates.splice(i,1);}
       const diverse=selectDiverseCandidates(candidates,s.sources,schema,s.contract.settings,{question:s.previous?.question||s.question});
       candidates.splice(0,candidates.length,...diverse.candidates);drafts.push(...diverse.duplicates);
@@ -357,16 +375,19 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
         result.canvasScenarioIds=result.scenarios.map(scenario=>scenario.id);
       }
       result.evidenceRequirements=structuredClone(s.contract.evidenceRequirements||{});
-      result.agent={framework:'LangGraph',nodes:['understand','search','read','extract','corroborate','recover','complete'],graphVersion:24,planRepairs:s.contract.planRepairs,recovery:s.recovery,diversity:{method:'observed-specifications-v1',collapsed:diverse.duplicates.length}};
+      result.agent={...structuredClone(adaptiveAgentInfo),nodes:['understand','search','read','extract','corroborate','review','recover','review_after_recovery','complete'],runs:s.agentRuns||[],reviews:s.agentReviews||[],planRepairs:s.contract.planRepairs,recovery:s.recovery,diversity:{method:'observed-specifications-v1',collapsed:diverse.duplicates.length}};
+      if((s.agentReviews||[]).some(review=>['unavailable','context-budget-exceeded'].includes(review.status)))result.warnings.push('模型独立审查未完成；本轮结果仍按程序的来源与引文规则校验。');
       if(result.pendingConversationResearch?.request===s.adaptation){
         const selected=result.scenarios.find(branch=>branch.id===result.activeScenarioId),pool=result.candidates.filter(c=>selected.candidateIds.includes(c.id)),rows=evaluateDecision(pool,selected.settings,result.schema),eligible=rows.filter(r=>r.status==='eligible'),unresolved=rows.filter(r=>r.status==='unresolved');
         const primary=result.schema.fields.find(f=>f.key===result.schema.layout.primaryField),best=pool.find(c=>c.id===eligible[0]?.id);
         const detail=best&&primary&&hasDecisionValue(best.facts[primary.key]?.value,primary)?`「${best.name}」在当前设置下排在前面，${primary.label}为 ${best.facts[primary.key].value}${primary.unit}。`:'';
-        result.conversation.push({id:randomUUID(),role:'assistant',at:new Date().toISOString(),scenarioId:selected.id,content:`这轮已经核对完公开资料。这条路径现在有 ${eligible.length} 个符合条件的方案。${detail}${unresolved.length?`仍有 ${unresolved.length} 个方案缺少关键依据，暂不作为推荐。`:''}原来的情况保留，你可以接着问具体取舍。`});
+        result.conversation.push({id:randomUUID(),role:'assistant',at:new Date().toISOString(),scenarioId:selected.id,interaction:{kind:'research-complete'},content:`这轮已经核对完公开资料。这条路径现在有 ${eligible.length} 个符合条件的方案。${detail}${unresolved.length?`仍有 ${unresolved.length} 个方案缺少关键依据，暂不作为推荐。`:''}原来的情况保留，你可以接着问具体取舍。`});
+        result.conversationState={focus:{scenarioId:selected.id,fields:[]}};
         delete result.pendingConversationResearch;
       }
       return {result};
-    }).addNode('analyze',async s=>{
+    },
+    analyze:async(s,io)=>{
       const result=structuredClone(s.result),selected=result.scenarios.find(x=>x.id===result.activeScenarioId)||result.scenarios[0];
       const candidates=result.candidates.filter(c=>(selected.candidateIds||result.candidates.map(x=>x.id)).includes(c.id));
       if(!candidates.length)return {};
@@ -384,7 +405,43 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
       }catch{result.analysis={summary:'你可以先比较已经取得依据的选择，再告诉我还在意哪些方面。',insights:[],settingsKey:JSON.stringify(selected.settings),scenarioId:selected.id};}
       result.trace.push(eventValue);result.agent.nodes.push('analyze');
       return {result,trace:result.trace};
-    }).addEdge(START,'understand').addEdge('understand','search').addEdge('search','read').addEdge('read','extract').addEdge('extract','corroborate').addEdge('corroborate','recover').addEdge('recover','complete').addEdge('complete','analyze').addEdge('analyze',END);
+    },
+  };
+  const specialists={
+    coordinator:createSpecialist('coordinator',{understand:stages.understand},io),
+    researcher:createSpecialist('researcher',Object.fromEntries(['search','read','extract','corroborate','recover'].map(phase=>[phase,stages[phase]])),io),
+    reviewer:createSpecialist('reviewer',{review:(state,tools)=>reviewEvidence(state,tools,{checkCandidates:checkDecisionCandidates,event})},io),
+    analyst:createSpecialist('analyst',{analyze:stages.analyze},io),
+  };
+  const fingerprint=state=>createHash('sha256').update(JSON.stringify([state.raw,state.sources])).digest('hex');
+  const delegate=(role,phase)=>async state=>{
+    const response=await specialists[role].invoke({phase,task:specialistTask(role,state)});
+    let artifact=response.artifact||{};
+    const agentRuns=[...(state.agentRuns||[]),response.usage];
+    if(role==='analyst'){
+      const result={...state.result,...(artifact.result?{analysis:artifact.result.analysis}:{}),trace:[...state.result.trace,...(artifact.result?.trace||[])],agent:{...state.result.agent,nodes:artifact.result?.agent.nodes||state.result.agent.nodes,runs:agentRuns}};
+      artifact={result,trace:result.trace};
+    }
+    return {...artifact,agentRuns};
+  };
+  const review=async state=>{
+    if(state.evidenceReview?.fingerprint===fingerprint(state))return {};
+    const artifact=await delegate('reviewer','review')(state);
+    const evidenceReview={...artifact.evidenceReview,fingerprint:fingerprint({...state,...artifact})};
+    return {...artifact,evidenceReview,agentReviews:[...(state.agentReviews||[]),evidenceReview]};
+  };
+  const graph=new StateGraph(researchState)
+    .addNode('understand',delegate('coordinator','understand'))
+    .addNode('search',delegate('researcher','search'))
+    .addNode('read',delegate('researcher','read'))
+    .addNode('extract',delegate('researcher','extract'))
+    .addNode('corroborate',delegate('researcher','corroborate'))
+    .addNode('review',review)
+    .addNode('recover',delegate('researcher','recover'))
+    .addNode('review_after_recovery',review)
+    .addNode('complete',state=>stages.complete(state,io))
+    .addNode('analyze',delegate('analyst','analyze'))
+    .addEdge(START,'understand').addEdge('understand','search').addEdge('search','read').addEdge('read','extract').addEdge('extract','corroborate').addEdge('corroborate','review').addEdge('review','recover').addEdge('recover','review_after_recovery').addEdge('review_after_recovery','complete').addEdge('complete','analyze').addEdge('analyze',END);
   return graph.compile({checkpointer});
 }
 export async function runGeneralResearch(question,io,onProgress=()=>{},options={}){

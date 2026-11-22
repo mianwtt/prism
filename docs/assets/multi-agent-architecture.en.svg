@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="664" viewBox="0 0 1280 664" role="img" aria-labelledby="title desc" lang="en" font-family="Segoe UI, Microsoft YaHei, Arial, sans-serif" font-style="normal"><title id="title">From public sources to traceable decisions</title><desc id="desc">Four specialist roles exchange structured tasks; program rules retain authority over user conditions. Four roles are not four models or a fixed number of model calls.</desc><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#638b82"/></marker></defs><rect width="1280" height="664" rx="16" fill="#ffffff"/>
+<text x="40" y="36" fill="#247260" font-size="12" font-weight="600" letter-spacing="1.6">PRISM / MULTI-AGENT RESEARCH</text>
+<text x="1240" y="36" fill="#526773" font-size="14" font-weight="400" text-anchor="end">Shared model service · Sequential execution</text>
+<text x="40" y="79" fill="#183e37" font-size="30" font-weight="650" >From public sources to traceable decisions</text>
+<text x="40" y="111" fill="#526773" font-size="17" font-weight="400" >Four specialist roles exchange structured tasks; program rules retain authority over user conditions.</text>
+<rect x="28" y="190" width="1232" height="210" rx="16" fill="#f5f8fa" stroke="#e1e9ee"/>
+<rect x="40" y="133" width="232" height="38" rx="9" fill="#eaf5f0" stroke="#c5ded3"/>
+<text x="156" y="158" fill="#246e5e" font-size="16" font-weight="600" text-anchor="middle">Question / further research</text>
+<path d="M 156 171 L 156 210" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 780 210 L 780 178 L 468 178 L 468 210" fill="none" stroke="#638b82" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow)"/>
+<rect x="439" y="137" width="370" height="32" rx="8" fill="#ffffff" stroke="#ffffff"/>
+<text x="624" y="159" fill="#246e5e" font-size="15" font-weight="500" text-anchor="middle">Evidence gaps: at most one repair round</text>
+<rect x="40" y="210" width="232" height="170" rx="12" fill="#fff" stroke="#d6e1e7"/>
+<path d="M 52 211 H 260" stroke="#2b806c" stroke-width="3"/>
+<text x="60" y="241" fill="#688c81" font-size="13" font-weight="600" >01</text>
+<text x="60" y="273" fill="#183e37" font-size="22" font-weight="650" >Coordinator</text>
+<text x="60" y="305" fill="#526773" font-size="16" font-weight="400" >Define comparison fields</text>
+<text x="60" y="330" fill="#526773" font-size="16" font-weight="400" >Set conditions and queries</text>
+<text x="60" y="355" fill="#526773" font-size="16" font-weight="400" >Keep requirements intact</text>
+<rect x="352" y="210" width="232" height="170" rx="12" fill="#fff" stroke="#d6e1e7"/>
+<path d="M 364 211 H 572" stroke="#2b806c" stroke-width="3"/>
+<text x="372" y="241" fill="#688c81" font-size="13" font-weight="600" >02</text>
+<text x="372" y="273" fill="#183e37" font-size="22" font-weight="650" >Researcher</text>
+<text x="372" y="305" fill="#526773" font-size="16" font-weight="400" >Search and read public pages</text>
+<text x="372" y="330" fill="#526773" font-size="16" font-weight="400" >Bind observations to sources</text>
+<text x="372" y="355" fill="#526773" font-size="16" font-weight="400" >Keep missing facts unknown</text>
+<rect x="664" y="210" width="232" height="170" rx="12" fill="#fff" stroke="#d6e1e7"/>
+<path d="M 676 211 H 884" stroke="#2b806c" stroke-width="3"/>
+<text x="684" y="241" fill="#688c81" font-size="13" font-weight="600" >03</text>
+<text x="684" y="273" fill="#183e37" font-size="22" font-weight="650" >Reviewer</text>
+<text x="684" y="305" fill="#526773" font-size="16" font-weight="400" >Check identity, specs, prices</text>
+<text x="684" y="330" fill="#526773" font-size="16" font-weight="400" >Withhold disputed fields</text>
+<text x="684" y="355" fill="#526773" font-size="16" font-weight="400" >Cite evidence for findings</text>
+<rect x="1016" y="210" width="232" height="170" rx="12" fill="#fff" stroke="#d6e1e7"/>
+<path d="M 1028 211 H 1236" stroke="#2b806c" stroke-width="3"/>
+<text x="1036" y="241" fill="#688c81" font-size="13" font-weight="600" >04</text>
+<text x="1036" y="273" fill="#183e37" font-size="22" font-weight="650" >Analyst</text>
+<text x="1036" y="305" fill="#526773" font-size="16" font-weight="400" >Explain evaluated tradeoffs</text>
+<text x="1036" y="330" fill="#526773" font-size="16" font-weight="400" >Retain facts and citations</text>
+<text x="1036" y="355" fill="#526773" font-size="16" font-weight="400" >Never rewrite eligibility</text>
+<path d="M 272 290 L 352 290" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 584 290 L 664 290" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="912" y="255" width="88" height="70" rx="10" fill="#eaf5f0" stroke="#a8cbbc"/>
+<text x="956" y="284" fill="#246e5e" font-size="15" font-weight="600" text-anchor="middle">Program</text>
+<text x="956" y="307" fill="#246e5e" font-size="15" font-weight="600" text-anchor="middle">validation</text>
+<path d="M 896 290 L 912 290" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1000 290 L 1016 290" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 468 380 L 468 422 L 216 422 L 216 446" fill="none" stroke="#638b82" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<path d="M 1132 380 L 1132 446" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="446" width="340" height="110" rx="12" fill="#f8fafc" stroke="#d6e1e7"/>
+<text x="60" y="478" fill="#183e37" font-size="20" font-weight="600" >Public-source tools</text>
+<text x="60" y="509" fill="#526773" font-size="16" font-weight="400" >tofu-search / Tavily · Catalogs and pages</text>
+<text x="60" y="535" fill="#526773" font-size="15" font-weight="400" >Optional Redis: reuse search results</text>
+<rect x="420" y="446" width="340" height="110" rx="12" fill="#f8fafc" stroke="#d6e1e7"/>
+<text x="440" y="478" fill="#183e37" font-size="20" font-weight="600" >SQLite stage checkpoints</text>
+<text x="440" y="509" fill="#526773" font-size="16" font-weight="400" >Parent graph saves completed stages</text>
+<text x="440" y="535" fill="#526773" font-size="15" font-weight="400" >Interrupted requests may repeat</text>
+<rect x="800" y="446" width="448" height="110" rx="12" fill="#f8fafc" stroke="#d6e1e7"/>
+<text x="820" y="478" fill="#183e37" font-size="20" font-weight="600" >What-if decision canvas</text>
+<text x="820" y="509" fill="#526773" font-size="16" font-weight="400" >Matching choices · Evidence · Conversation</text>
+<text x="820" y="535" fill="#526773" font-size="15" font-weight="400" >Known condition edits: no model or search</text>
+<path d="M 1024 556 L 1024 578" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="800" y="578" width="448" height="40" rx="10" fill="#eaf5f0" stroke="#c5ded3"/>
+<text x="1024" y="604" fill="#246e5e" font-size="16" font-weight="500" text-anchor="middle">Save decision versions: choice · reasons · evidence</text>
+<text x="40" y="589" fill="#526773" font-size="15" font-weight="400" >At most two model reviews; unavailable review is recorded.</text>
+<text x="40" y="618" fill="#526773" font-size="15" font-weight="400" >Four roles are not four models or a fixed number of model calls.</text>
+</svg>

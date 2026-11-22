@@ -1,12 +1,12 @@
-# Adaptive research Agent
+# Adaptive multi-agent research
 
 [Documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Verification](reports/VERIFICATION.md)
 
-New research uses the compiled LangGraph in `src/general-research.mjs`. The model proposes a typed comparison model from the question; the application validates it and controls tool budgets. Housing, laptops and other questions share this path rather than selecting a fixed frontend template.
+New research uses coordinated specialist subgraphs in `src/general-research.mjs` and `src/agents/`. The coordinator proposes a typed model; a researcher gathers observations; an independent reviewer may withhold evidence; an analyst explains the evaluated choices. The application controls handoffs, validation and budgets. Housing, laptops and other questions share the same path.
 
 ```mermaid
 flowchart LR
-  understand --> search --> read --> extract --> corroborate --> recover --> complete --> analyze
+  understand --> search --> read --> extract --> corroborate --> review --> recover --> review_after_recovery --> complete --> analyze
 ```
 
 | Node | Responsibility |
@@ -16,11 +16,15 @@ flowchart LR
 | `read` | Read observed pages and concrete detail links within bounded budgets |
 | `extract` | Extract candidate observations and source quotations |
 | `corroborate` | Seek additional evidence for incomplete observations |
+| `review` | Independently challenge source-bound observations; invalid findings cannot change facts |
 | `recover` | Supplement insufficient comparable results using observed catalogs and focused queries |
+| `review_after_recovery` | Review again only if sources or observations changed |
 | `complete` | Validate supported fields, photo requirements, scopes and suggested branches |
 | `analyze` | Keep match/unresolved counts deterministic; retain source-bound model interpretation separately |
 
 The graph is compiled with a checkpointer. `src/jobs.mjs` persists task progress and SQLite checkpoints; a failed task can continue from saved steps. An interrupted external request may repeat. Model responses cannot execute arbitrary tools or exceed application budgets.
+
+The four specialists have separate task contexts and adapter capabilities; ordinary conversation and What-if remain on their existing application routes. The current implementation executes sequentially using the configured model provider. It is a bounded workflow with specialist handoffs, not a benchmarked claim of better accuracy or parallel performance. See [role contracts, failure behavior and actual verification](MULTI-AGENT.md).
 
 ## Bounded evidence recovery
 

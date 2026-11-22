@@ -1,3 +1,62 @@
+## Multi-agent README and architecture presentation — 2026-11-22
+
+- Expose all four implemented specialist roles in the Chinese and English README with matching vector architecture diagrams, concrete laptop handoffs and links to source contracts.
+- Distinguish role count from model count, tool-call count and execution stages. Document sequential shared-model execution, program authority over eligibility, bounded repair and explicit review degradation.
+- Use normal body text for all README screenshot captions instead of Markdown emphasis.
+- Recheck the synchronized implementation with 299 unit/HTTP tests and 71 Microsoft Edge browser regressions; inspect both vector diagrams and validate the Mermaid source diagrams before publication.
+
+## Coordinated specialist subgraphs — 2026-11-21
+
+- Run coordinator, researcher, independent evidence reviewer and analyst as compiled LangGraph subgraphs with projected task contexts and role-scoped adapters. Existing What-if computation and ordinary conversation routes retain their behavior.
+- Preserve grounded review holds through the bounded recovery handoff; a disputed observation cannot silently reappear through re-extraction or the public-price fallback. Model review may withhold facts, not invent replacements or change requirements.
+- Record role/phase calls, character counts, durations, review coverage and explicit degraded-review status. Keep sequential execution and one bounded repair round; do not claim parallel performance or accuracy gains.
+- Pass 299 unit/HTTP tests and 71 Edge regressions. A fresh actual-model Binjiang run yields seven eligible source-photo listings; review completes, and rent 3000 recalculates seven to two. See [the implementation and evidence](MULTI-AGENT.md).
+
+## Interaction routing and usage follow-through — 2026-11-21
+
+- Separate research, deterministic What-if and existing-evidence explanations in both README diagrams. Document providers, checkpoints, business snapshots and caches as dependencies with different roles rather than serial user steps.
+- Retain validated same-origin workspace drafts across navigation and refresh. Export current unsaved canvas conditions instead of silently exporting an older version; deleting a family also clears its browser drafts.
+- Keep baseline filter controls available after clearing a zero-weight limit, and execute exact categorical short replies such as “还是整租吧” before model prose.
+- Resolve over-specific rental city inputs through observed city-index labels. A fresh Beijing Haidian task recovers from zero to six fully qualifying source-photo records; this is targeted regression evidence, not general search accuracy.
+- Preserve 293 passing unit/HTTP checks, 71 Edge browser regressions and 11 real-service usage checks. See the [usage report](reports/USER-JOURNEY-2026-11-21.md) for failures, the interval limitation and verification scope.
+
+## Rental district compliance — 2026-11-20
+
+- Preserve city/district metadata from the same native listing identity; never infer location from an advert, a development name or recommended listings.
+- Reach a district catalog through an actual observed listing breadcrumb, and prevent later catalog filters from silently broadening the selected district back to the whole city.
+- Bind an explicit requested region to a source-grounded enum constraint and preserve it across What-if, dialogue, imports and source rechecks. Unknown/outside districts do not count toward research completion. Unresolved regional discovery keeps evidence as drafts rather than recommending city-wide substitutes.
+- Add district checks to independent task acceptance. Two fresh Edge homepage research runs for the same Hangzhou Binjiang request yield 6 and 7 fully qualifying source-photo records, respectively; lowering rent to 3000 yields 1 and 2 while preserving the baseline. These are targeted regressions, not general discovery success-rate claims.
+- Verify 285 unit/HTTP tests, 66 Edge browser regressions and five real-data Edge interactions. See the [regional compliance report](reports/RENTAL-GEOGRAPHY-2026-11-20.md) for before/after evidence and limitations.
+
+## Real-interface usage simulation and follow-up fixes — 2026-11-20
+
+- Replay everyday language through Microsoft Edge using copies of existing source-backed decisions and the actual model. Start one real rental research task from the homepage, then inspect its sources and original photographs. No research/model responses are substituted in these usage simulations.
+- Respect explicit requests to explain without changing conditions; calculate the proposed threshold separately and describe the actual current settings instead of copying another branch's history.
+- Recognize another increment, corrections that negate an earlier value, and removal requests that mention the old threshold. Resolve typed operations before generating action-result prose.
+- Keep user navigation when a pending reply finishes, including navigation to another space or the homepage. Preserve each response's original path association and pause condition editing while that conversation is being applied.
+- Validate semantic field synonyms against the quoted request, retain grounded user vocabulary, and apply a common supported edit without accepting unrelated proposed removals. This fixes generated “月租金” fields receiving later “月租” requests.
+- Independently review geographic requirements: the pre-fix “杭州滨江” discovery returned six source-photo records, but a source explicitly naming 拱墅 was still admitted. This was a release blocker; source/record counts and successful What-if replays did not pass the original task. The subsequent district repair and fresh research results are documented above.
+
+## Contextual conversation and reversible actions — 2026-11-20
+
+- Separate typed condition changes, removing a limit, clarification answers and undo. Keep schema-selected fields generic across laptop, housing and other decisions; never infer new numeric constraints from old messages.
+- Persist the active field and pending question. Support short follow-ups such as “32G呢”, “如果没有要求呢” and “第一个”; scope pending answers to their original path and reject expired choices.
+- Execute validated semantic model actions through the same application evaluator. Preserve specific questions, and prevent an unrelated model question from overriding a valid targeted change. Display actual counts rather than model-written claims of success.
+- Add effect-derived clarification choices, concise condition chips with removal controls, result navigation and undo receipts. Keep unchanged explanatory replies free of redundant path buttons. Preserve baseline conditions, source records, real source images and historical branches.
+- Undo returns to the prior path and folds the undone subtree without deleting history; refuse to overwrite later manual edits. Export/import validates and retains conversational context and operation snapshots.
+- Route model-recognized requests for new evidence into the actual adaptive research job, including when the sentence does not contain a fixed search verb. Explanations alone do not launch research.
+- Pass 268 unit/HTTP tests and 63 Microsoft Edge browser tests, with final targeted conversation/HTTP and 12 Edge regressions after the last refinements. Visually inspect desktop and mobile views using copies of existing source-backed decisions.
+- Three small real-model checks on a fictional housing fixture cover semantic clearing, an explanation without edits and a missing-evidence research request. These are interaction checks, not a live-search recall measurement. Numeric intervals still require both-bound support in the underlying decision model and are not silently applied.
+
+## Conversational condition targets — 2026-11-20
+
+- Fix requests such as “如果降低预算到5000以内呢”: recognize verbs before or after a field name and distinguish an absolute target (“减少到5000”) from a relative change (“减少1000”). Keep typed unit conversions and the original situation intact.
+- Recognize a request for the condition already active; explain the existing threshold and eligible choices without calling the model or creating a duplicate branch.
+- Separate conversation path navigation from continued conversation: close history, reveal hidden ancestors, pan to and highlight the destination, and preserve zoom, evidence and saved conditions. Both desktop and narrow-screen tests cover the route back to the baseline.
+- Reject unsupported numeric intervals with an explicit clarification and the actual active conditions; do not let model text claim that an unapplied 6000–7000 budget range changed the decision or partially apply other fields.
+- Add regression coverage for the exact reported sentence through the actual HTTP conversation and Edge canvas, including saved history, matching image nodes and unchanged source records. This change does not establish improved live-search recall.
+- Local Windows/Node 24 validation passes 251 unit/HTTP tests, 59 Microsoft Edge browser tests, syntax and complete-source checks.
+
 ## Configuration diversity and preview verification — 2026-11-19
 
 - Group only source-supported matching configurations; retain other colour/merchant observations without mixing quotations or changing the baseline and sibling scopes. Explicit different-configuration requirements also gate research completion.

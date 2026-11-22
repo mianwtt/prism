@@ -1,4 +1,5 @@
 import {mountUniversal} from '/universal-view.mjs';
+import {clearWorkspaceDrafts} from '/workspace-draft.mjs';
 import {adaptLegacyDecision} from '/legacy-decision.mjs';
 const classicView=location.pathname.startsWith('/classic');
 document.body.classList.toggle('adaptive-studio',!classicView);
@@ -269,6 +270,7 @@ deleteDialog.querySelector('form').onsubmit=async e=>{
   confirm.disabled=cancel.disabled=true;confirm.textContent='正在删除…';error.hidden=true;
   try{
     const deleted=await api('/api/spaces/'+pendingDeletion,{method:'DELETE'});
+    clearWorkspaceDrafts(deleted.deletedRootId);
     if(space?.rootId===deleted.deletedRootId){
       universalRoot.__disconnectBranches?.();universalRoot.__disconnectBranches=null;universalRoot.__flowParents=null;
       for(const handler of ['onclick','oninput','onchange','onsubmit','onpointerdown','onfocusin','onkeydown'])universalRoot[handler]=null;
@@ -287,7 +289,7 @@ async function load(data) {
   universalRoot.hidden=!data.schema;
   if(data.schema){
     dirty=false;show('workspace');history.replaceState(null,'','#'+data.id);$('breadcrumb').textContent=data.schema.label;
-    mountUniversal(universalRoot,data,{api,onLoad:load,onResearch:watchJob,toast});await refreshSidebar();return;
+    mountUniversal(universalRoot,data,{api,onLoad:load,onResearch:watchJob,toast,onBackgroundResult:refreshSidebar});await refreshSidebar();return;
   }
   conditionOrigins.clear();
   $('workspace').dataset.mode=data.mode;
@@ -800,7 +802,7 @@ $("research-form").onsubmit = async (e) => {
   }
 };
 window.addEventListener("beforeunload", (e) => {
-  if (dirty) {
+  if (dirty||universalRoot.__hasUnsavedUniversal?.()) {
     e.preventDefault();
     e.returnValue = "";
   }

@@ -1,0 +1,32 @@
+import {test,expect} from '@playwright/test';
+import {completeFixture} from './complete-space.fixture.mjs';
+
+test('the reported budget sentence updates a real conversation, matching images and saved branch context; repeating it explains the existing target',async({page,request})=>{
+ const original=await(await request.post('/api/spaces/import',{data:completeFixture()})).json();
+ let searches=0;const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ page.on('request',r=>{if(r.method()==='POST'&&/\/(?:explore|research|adapt)$/.test(new URL(r.url()).pathname))searches++;});
+ await page.route('https://example.com/fixture-product-*.svg',r=>r.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="240" height="150"><rect width="240" height="150" fill="#dae8d4"/></svg>'}));
+ await page.goto('/#'+original.id);
+ await page.locator('#board-scenario').selectOption('scenario-baseline');
+ await expect(page.locator('.tree-origin .tree-candidates>.tree-choice')).toHaveCount(2);
+ const chat=page.locator('#conversation-message');await chat.fill('如果降低预算到5000以内呢');await chat.press('Enter');
+ await expect(page.locator('.chat-message.assistant').last()).toContainText('2 个 → 1 个可选');
+ await expect(page.locator('.chat-message.assistant').last()).toContainText('7,000元 → 5,000元');
+ await expect(page.locator('.tree-branch.is-active .tree-candidates>.tree-choice')).toHaveCount(1);
+ await expect(page.locator('.tree-branch.is-active .tree-choice')).toContainText('联想');
+ await expect(page.locator('.tree-origin .tree-candidates>.tree-choice')).toHaveCount(2);
+ await expect(page.locator('[data-live-input=price]')).toHaveValue('5000');
+ const branches=await page.locator('[data-tree-node]').count();
+ await chat.fill('如果降低预算到5000以内呢');await chat.press('Enter');
+ await expect(page.locator('.chat-message.assistant').last()).toContainText('已经是：预算 ≤ 5,000元');
+ await expect(page.locator('[data-tree-node]')).toHaveCount(branches);
+ await chat.fill('预算在6000-7000呢');await chat.press('Enter');
+ await expect(page.locator('.chat-message.assistant').last()).toContainText('没有应用区间');
+ await expect(page.locator('[data-live-input=price]')).toHaveValue('5000');
+ await expect(page.locator('[data-tree-node]')).toHaveCount(branches);
+ const saved=await(await request.get('/api/spaces/'+await page.evaluate(()=>location.hash.slice(1)))).json();
+ expect(saved.baselineSettings.limits.price).toBe(7000);expect(saved.settings.limits.price).toBe(5000);
+ expect(saved.candidates).toEqual(original.candidates);expect(saved.sources).toEqual(original.sources);
+ await page.reload();await chat.click();await expect(page.locator('.chat-message.user')).toHaveCount(3);
+ expect(searches).toBe(0);expect(errors).toEqual([]);
+});

@@ -2,23 +2,37 @@ import {branchComparisonView} from '/branch-comparison-view.mjs';
 import {branchCanvas,connectBranches} from '/branch-canvas.mjs';
 import {researchView,evidenceView,memoryView,versionDiffView} from '/workflow-view.mjs';
 import {evidenceRows} from '/decision-workflow.mjs';
+import {readWorkspaceDraft,writeWorkspaceDraft,clearWorkspaceDraft,exportWorkspaceSnapshot} from '/workspace-draft.mjs';
 import {decisionScenarios,evaluateDecision,parseDecisionChange,summarizeConditions,validateDecisionSettings,formatDecisionValue,hasDecisionValue,changeScenarioSettings,resolveScenarioInheritance} from '/decision-schema.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const amount=formatDecisionValue;
 const tabIcon=key=>'<svg viewBox="0 0 20 20" aria-hidden="true">'+({canvas:'<path d="M4 10h5m0 0c4 0 3-5 7-5m-7 5c4 0 3 5 7 5"/><circle cx="3" cy="10" r="1.5"/><circle cx="17" cy="5" r="1.5"/><circle cx="17" cy="15" r="1.5"/>',research:'<circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/>',evidence:'<path d="M5 2h7l4 4v12H5zM12 2v5h4M8 10h5M8 13h5"/>',memory:'<path d="M5 3h10v15l-5-4-5 4z"/>'}[key]||'')+'</svg>';
-export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
+export function mountUniversal(root,space,{api,onLoad,onResearch,toast,onBackgroundResult=async()=>{}}){
   root.__disconnectBranches?.();
+  const mountToken={};root.__universalMount=mountToken;
   root.dataset.displaySpace=space.id;
   if(root.dataset.flowRoot!==(space.rootId||space.id)){delete root.dataset.flowZoom;delete root.dataset.workflowPane;delete root.dataset.evidenceCandidate;delete root.dataset.canvasInspectorOpen;delete root.dataset.canvasDock;delete root.dataset.canvasThreadOpen;root.dataset.flowRoot=space.rootId||space.id;}
   document.documentElement.classList.remove('option-dialog-open');
   if(!root.dataset.imageErrorsHandled){root.addEventListener('error',event=>{if(event.target.tagName==='IMG')event.target.hidden=true;},true);root.dataset.imageErrorsHandled='true';}
-  let scenarios=decisionScenarios(space),active=scenarios.some(s=>s.id===space.activeScenarioId)?space.activeScenarioId:'scenario-baseline',pane=root.dataset.workflowPane||'canvas',dirty=false,saving=false,panel=false,panelMode='option',composer=false,disconnect=()=>{};
+  const draft=readWorkspaceDraft(space);
+  let scenarios=draft?.scenarios||decisionScenarios(space),active=draft?.activeScenarioId||(scenarios.some(s=>s.id===space.activeScenarioId)?space.activeScenarioId:'scenario-baseline'),pane=draft?.pane||root.dataset.workflowPane||'canvas',dirty=draft?.dirty||false,saving=false,panel=false,panelMode='option',composer=false,disconnect=()=>{};
   const schema=space.schema,baseline=scenarios[0],inspected=new Map(),reactions=new Map();
   const sizePrompt=input=>{if(input){input.style.height='26px';input.style.height=Math.min(90,Math.max(26,input.scrollHeight))+'px';}};
   let conditionEditor=null,editSession=null,modalEvidence=false,threadOpen=root.dataset.canvasThreadOpen==='true',compareOpen=false,compareLeft=baseline.id,compareRight=active,compareCategory='auto';
   let dockTab='conditions',dockOpen=root.dataset.canvasInspectorOpen!==undefined?root.dataset.canvasInspectorOpen==='true':innerWidth>760&&(space.canvasScenarioIds||[]).filter(id=>id!=='scenario-baseline').length<4;
-  let evidenceCandidate=root.dataset.evidenceCandidate||space.candidates[0]?.id,researchDraft='',workflowBusy=false,decisionDraft={candidateId:space.decision?.candidateId||'',rationale:space.decision?.rationale||''};
-  let visibleIds=[...new Set(['scenario-baseline',...(space.canvasScenarioIds||[active])])],messages=structuredClone(space.conversation||[]),chatBusy=false,chatDraft='';
+  let evidenceCandidate=root.dataset.evidenceCandidate||space.candidates[0]?.id,researchDraft=draft?.researchDraft||'',workflowBusy=false,decisionDraft=draft?.decisionDraft||{candidateId:space.decision?.candidateId||'',rationale:space.decision?.rationale||''};
+  let visibleIds=draft?.canvasScenarioIds||[...new Set(['scenario-baseline',...(space.canvasScenarioIds||[active])])],messages=structuredClone(space.conversation||[]),chatBusy=false,chatDraft=draft?.chatDraft||'',draftStored=true;
+  const draftState=()=>({scenarios,activeScenarioId:active,canvasScenarioIds:visibleIds,dirty,pane,chatDraft,researchDraft,decisionDraft});
+  const hasDraft=()=>dirty||Boolean(chatDraft||researchDraft)||decisionDraft.candidateId!==(space.decision?.candidateId||'')||decisionDraft.rationale!==(space.decision?.rationale||'');
+  function persistDraft(){if(hasDraft())draftStored=writeWorkspaceDraft(space,draftState());else{clearWorkspaceDraft(space.id);draftStored=true;}}
+  root.__hasUnsavedUniversal=()=>hasDraft()&&!draftStored;
+  function accepted(result,{decisionSaved=false}={}){
+    clearWorkspaceDraft(space.id);dirty=false;
+    const pendingDecision=!decisionSaved&&(decisionDraft.candidateId!==(result.decision?.candidateId||'')||decisionDraft.rationale!==(result.decision?.rationale||''));
+    if(pendingDecision||researchDraft||chatDraft)writeWorkspaceDraft(result,{...draftState(),scenarios:result.scenarios,activeScenarioId:result.activeScenarioId,canvasScenarioIds:result.canvasScenarioIds||[],dirty:false,decisionDraft:decisionSaved?{candidateId:result.decision?.candidateId||'',rationale:result.decision?.rationale||''}:decisionDraft});
+  }
+  let chatFocus=space.conversationState?.focus;
+  const focusedField=()=>chatFocus?.scenarioId===active&&chatFocus.fields?.length===1?chatFocus.fields[0]:null;
   function setThread(open){
     threadOpen=open;root.dataset.canvasThreadOpen=String(open);
     const panel=root.querySelector('.canvas-thread');if(panel)panel.hidden=!open;
@@ -86,11 +100,32 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
     const tabs='<nav class="option-dialog-tabs" aria-label="方案详情视图"><button type="button" data-option-tab="overview" aria-pressed="'+!modalEvidence+'">方案信息</button><button type="button" data-option-tab="evidence" aria-pressed="'+modalEvidence+'">来源依据</button></nav>';
     const details=tabs+(modalEvidence?optionEvidence(candidate):explanation+option(candidate,'方案信息'));
     root.__flowParents=Object.fromEntries(scenarios.map(s=>[s.id,s.parentScenarioId||baseline.id]));
-    return branchCanvas(space,scenarios,active,inspected,{panel,composer,details,editor:conditionEditor,reactions,visibleIds,messages,chatBusy,chatDraft,dockTab,dockOpen,threadOpen});
+    return branchCanvas(space,scenarios,active,inspected,{panel,composer,details,editor:conditionEditor,reactions,visibleIds,messages,chatBusy,chatDraft,dockTab,dockOpen,threadOpen,focusField:focusedField()});
+  }
+  async function sendConversation(message,extra={}){
+    if(chatBusy||message.length<2)return;
+    const previousActive=active;
+    chatDraft=message;chatBusy=true;threadOpen=true;render();
+    try{
+      const result=await api('/api/spaces/'+space.id+'/conversation',{method:'POST',body:JSON.stringify({message,scenarios,scenarioId:active,canvasScenarioIds:visibleIds,focusField:focusedField(),autoResearch:true,...extra})});
+      chatDraft='';chatBusy=false;
+      accepted(result);
+      if(root.__universalMount!==mountToken||root.closest('[hidden]')){await onBackgroundResult();toast('对话已保存到原来的决策空间。');return;}
+      const followedRequest=active===previousActive;
+      const selectedResult=result.scenarios.find(scenario=>scenario.id===active);
+      const displayed=followedRequest||!selectedResult?result:{...result,activeScenarioId:active,settings:structuredClone(selectedResult.settings),canvasScenarioIds:[...visibleIds]};
+      await onLoad(displayed);
+      if(followedRequest&&result.activeScenarioId!==previousActive)requestAnimationFrame(()=>{
+        root.dispatchEvent(new CustomEvent('prism:focus-path',{detail:{scenarioId:result.activeScenarioId}}));
+        root.querySelector('#conversation-message')?.focus({preventScroll:true});
+      });
+      else if(followedRequest)root.querySelector('#conversation-message')?.focus({preventScroll:true});
+      if(result.nextAction?.type==='research')await onResearch(result.nextAction.jobId,{inline:true});
+    }catch(error){chatBusy=false;if(root.__universalMount===mountToken&&!root.closest('[hidden]')){render();root.querySelector('#conversation-message')?.focus({preventScroll:true});}throw error;}
   }
   async function save(decision,extra={}){
     if(saving)return;saving=true;
-    try{const result=await api('/api/spaces/'+space.id+'/versions',{method:'POST',body:JSON.stringify({adaptive:true,scenarios,activeScenarioId:active,canvasScenarioIds:visibleIds,...extra,...(decision?{decision}:{})})});await onLoad(result);if(pane!=='canvas')root.querySelector('[data-u-pane="'+pane+'"]')?.click();toast('已保存，当前情况和旧版本都已保留。');return result;}finally{saving=false;}
+    try{const result=await api('/api/spaces/'+space.id+'/versions',{method:'POST',body:JSON.stringify({adaptive:true,scenarios,activeScenarioId:active,canvasScenarioIds:visibleIds,...extra,...(decision?{decision}:{})})});accepted(result,{decisionSaved:Boolean(decision)});await onLoad(result);if(pane!=='canvas')root.querySelector('[data-u-pane="'+pane+'"]')?.click();toast('已保存，当前情况和旧版本都已保留。');return result;}finally{saving=false;}
   }
   async function continueResearch(request,{refresh=false}={}){
     if(workflowBusy)return;
@@ -114,6 +149,7 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
     const job=await api('/api/spaces/'+space.id+'/explore',{method:'POST',body:JSON.stringify({adaptive:true,scenarios,scenarioId:active})});await onResearch(job.id);
   }
   function render(keepControls=false){
+    persistDraft();
     root.dataset.canvasDock=dockTab;root.dataset.canvasThreadOpen=String(threadOpen);
     root.dataset.canvasInspectorOpen=String(dockOpen);
     root.dataset.workflowPane=pane;if(evidenceCandidate)root.dataset.evidenceCandidate=evidenceCandidate;
@@ -131,6 +167,7 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
       root.__flowParents=Object.fromEntries(scenarios.map(s=>[s.id,s.parentScenarioId||baseline.id]));
       disconnect=connectBranches(root);root.__disconnectBranches=disconnect;
       const chatContext=root.querySelector('#u-conversation>label'),nextContext=next.content.querySelector('#u-conversation>label');if(chatContext&&nextContext)chatContext.textContent=nextContext.textContent;
+      const context=root.querySelector('.prompt-context'),freshContext=next.content.querySelector('.prompt-context');if(context&&freshContext)context.replaceWith(freshContext);
       for(const selector of ['.inspector-impact','.inspector-references']){const old=root.querySelector(selector),fresh=next.content.querySelector(selector);if(old&&fresh)old.replaceWith(fresh);}
       for(const node of root.querySelectorAll('[data-tree-node]'))node.classList.toggle('is-active',node.dataset.treeNode===active);
       root.querySelector('.tree-inspector')?.remove();
@@ -142,6 +179,8 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
       return;
     }
     root.innerHTML=html;
+    for(const control of root.querySelectorAll('[data-live-input],[data-live-range],[data-live-condition],[data-u-weight]'))control.disabled=chatBusy;
+    if(chatBusy){const hint=root.querySelector('.board-control-context>span');if(hint)hint.textContent='这条对话正在处理，条件稍后可调整；仍可切换路径查看。';}
     sizePrompt(root.querySelector('#conversation-message'));
     const thread=root.querySelector('.conversation-messages');if(thread)thread.scrollTop=thread.scrollHeight;
     const dialog=root.querySelector('.option-dialog');
@@ -163,11 +202,17 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
     }
   }
   root.onclick=async e=>{
+    const exported=e.target.closest('[data-export-workspace]');
+    if(exported){e.preventDefault();try{const snapshot=exportWorkspaceSnapshot(space,draftState()),url=URL.createObjectURL(new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='prism-'+space.id+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(error){toast(error.message);}return;}
     if(e.target.id==='conversation-message'){setThread(true);return;}
     const b=e.target.closest('button');if(!b)return;
     try{
       if(b.hasAttribute('data-thread-close')){setThread(false);root.querySelector('.prompt-history')?.focus({preventScroll:true});}
       else if(b.hasAttribute('data-thread-toggle'))setThread(!threadOpen);
+      else if(b.dataset.chatFocus){chatFocus={scenarioId:active,fields:[b.dataset.chatFocus]};threadOpen=true;render();root.querySelector('#conversation-message')?.focus({preventScroll:true});}
+      else if(b.dataset.chatClear){const field=schema.fields.find(field=>field.key===b.dataset.chatClear);if(field)await sendConversation('取消'+(field.conditionLabel||field.label)+'限制');}
+      else if(b.dataset.chatChoice)await sendConversation(b.textContent.trim(),{choiceId:b.dataset.chatChoice,clarificationId:b.dataset.clarificationId});
+      else if(b.dataset.chatUndo)await sendConversation('撤销这次修改',{undoActionId:b.dataset.chatUndo});
       else if(b.dataset.compareOpen){
         const selected=scenarios.find(s=>s.id===b.dataset.compareOpen)||current();
         compareLeft=selected.parentScenarioId||baseline.id;compareRight=selected.id===baseline.id?(scenarios[1]?.id||baseline.id):selected.id;
@@ -212,6 +257,11 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
         if(hidden.has(active))active=scenarios.find(s=>s.id===b.dataset.hideBranch)?.parentScenarioId||baseline.id;
         showPath(active);dirty=true;panel=false;render();
       }
+      else if(b.dataset.chatPath){
+        if(!scenarios.some(s=>s.id===b.dataset.chatPath))return;
+        showPath(b.dataset.chatPath);active=b.dataset.chatPath;pane='canvas';threadOpen=false;panel=false;compareOpen=false;render();
+        requestAnimationFrame(()=>root.dispatchEvent(new CustomEvent('prism:focus-path',{detail:{scenarioId:active}})));
+      }
       else if(b.dataset.chatFrom){showPath(b.dataset.chatFrom);active=b.dataset.chatFrom;threadOpen=true;render();root.querySelector('#conversation-message')?.focus({preventScroll:true});}
       else if(b.dataset.chatResearch){const job=await api('/api/spaces/'+space.id+'/adapt',{method:'POST',body:JSON.stringify({change:b.dataset.chatResearch,scenarios,scenarioId:active})});await onResearch(job.id);}
       else if(b.hasAttribute('data-tree-close'))closeOption();
@@ -236,14 +286,8 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
       if(form.id==='u-followup'){
         researchDraft=form.querySelector('textarea').value.trim();if(researchDraft.length<2)throw new Error('请说明想继续研究的问题');await continueResearch(researchDraft);
       }else if(form.id==='u-conversation'){
-        if(chatBusy)return;
         const message=form.querySelector('textarea').value.trim();if(message.length<2)return;
-        chatDraft=message;chatBusy=true;threadOpen=true;render();
-        try{
-          const result=await api('/api/spaces/'+space.id+'/conversation',{method:'POST',body:JSON.stringify({message,scenarios,scenarioId:active,canvasScenarioIds:visibleIds,autoResearch:true})});
-          chatDraft='';chatBusy=false;await onLoad(result);
-          if(result.nextAction?.type==='research')await onResearch(result.nextAction.jobId,{inline:true});
-        }catch(error){chatBusy=false;render();root.querySelector('#conversation-message')?.focus();throw error;}
+        await sendConversation(message);
       }else if(form.id==='u-whatif'){
         const text=form.querySelector('input').value.trim();
         if(space.mode!=='demo'){
@@ -263,11 +307,11 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
   };
   root.onpointerdown=e=>{if(e.target.id==='conversation-message')setThread(true);else if(threadOpen&&!e.target.closest('.canvas-prompt'))setThread(false);if(!e.target.closest('.space-menu')){const menu=root.querySelector('.space-menu');if(menu)menu.open=false;}if(e.target.matches('[data-live-range]'))editSession={scenarioId:active,settings:structuredClone(current().settings),overrides:structuredClone(current().overrides)};};
   root.onkeydown=e=>{if(e.key==='Escape'&&threadOpen&&!compareOpen&&!panel){setThread(false);root.querySelector('.prompt-history')?.focus({preventScroll:true});}if(e.key==='Escape'){const menu=root.querySelector('.space-menu[open]');if(menu){menu.open=false;menu.querySelector('summary').focus();}}if(e.target.id==='conversation-message'&&e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();e.target.form.requestSubmit();}};
-  root.onfocusin=e=>{if(e.target.id==='conversation-message')setThread(true);if(e.target.matches('[data-live-input]'))editSession={scenarioId:active,settings:structuredClone(current().settings),overrides:structuredClone(current().overrides)};};
+  root.onfocusin=e=>{if(e.target.id==='conversation-message')setThread(true);if(e.target.matches('[data-live-input]')){chatFocus={scenarioId:active,fields:[e.target.dataset.liveInput]};editSession={scenarioId:active,settings:structuredClone(current().settings),overrides:structuredClone(current().overrides)};}};
   root.oninput=e=>{
-    if(e.target.id==='followup-message'){researchDraft=e.target.value;return;}
-    if(e.target.closest('#u-record')&&e.target.name==='rationale'){decisionDraft.rationale=e.target.value;return;}
-    if(e.target.id==='conversation-message'){chatDraft=e.target.value;sizePrompt(e.target);return;}
+    if(e.target.id==='followup-message'){researchDraft=e.target.value;persistDraft();return;}
+    if(e.target.closest('#u-record')&&e.target.name==='rationale'){decisionDraft.rationale=e.target.value;persistDraft();return;}
+    if(e.target.id==='conversation-message'){chatDraft=e.target.value;sizePrompt(e.target);persistDraft();return;}
     const key=e.target.dataset.liveRange||e.target.dataset.liveInput;if(!key)return;
     try{const value=e.target.value===''?null:Number(e.target.value);applyLive(key,value,active,true);const label=root.querySelector('[data-live-input="'+key+'"]');if(label&&e.target.dataset.liveRange)label.value=value??'';const range=root.querySelector('[data-live-range="'+key+'"]');if(range&&e.target.dataset.liveInput){if(value!==null){range.min=Math.min(Number(range.min),value);range.max=Math.max(Number(range.max),value);}range.value=value??range.min;}for(const button of root.querySelectorAll('.board-controlbar [data-live-condition="'+key+'"]')){const selected=JSON.parse(button.dataset.liveValue)===value;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));}}
     catch(error){toast(error.message);}
@@ -276,7 +320,7 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast}){
     if(e.target.dataset.compareSide){const side=e.target.dataset.compareSide;if(side==='left')compareLeft=e.target.value;else compareRight=e.target.value;render();root.querySelector('[data-compare-side="'+side+'"]')?.focus({preventScroll:true});return;}
 
     if(e.target.matches('[data-workflow-scenario]')){active=e.target.value;showPath(active);render();return;}
-    if(e.target.closest('#u-record')&&e.target.name==='candidateId'){decisionDraft.candidateId=e.target.value;return;}
+    if(e.target.closest('#u-record')&&e.target.name==='candidateId'){decisionDraft.candidateId=e.target.value;persistDraft();return;}
     if(e.target.matches('[data-live-range],[data-live-input]')){
       editSession=null;
       if(e.target.matches('[data-live-range]'))render('live');

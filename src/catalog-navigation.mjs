@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {safeUrl} from './evidence.mjs';
 import {attachRentalPage} from './public-rental-read.mjs';
 import {attachMerchantPage} from './public-merchant-read.mjs';
+import {rentalScopedCatalogPrefix} from './rental-scope.mjs';
 
 export async function readCatalogWithRetry(request,io,{attempts=2,onRetry=()=>{}}={}){
   for(let attempt=0;attempt<Math.min(2,Math.max(1,attempts));attempt++)try{return await io.searchCatalog(request);}
@@ -14,6 +15,10 @@ export async function readCatalogWithRetry(request,io,{attempts=2,onRetry=()=>{}
 
 export function catalogRequestForConditions(request,contract,platforms=[]){
   const capabilities=platforms.find(p=>p.platform===request.platform)?.capabilities||[];
+  if(capabilities.includes('geographic-scope')){
+    const scope=contract.evidenceRequirements?.rentalScope;
+    return {...request,question:contract.question,...(scope?{scopeValue:contract.settings.limits[scope.field]??null}: {})};
+  }
   if(!capabilities.includes('price-range'))return request;
   const fields=contract.schema.fields.filter(f=>(f.type||'number')==='number'&&f.direction===-1&&/^(?:元|CNY|人民币)$/i.test(f.unit)&&/价格|售价|标价|报价|费用|预算|price|cost/i.test([f.label,...(f.aliases||[])].join(' '))&&Number.isFinite(contract.settings.limits[f.key]));
   if(fields.length!==1)return request;
@@ -23,11 +28,11 @@ export function catalogRequestForConditions(request,contract,platforms=[]){
 // Follow public navigation actually exposed by a reader. A model chooses the
 // useful filter; the application never constructs a price/location filter URL.
 export async function refineObservedCatalogs(sources,contract,io,{question='',event=()=>{},limit=3}={}){
-  const visited=new Set(sources.map(s=>s.url)),fresh=[];let frontier=sources,selection=0,read=0;
+  const visited=new Set(sources.map(s=>s.url)),fresh=[],scopePrefix=rentalScopedCatalogPrefix(sources,contract);let frontier=sources,selection=0,read=0;
   if(typeof io.fetchSource!=='function')return {sources:[],calls:{selection,read}};
   while(read<Math.min(3,limit)){
     const seen=new Set(visited),links=[];
-    for(const source of frontier)for(const link of source.observedCatalogLinks||[]){const url=safeUrl(link.url);if(url&&!seen.has(url)){seen.add(url);links.push({...link,url});}}
+    for(const source of frontier)for(const link of source.observedCatalogLinks||[]){const url=safeUrl(link.url);if(url&&!seen.has(url)&&(!scopePrefix||url.startsWith(scopePrefix))){seen.add(url);links.push({...link,url});}}
     if(!links.length)break;
     let urls=[];for(let attempt=0;attempt<2;attempt++)try{
       selection++;const answer=await io.model([{role:'system',content:'Choose up to 3 observed catalog filter URLs across this navigation. For THIS step choose ONE URL; I will supply the resulting page so another filter can build on the first. 只从links选一个链接，优先满足全部硬性条件的范围；先选类型后，在新页选择保留该类型的价格筛选。如果已先选价格，进入类型页后还可以沿实际新链接重新选价格，最多三步，不猜组合路径。预算以内的区间优先于跨越预算的区间。不改用户要求，不跳城市，不猜URL。Return JSON {urls:["observed URL"]}; if all useful filters are already applied, return urls:[].'},

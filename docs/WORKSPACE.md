@@ -47,9 +47,11 @@ In **我的判断**, record a choice and personal reason, including when you hav
 
 Immutable local versions let you inspect earlier snapshots without rewriting them. Refreshing sources creates a new version.
 
+Unsaved condition changes, questions and judgment drafts are retained in the current browser, so switching spaces or refreshing does not silently discard them. Saving a version remains an explicit operation; a browser draft does not replace the saved source snapshots or synchronize across browser origins.
+
 ## Export and import
 
-Export a decision as JSON for backup or sharing. **导入决策文件** creates an independent local space from a supported snapshot, up to **5 MB**.
+Export a decision as JSON for backup or sharing. The workspace export includes the conditions and branches currently displayed, including unsaved canvas edits; a rationale still being typed must be submitted to become a recorded judgment. **导入决策文件** creates an independent local space from a supported snapshot, up to **5 MB**.
 
 Import preserves the validated schema, source snapshots, conditions, branch pools, photo URLs, choice rationale and user/assistant conversation records. It does not restore the old version chain, generated analysis or human confirmation authority. Source-specific reader metadata is not all restored. Imported evidence remains imported material; verify its sources before relying on it.
 
@@ -57,6 +59,6 @@ Import does not fetch pages or execute message actions. Exports may contain your
 
 ## Delete a decision
 
-Delete from the sidebar or workspace menu, then confirm. Prism removes that decision's local versions, conversations, sources, associated tasks and checkpoint threads. Related active research must finish before deletion.
+Delete from the sidebar or workspace menu, then confirm. Prism removes that decision's local versions, conversations, sources, associated tasks and checkpoint threads, and clears that family's drafts in the current browser origin. Related active research must finish before deletion.
 
 Independent spaces, shared provider settings, bundled assets and exported backup files remain separate. Restart does not recreate deleted spaces from a seed directory.

@@ -2,16 +2,43 @@
 
 Prism's useful unit is a decision space, not a chat answer. A space contains a question, typed model, source snapshots, candidate facts, branch scopes, conversation and a versioned personal decision.
 
+## Interaction routes come before research
+
+The UI and API separate three operations. They are not three Agents, and not every conversation turn invokes the research graph.
+
+| Operation | Actual execution | Data boundary |
+| --- | --- | --- |
+| New question or additional evidence | A research job invokes the compiled LangGraph | Search/read/extract/validate observations, then commit a result |
+| Change a known condition | Validate a typed operation and run the deterministic evaluator | Recalculate the active branch's candidate pool; preserve the baseline |
+| Explain or clarify | Use the active path, conversation context and saved observations; call the model when needed | Do not change conditions or silently launch a search for an explanation |
+
+The new-question entry is `POST /api/research`. Follow-ups use `POST /api/spaces/:id/conversation`: `src/conversation-intent.mjs` resolves supported contextual operations, `src/conversation.mjs` validates model proposals, and the server starts a separate scoped job when the result requests new research. Direct canvas edits use the shared evaluator in the browser. This is application routing, not a universal LLM router through which every mouse click passes.
+
+For example, “budget 5000” recalculates acquired alternatives, “why was this excluded?” explains recorded conditions, and “find more options for this path” starts research. A new criterion may require clarifying the request before research. Zero matches are not evidence that no matching option exists in the market; the current numeric model also cannot apply a two-sided interval as a single upper/lower limit.
+
 ## Research and reasoning
 
-`src/general-research.mjs` implements the adaptive LangGraph sequence:
+`src/general-research.mjs` coordinates four compiled specialist subgraphs. `src/agents/specialist.mjs` gives each role a private task state, a model instruction and an allowed adapter surface. Research stages remain explicit for checkpoint compatibility:
+
+Four is a count of responsibilities, not model instances: coordinator (comparison contract), researcher (source observations), reviewer (evidence critique), and analyst (tradeoff explanation). They use the configured model service sequentially; the parent graph owns scheduling. What-if evaluation, source validation, caches and persistence are program components rather than additional agents.
 
 ```mermaid
 flowchart LR
-  understand --> search --> read --> extract --> corroborate --> recover --> complete --> analyze
+  C["Coordinator<br/>Comparison contract"] --> R["Researcher<br/>Source observations"]
+  R --> V["Reviewer<br/>Evidence critique"]
+  V -.->|At most one feedback-driven repair round| R
+  V --> G["Program validation<br/>Eligibility evaluation"]
+  G --> A["Analyst<br/>Tradeoff explanation"]
 ```
 
-The planner proposes 1–8 numeric, boolean or categorical dimensions plus a bounded presentation contract. Source extraction checks structured values and excerpts. New concerns can extend the model; old baseline conditions remain preserved. The analyst produces source-backed commentary, not executable formulas or authoritative eligibility.
+The underlying stage graph is:
+
+```mermaid
+flowchart LR
+  understand --> search --> read --> extract --> corroborate --> review --> recover --> review_after_recovery --> complete --> analyze
+```
+
+The coordinator proposes 1–8 typed dimensions and a bounded presentation contract. The researcher handles source discovery, reading, extraction and bounded repair. An independent reviewer can withhold source-bound fields; its structured findings remain attached to repair so re-extraction does not silently restore the same disputed observation. The analyst sees the active candidate pool and evaluated status, and returns interpretation without rewriting facts or conditions. Program checks still decide source support and eligibility. See [the multi-agent implementation](MULTI-AGENT.md).
 
 `src/research-providers.mjs` connects model/search services. ChatOllama handles local Ollama; compatible providers use the HTTP adapter. `src/jobs.mjs` persists task records and graph checkpoints in SQLite. Completed graph steps can resume after restart; an interrupted external request may repeat. Only one research job runs at a time.
 
@@ -34,6 +61,10 @@ The evaluator separates eligible, excluded, unresolved and disabled candidates. 
 `src/general-refresh.mjs` rechecks up to 12 referenced pages per resumable batch. Missing excerpts or failed reads withdraw support while retaining the historical value. It does not infer replacement prices. Follow-up research is a distinct graph job.
 
 `src/store.mjs` commits immutable JSON snapshots with server-generated IDs, ancestry and timestamps. Older records remain accessible. A decision captures its candidate, rationale, original conditions, rules, facts and source metadata; later versions reassess it under that captured model.
+
+Infrastructure supports these operations rather than forming a serial product workflow. Models interpret requests and source material; search and native public-page adapters collect observations. SQLite checkpoints belong to research jobs, JSON snapshots belong to business versions, and optional Redis entries cache searches. None is a substitute for the typed evaluator or source verification.
+
+`src/workspace-draft.mjs` retains unsaved branch settings and input drafts in same-origin browser storage, keyed by immutable space version. Drafts are validated on restoration and keep source pools scoped; they do not overwrite saved facts, quotations or the pinned baseline. Export includes the current canvas conditions rather than silently downloading an older saved state. Successful deletion also clears the decision family's drafts in the current browser origin.
 
 ## Portable files and boundaries
 

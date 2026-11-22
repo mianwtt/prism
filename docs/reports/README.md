@@ -6,6 +6,8 @@ Reports are dated evidence. Read their scope and limitations; older counts and f
 
 | Report | Scope |
 | --- | --- |
+| [Real usage and interaction routing — 2026-11-21](USER-JOURNEY-2026-11-21.md) | Five reproduced interaction/discovery issues, browser drafts and export repairs, 11 actual-service checks, new-city recovery and the remaining interval limitation |
+| [Rental district compliance — 2026-11-20](RENTAL-GEOGRAPHY-2026-11-20.md) | Native city/district binding, observed regional navigation and separate fresh Hangzhou Binjiang regressions |
 | [Preview quality and configuration diversity — 2026-11-18/19](PREVIEW-QUALITY-2026-11-18.md) | Conservative configuration grouping, additional phone/city tasks, clean-source checks and current release boundaries |
 | [Agent discovery and page reading — 2026-11-18](AGENT-DISCOVERY-2026-11-18.md) | Observed city/catalog navigation, ordinary-price isolation, plan normalization; separate complete 3/10, 7/10 and final 10/10 regression cohorts, with diversity limits |
 | [Fixed live acceptance — 2026-11-18](LIVE-ACCEPTANCE-2026-11-18.md) | Ten predefined computer/rental tasks, public merchant catalog/detail adapters, independent coverage checks and retained diagnostic failures |

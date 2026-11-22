@@ -69,12 +69,19 @@ export function assessResearchTask(task,space,{minimum=3}={}){
     const observedType=source?.rentalObservation?.rentalType;
     const sourceURL=publicURL(source?.url),code=sourceURL?.hostname.match(/^([a-z]+)\.zu\.fang\.com$/)?.[1]||sourceURL?.pathname.match(/^\/(?:zf\/)?([a-z]+)\//)?.[1];
     const city=!task.cityCodes||task.cityCodes.includes(code),rentalType=!task.rentalType||observedType===task.rentalType;
+    // A city-level source URL or a neighbourhood name in an advert cannot pass
+    // a district-specific task. Inspect the native main-listing observation,
+    // independently of whether the Agent remembered to create a region field.
+    const location=source?.rentalObservation?.location;
+    const geography=!task.geography||Boolean(location&&location.city===task.geography.city&&location.district===task.geography.district&&
+      location.provenance?.listingId===sourceURL?.pathname.match(/\/(?:chuzu\/)?[13]_(\d+)(?:_\d\.htm|\.html)$/)?.[1]&&
+      normalize(source.text).includes(normalize(location.quote))&&normalize(location.quote).includes(normalize(location.value)));
     const key=identityURL(source?.url),duplicate=key&&seen.has(key);if(key)seen.add(key);
     const applicationEligible=eligible.has(c.id);
     const configurationKey=observedConfigurationKey(c,space.sources,space.schema,{question:task.question||''}),configurationDuplicate=Boolean(configurationKey&&configurations.has(configurationKey));
-    const qualified=fields.every(f=>f.supported&&f.meets)&&applicationEligible&&city&&rentalType&&(!task.sourceImages||sourceImage)&&!duplicate&&!configurationDuplicate&&(!task.distinctConfigurations||Boolean(configurationKey));
+    const qualified=fields.every(f=>f.supported&&f.meets)&&applicationEligible&&city&&geography&&rentalType&&(!task.sourceImages||sourceImage)&&!duplicate&&!configurationDuplicate&&(!task.distinctConfigurations||Boolean(configurationKey));
     if(qualified&&configurationKey)configurations.add(configurationKey);
-    rows.push({id:c.id,qualified,applicationEligible,fields,city,rentalType,sourceImage,duplicate:Boolean(duplicate),configurationDuplicate,configurationSupported:Boolean(configurationKey),imageURL:sourceImage?c.media.url:null});
+    rows.push({id:c.id,qualified,applicationEligible,fields,city,geography,rentalType,sourceImage,duplicate:Boolean(duplicate),configurationDuplicate,configurationSupported:Boolean(configurationKey),imageURL:sourceImage?c.media.url:null});
   }
   const qualified=rows.filter(row=>row.qualified).length;
   return {qualified,passed:qualified>=minimum,candidates:rows.length,requiredFields:task.criteria.length,

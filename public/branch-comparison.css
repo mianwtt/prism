@@ -12,6 +12,18 @@ body.adaptive-studio .canvas-thread .chat-message>small{font-size:11px;color:#59
 body.adaptive-studio .canvas-thread .chat-message p{white-space:pre-wrap;margin:6px 0}
 body.adaptive-studio .canvas-thread .chat-message button{border:0;background:none;padding:5px 0;margin-right:14px;font-size:11px;color:var(--ps-accent)}
 body.adaptive-studio .canvas-thread .chat-effect{display:block;font-size:11px;color:#7d929f}
+body.adaptive-studio #u-conversation .prompt-context{display:flex;justify-content:flex-start;gap:5px;overflow-x:auto;scrollbar-width:thin;padding:1px 0 5px;margin:4px 0 5px;max-width:100%}
+body.adaptive-studio .prompt-condition{display:inline-flex;flex:none;align-items:center;border:1px solid #e1e8ec;background:#f7f9fb;border-radius:7px;overflow:hidden}
+body.adaptive-studio .prompt-condition.is-focused{border-color:#7dafa2;background:#eef6f3}
+body.adaptive-studio .prompt-condition button{padding:4px 7px;background:none;border:0;font-size:10px;line-height:1.5;color:#526c79;white-space:nowrap;min-height:25px}
+body.adaptive-studio .prompt-condition .prompt-clear{padding:3px 6px;font-size:14px;color:#7b919a;border-left:1px solid #e1e8ec}
+body.adaptive-studio .prompt-condition button:hover{color:#176e5c;background:#eaf3ef}
+body.adaptive-studio .canvas-thread .chat-choices{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 3px}
+body.adaptive-studio .canvas-thread .chat-choices button{padding:7px 10px;margin:0;border:1px solid #cddfd9;border-radius:8px;background:#fff;color:#246d5a;font-size:12px}
+body.adaptive-studio .canvas-thread .chat-choices button:hover{background:#eaf3ef;border-color:#7caa9c}
+body.adaptive-studio .chat-choice-receipt{display:block;margin-top:7px;font-size:11px;color:#607c75}
+body.adaptive-studio .canvas-thread .chat-message .chat-scope{display:block;max-width:100%;padding:2px 0;margin:1px 0 6px;font-size:10px;color:#637f89;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+body.adaptive-studio .canvas-thread button:disabled,body.adaptive-studio .prompt-context button:disabled{opacity:.5;cursor:default}
 body.adaptive-studio .thread-empty{padding:5px 10px;font-size:12px;color:var(--ps-muted);line-height:1.8}
 body.adaptive-studio .inspector-tabs>strong{font-size:13px;font-weight:600;color:var(--ps-ink)}
 

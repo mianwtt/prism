@@ -16,7 +16,7 @@ export function conditionButtons(field,scenario,baseline,hints){
   return conditionValues(field,value,baseline,hints).map(v=>`<button type="button" class="condition-preset ${v===value?'selected':''}" aria-pressed="${v===value}" data-live-condition="${esc(field.key)}" data-live-value="${esc(JSON.stringify(v))}" data-live-scenario="${esc(scenario.id)}">${v===null?'不限':esc((field.type||'number')==='number'?Number(v).toLocaleString('zh-CN'):formatDecisionValue(v,field))}</button>`).join('');
 }
 export function liveControls(schema,scenario,baseline,context){
-  return `<div class="live-condition-grid" id="u-conditions">${schema.fields.filter(f=>scenario.settings.weights[f.key]>0||scenario.settings.limits[f.key]!==null).map(f=>{
+  return `<div class="live-condition-grid" id="u-conditions">${schema.fields.filter(f=>scenario.settings.weights[f.key]>0||scenario.settings.limits[f.key]!==null||baseline.settings.limits[f.key]!==null).map(f=>{
     const hints=context?[...(context.candidates||[]).filter(c=>c.enabled!==false).map(c=>c.facts[f.key]).filter(fact=>['cited','confirmed','example'].includes(fact?.status)).map(fact=>fact.value),...(context.scenarios||[]).map(s=>s.settings.limits[f.key])]:undefined;
     const value=scenario.settings.limits[f.key],base=baseline.settings.limits[f.key],numeric=(f.type||'number')==='number',values=conditionValues(f,value,base,hints).filter(Number.isFinite);
     const min=numeric?Math.max(0,Math.min(...values,base??Infinity)-(f.step||1)):0,max=numeric?Math.max(...values,0)+2*(f.step||1):0;

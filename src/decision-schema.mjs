@@ -32,33 +32,56 @@ export function validateDecisionSettings(raw,schema) {
   return {limits,weights,...(raw?.evidenceMode==='reviewed'?{evidenceMode:'reviewed'}:{})};
 }
 const escapeRE=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+// Vocabulary comes from an already validated user-quoted field binding, never a
+// fixed list of product/rental labels or an untrusted source-page instruction.
+export function rememberConditionAlias(schema,key,quote){
+  const field=schema.fields.find(field=>field.key===key);if(!field||typeof quote!=='string')return;
+  const match=/(?:^|[，,。；;])\s*(?:(?:如果|那|请|先|把|将|现在|希望|要求)\s*)*([\p{L}][\p{L}\s]{1,14}?)\s*(?:(?:再)?(?:改为|改成|调整为|调整到|设为|增加|减少|提高|降低|放宽到|收紧到)|不超过|不少于|不低于|不高于|至少|最多|上限|下限|≤|≥)\s*\d/u.exec(quote);
+  const alias=match?.[1].trim();if(!alias||alias.length>20||schema.fields.some(other=>other.key!==key&&[other.label,other.conditionLabel,...(other.aliases||[])].includes(alias)))return;
+  field.aliases=[...new Set([alias,...(field.aliases||[])])].slice(0,6);
+}
 export function parseDecisionChange(text,settings,schema) {
-  const next=structuredClone(settings),changed=[];
+  const next=structuredClone(settings),changed=[],specified=[],ranges=[];
   for(const f of schema.fields){
-    const names=[f.label,f.conditionLabel,...f.aliases].filter(Boolean).map(escapeRE).join('|');
+    const names=[...new Set([f.label,f.conditionLabel,f.label.replace(/\s*[(（][^()（）]*[)）]\s*$/,''),...(f.aliases||[])].filter(Boolean))].sort((a,b)=>b.length-a.length).map(escapeRE).join('|');
     if(f.type==='boolean'||f.type==='enum'){
       const match=[...text.matchAll(new RegExp(`(?:${names})`,'g'))].at(-1);
       if(!match)continue;
       const prefix=text.slice(0,match.index).split(/[，,。；;]/).at(-1).slice(-5);
       const segment=prefix+text.slice(match.index,match.index+match[0].length+35).split(/[，,。；;]/)[0];
       let value=/不限|不限制|无要求/.test(segment)?null:f.type==='boolean'?!/不能|不允许|不支持|禁止|不要|无需|不需要/.test(segment):f.options.find(x=>segment.includes(x));
-      if(value!==undefined&&value!==next.limits[f.key]){next.limits[f.key]=value;changed.push(f.key);}continue;
+      if(value!==undefined){specified.push(f.key);if(value!==next.limits[f.key]){next.limits[f.key]=value;changed.push(f.key);}}continue;
     }
-    const re=new RegExp(`(?:${names})\\s*(?:(增加|减少|加|减|提高|降低|放宽|收紧)\\s*)?(?:改为|改成|调整到|至少|不超过|最多|上限|下限|到|为|要求|≥|≤)?\\s*(\\d+(?:\\.\\d+)?)`,'i');
+    const verbs='增加|减少|提高|降低|放宽|收紧|上调|下调|缩短|延长|加|减|升|降';
+    const targets='调整到|调整为|设置为|控制在|改为|改成|设为|至少|不超过|不少于|不高于|最多|上限|下限|要求|至|到|为|≥|≤';
+    const number='(?:\\d{1,3}(?:[,，]\\d{3})+|\\d+)(?:\\.\\d+)?';
+    const unit='(?:kg\\b|千克|公斤|GB\\b|TB\\b|g\\b|克|分钟|min\\b|小时|h\\b|万元|万|元(?:/月)?|CNY\\b|㎡|平方米|平米|m²|m2\\b)';
+    const range=new RegExp(`(?:(?:${verbs})\\s*)?(?:${names})\\s*(?:(?:${verbs})\\s*)?(?:${targets}|在|介于)?\\s*${number}\\s*${unit}?\\s*(?:[-~～–—]|至|到)\\s*${number}\\s*${unit}?`,'i').exec(text);
+    if(range){ranges.push({field:f.key,quote:range[0]});continue;}
+    const re=new RegExp(`(?:(?:再\\s*)?(?<before>${verbs})\\s*)?(?:${names})\\s*(?:(?:再\\s*)?(?<after>${verbs})\\s*)?(?<target>${targets})?\\s*(?<amount>${number})`,'i');
     let m=re.exec(text);
     if(!m&&/^(?:㎡|m2|m²|平米|平方米)$/.test(f.unit))m=/(\d+(?:\.\d+)?)\s*(?:㎡|平方米|平米|m²|m2)/i.exec(text);
     if(!m)continue;
-    let value=Number(m[2]??m[1]);
+    // Negation and ranges do not establish a single executable target.
+    const prefix=text.slice(0,m.index).split(/[，,。；;]/).at(-1);
+    if(/(?:不要|别|无需|不需要|不想|不必|不再)\s*(?:把|将)?\s*$/.test(prefix))continue;
     const suffix=text.slice(m.index+m[0].length);
-    const explicitUnit=/^\s*(kg|千克|公斤|g\b|克|分钟|min\b|小时|h\b|GB\b|TB\b|万元|万|元|CNY\b)/i.exec(suffix)?.[1];
-    if(explicitUnit){const converted=convertQuantity(value,explicitUnit,f.unit);if(converted!==null)value=converted;}
-    if(f.unit==='元/月'&&/^\s*万/.test(suffix))value*=10000;
-    const relative=m.length>2&&m[1];
-    if(relative){if(next.limits[f.key]===null)throw new Error(`请先给出${f.label}的具体数值`);value=next.limits[f.key]+(/减少|减|降低|收紧/.test(relative)?-1:1)*value;}
+    if(/^\s*(?:[-~～–]|至|到)\s*\d/.test(suffix))continue;
+    let value=Number((m.groups?.amount??m[1]).replace(/[,，]/g,''));
+    const explicitUnit=/^\s*(kg\b|千克|公斤|GB\b|TB\b|g\b|克|分钟|min\b|小时|h\b|万元|万|元|CNY\b|㎡|平方米|平米|m²|m2\b)/i.exec(suffix)?.[1];
+    if(explicitUnit){const converted=convertQuantity(value,explicitUnit,f.unit==='元/月'?'元':f.unit);if(converted===null)continue;value=converted;}
+    const relative=!m.groups?.target&&(m.groups?.after||m.groups?.before);
+    if(relative){
+      if(/^\s*(?:kg\b|千克|公斤|GB\b|TB\b|g\b|克|分钟|min\b|小时|h\b|万元|万|元|CNY\b)?\s*(?:以内|以下|以上)/i.test(suffix))continue;
+      if(next.limits[f.key]===null)throw new Error(`请先给出${f.label}的具体数值`);
+      const direction=relative==='放宽'?-f.direction:relative==='收紧'?f.direction:/减少|减|降低|下调|缩短|降/.test(relative)?-1:1;
+      value=next.limits[f.key]+direction*value;
+    }
+    specified.push(f.key);
     if(value!==next.limits[f.key])changed.push(f.key);
     next.limits[f.key]=value;
   }
-  return {settings:validateDecisionSettings(next,schema),changed};
+  return {settings:validateDecisionSettings(next,schema),changed,specified,ranges};
 }
 export const hasDecisionValue=(value,field)=>(field.type||'number')==='number'?Number.isFinite(value):field.type==='boolean'?typeof value==='boolean':field.options.includes(value);
 export const formatDecisionValue=(value,field)=>value===null||value===undefined?'不限':field.type==='boolean'?(value?'是':'否'):field.type==='enum'?String(value):`${Number(value).toLocaleString('zh-CN')}${field.unit}`;

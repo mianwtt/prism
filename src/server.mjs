@@ -13,6 +13,7 @@ import {adaptLegacyDecision} from './legacy-decision.mjs';
 import {validateDecisionScenarios,summarizeConditions} from './decision-schema.mjs';
 import { editSpace, diffSpaces } from "./space-edits.mjs";
 import { Jobs } from "./jobs.mjs";
+import {adaptiveAgentInfo} from './general-research.mjs';
 import { supplementQuestion } from "./supplement.mjs";
 import {prepareScenario,scenarioQuestion} from './scenario-research.mjs';
 import {
@@ -88,13 +89,13 @@ export function createApp({
           ok: true,
           live: liveConfigured(env),
           version: packageInfo.version,
-          agent: { ...agentInfo, checkpointStorage: "sqlite" },
+          agent: { ...adaptiveAgentInfo, checkpointStorage: "sqlite",legacy:agentInfo },
           searchProvider: publicSettings(env).searchProvider,
           searchCache: searchCache.info(),
           capabilities:{scenarioResearch:true,spaceDeletion:true},
         });
       if (req.method === "GET" && path === "/api/agent")
-        return json(200, { ...agentInfo, checkpointStorage: "sqlite" });
+        return json(200, { ...adaptiveAgentInfo, checkpointStorage: "sqlite",legacy:agentInfo });
       if (req.method === "GET" && path === "/api/jobs")
         return json(200, jobs.list());
       if (req.method === "GET" && path === "/api/spaces")
@@ -119,8 +120,9 @@ export function createApp({
           if(automaticResearch&&!liveConfigured(env)&&!io)return json(503,{error:'请先连接研究助手，再继续核对公开资料'});
           previous=adaptLegacyDecision(previous);
           const next=await converse(previous,input,previous.mode==='demo'?null:researchIO());
+          if(next.pendingConversationResearch&&!liveConfigured(env)&&!io)return json(503,{error:'请先连接研究助手，再继续核对公开资料'});
           const saved=await store.save(next,previous);
-          if(automaticResearch){
+          if(next.pendingConversationResearch){
             const job=jobs.start({type:'adapt',adaptive:true,parentId:saved.id,question:saved.question,change:next.pendingConversationResearch.request,scenarios:saved.scenarios,scenarioId:saved.activeScenarioId});
             return json(201,{...saved,nextAction:{type:'research',jobId:job.id}});
           }
@@ -231,6 +233,7 @@ export function createApp({
         "/decision-evidence.mjs": ["src/decision-evidence.mjs", "text/javascript"],
         "/legacy-decision.mjs": ["src/legacy-decision.mjs", "text/javascript"],
         "/universal-view.mjs": ["public/universal-view.mjs", "text/javascript"],
+        "/workspace-draft.mjs": ["src/workspace-draft.mjs", "text/javascript"],
         "/branch-canvas.mjs": ["public/branch-canvas.mjs", "text/javascript"],
         "/live-conditions.mjs": ["public/live-conditions.mjs", "text/javascript"],
         "/universal.css": ["public/universal.css", "text/css"],

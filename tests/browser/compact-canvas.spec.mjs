@@ -12,7 +12,8 @@ test('canvas owns the workspace, nodes stay compact and ordinary clicks never al
  expect(canvas.width/stage.width).toBeGreaterThan(.7);expect(canvas.height/stage.height).toBeGreaterThan(.7);
  await expect(view.locator('input,textarea,select,form')).toHaveCount(0);
  await expect(studio.locator('.canvas-prompt #conversation-message')).toBeVisible();
- await expect(studio.locator('#u-conversation button')).toHaveCount(1);
+ await expect(studio.locator('#u-conversation button[type=submit]')).toHaveCount(1);
+ await expect(studio.locator('.prompt-context [data-chat-focus]')).toHaveCount(data.schema?.fields.length||4);
  const face=await view.locator('.node-face').first().boundingBox();expect(face.width).toBeLessThanOrEqual(88);expect(face.height).toBeLessThanOrEqual(88);
  expect(await view.locator('.tree-node').first().evaluate(el=>getComputedStyle(el).borderTopWidth)).toBe('0px');
  await page.locator('[data-flow-condition="scenario-commute"] [data-tree-condition]').click();await expect(root).toHaveAttribute('data-flow-zoom','1');

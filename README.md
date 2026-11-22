@@ -8,9 +8,9 @@
 
 **让 Agent 找依据，让你推演每一个「如果」。**
 
-有来源的研究，可交互的 What-if，留得下的判断。
+多 Agent 协作查证，可交互的 What-if，留得下的判断。
 
-[![自动检查](https://github.com/mianwtt/prism/actions/workflows/check.yml/badge.svg)](https://github.com/mianwtt/prism/actions/workflows/check.yml) [![MIT 许可证](https://img.shields.io/badge/License-MIT-246e64)](LICENSE) [![LangGraph](https://img.shields.io/badge/Agent-LangGraph-246e64)](docs/ARCHITECTURE.md) [![本地存储](https://img.shields.io/badge/Storage-Local_first-526773)](.github/SECURITY.md) [![开发预览](https://img.shields.io/badge/Status-0.4_preview-526773)](docs/ROADMAP.md)
+[![自动检查](https://github.com/mianwtt/prism/actions/workflows/check.yml/badge.svg)](https://github.com/mianwtt/prism/actions/workflows/check.yml) [![MIT 许可证](https://img.shields.io/badge/License-MIT-246e64)](LICENSE) [![多 Agent](https://img.shields.io/badge/Multi--Agent-LangGraph-246e64)](docs/MULTI-AGENT.md) [![本地存储](https://img.shields.io/badge/Storage-Local_first-526773)](.github/SECURITY.md) [![开发预览](https://img.shields.io/badge/Status-0.4_preview-526773)](docs/ROADMAP.md)
 
 [开始体验](#quick-start) · [核心功能](#features) · [使用场景](#examples) · [Agent 框架](#agent-architecture) · [文档](#documentation)
 
@@ -18,7 +18,7 @@
 
 ![Prism 电脑决策画布：预算、内存与重量形成可继续探索的 What-if 分支](docs/assets/laptop-canvas.png)
 
-*电脑画面来自 Prism 的实际运行，使用历史苏宁商品观察及对应来源图片。五条分支是为展示设置的条件假设，保存的价格并非实时行情。*
+电脑画面来自 Prism 的实际运行，使用历史苏宁商品观察及对应来源图片。五条分支是为展示设置的条件假设，保存的价格并非实时行情。
 
 预算变了，多了一个要求，或者你想知道某个方案为什么被排除。Prism 把 Agent 的研究结果放进一张 **What-if 画布**，让你沿着不同条件比较选择，也能接着对话、补充资料，保留原来的判断依据。
 
@@ -55,7 +55,7 @@ npm start
 
 ## 核心功能
 
-- **Agent 可以继续为你研究。** 搜索并阅读公开资料，整理有来源的方案。沿选定路径追加问题，或明确要求继续查找更多选择。
+- **多 Agent 分工研究与核验。** 协调角色明确比较条件，研究角色搜索与读页，审查角色质疑有问题的依据，分析角色解释取舍。沿选定路径继续提问或补充资料。
 - **每一个「如果」都有具体变化。** 点击条件或拖动滑杆，匹配方案立即更新。保留原始情况，联动继承条件的后续分支，也保留子分支单独修改过的要求。
 - **点击方案，就能看到依据。** 图片、价格、参数、原文与来源链接在浮窗中展开；查看不同观察值，也能对比任意两条分支的进入与退出原因。
 - **比较条件随问题生成。** Agent 从需求中提出数值、是非或分类维度。笔记本与住房使用同一张画布，各自呈现相应条件。
@@ -67,18 +67,18 @@ npm start
 
 ![电脑分支对比：收紧预算后，哪些电脑退出可选，为什么退出](docs/assets/branch-comparison-preview.png)
 
-*图中的对比将 8 个可选方案收紧到 3 个。商品资料为历史采集记录，不代表当前跨平台实时价格。*
+图中的对比将 8 个可选方案收紧到 3 个。商品资料为历史采集记录，不代表当前跨平台实时价格。
 
 ### 选住房：月租变了，方案跟着变化
 ![Prism 实际操作录屏：修改一条分支的租金上限，方案随之变化，原始情况保留](docs/assets/what-if-demo.gif)
 
-*预算从 2,500 → 2,000 → 3,000 元，选定分支的匹配方案从 4 → 1 → 5 个变化。此处使用已保存依据实时重算，不会因为每次拖动而重新搜索。*
+预算从 2,500 → 2,000 → 3,000 元，选定分支的匹配方案从 4 → 1 → 5 个变化。此处使用已保存依据实时重算，不会因为每次拖动而重新搜索。
 
 <a id="examples"></a>
 
 ## 可以从这些问题开始
 
-比较维度随问题生成：电脑可以关注价格、内存和重量，住房可以关注月租与面积。两类问题共用同一个 Agent、证据模型和 What-if 画布。
+比较维度随问题生成：电脑可以关注价格、内存和重量，住房可以关注月租与面积。两类问题共用同一套多 Agent 研究流程、证据模型和 What-if 画布。
 
 | 起点 | 继续探索 |
 | --- | --- |
@@ -92,43 +92,73 @@ npm start
 
 <a id="agent-architecture"></a>
 
-## Agent 框架
+## 多 Agent 框架
 
-研究 Agent 由 LangGraph 编排：模型理解需求、提出比较维度，调用搜索与读页，提取、补查并整理有引文的方案。What-if 直接使用这份决策模型重算分支；明确要求继续研究时，再由 Agent 扩充资料。
+Prism 将一次研究拆为 **协调、资料研究、证据审查、决策分析 4 种职责**，分别由独立的 LangGraph 子图承接。各角色只接收本轮所需的上下文和工具权限，通过结构化任务与结果交接。它们共用配置的模型服务、顺序执行；“4 类”指职责种类，不是 4 个模型，也不是固定的调用次数。
 
-```mermaid
-flowchart TB
-  Question["提出问题 / 继续对话"] --> Agent["LangGraph StateGraph<br/>规划 · 研究 · 补查 · 分析"]
-  Model["模型适配<br/>ChatOllama / Chat Completions"] <--> Agent
-  Tools["搜索与公开页面<br/>tofu-search / Tavily"] <--> Agent
-  Agent --> Evidence["经过校验的决策模型<br/>字段 · 原文 · 来源配图"]
-  Agent -.-> Checkpoints["SQLite 检查点<br/>恢复研究进度"]
-  Evidence --> Canvas["What-if 画布<br/>保留原始情况 · 按分支重算"]
-  Conditions["修改一个条件"] --> Canvas
-  Canvas --> Memory["不可变 JSON 版本<br/>选择 · 理由 · 证据"]
-  Canvas -->|明确要求继续研究| Agent
-  classDef agent fill:#eaf6f1,stroke:#2b8a78,color:#173d36;
-  classDef store fill:#f2f4f8,stroke:#94a3b8,color:#334155;
-  class Agent,Evidence,Canvas agent;
-  class Checkpoints,Memory store;
-```
+![Prism 多 Agent 框架：协调、研究、审查、分析按职责交接，程序规则校验资格，What-if 使用已有证据重算](docs/assets/multi-agent-architecture.svg)
 
-| 层次 | 实现 | 职责 |
+| 角色 | 负责什么 | 为什么单独划分 |
 | --- | --- | --- |
-| 研究编排 | LangGraph `StateGraph` | 理解问题、调用工具、补齐依据、分析方案 |
-| 模型与工具 | ChatOllama / 兼容 HTTP；tofu-search / Tavily | 连接本机或远程模型与可公开读取的资料 |
-| 证据校验 | Zod 与来源／引文校验器 | 核对字段类型、单位、原文和对应图片 |
-| 交互与记忆 | 确定性评估器、SQLite、JSON 版本 | 重算条件、恢复任务、保留判断上下文 |
+| 协调 Agent | 把问题转成比较字段、明确条件和检索任务 | 先约定查什么，研究过程中不能自行放宽用户要求 |
+| 资料研究 Agent | 调用搜索、公开目录与读页工具，提取绑定原文的观察 | 将事实采集与后续评价分开，缺失信息保留未知 |
+| 证据审查 Agent | 独立核对来源依据，暂缓采用存在问题的字段 | 允许质疑研究结果；反馈必须带原文依据，不能编造替代数值 |
+| 决策分析 Agent | 基于已评估候选解释选择与取舍 | 解释不能反过来改写事实、用户条件或资格结果 |
+
+例如选电脑时，协调角色确认“预算 7,000 元、内存至少 16GB”；研究角色查找商品详情；审查角色检查报价是否需要领券、参数是否属于同一配置；程序据此评估资格，分析角色再解释可选方案的取舍。证据不足时按预算补查，**最多一轮反馈驱动补查、两次模型审查**；“一轮”不等于只搜索一次。审查不可用时明确记录降级，不能称为已完成独立审查。当前没有对照实验能够证明四角色必然优于单 Agent。
+
+**为什么是四类？** 这是当前实现按“明确任务 → 采集事实 → 质疑证据 → 解释选择”划分的职责边界，不是 Agent 项目的固定标准。最终资格由程序规则决定；What-if 计算和缓存不是额外的 Agent。
+
+### 对话与画布如何衔接
+
+新问题、补充来源或新的关注点进入研究；修改已知条件直接重算 What-if；询问取舍则围绕当前路径解释已有依据。后续对话会保留当前条件和历史上下文。
 
 <details>
-<summary>展开真实 LangGraph 节点与代码入口</summary>
+<summary>展开三种交互路径</summary>
 
 ```mermaid
 flowchart LR
-  understand --> search --> read --> extract --> corroborate --> recover --> complete --> analyze
+  Input["提问或操作画布"] --> Route{"本轮需要什么？"}
+  Route -->|新问题 / 补充资料| Research["多 Agent 研究<br/>LangGraph 协调式子图"]
+  Route -->|改变已知条件| Recalculate["What-if 推演<br/>校验条件 · 重算分支"]
+  Route -->|询问已有选择| Explain["解释与澄清<br/>围绕当前路径回答"]
+  Research --> Space["决策空间<br/>选择 · 图片 · 依据 · 对话"]
+  Recalculate --> Space
+  Explain --> Space
+  Space -->|记录选择与理由| Record["保存决策版本"]
+  classDef neutral fill:#f8fafc,stroke:#cbd5e1,color:#334155;
+  classDef research fill:#eaf6f1,stroke:#2b8a78,color:#173d36,stroke-width:2px;
+  classDef work fill:#ffffff,stroke:#86a99c,color:#173d36;
+  class Input,Route,Record neutral;
+  class Research research;
+  class Recalculate,Explain,Space work;
 ```
 
-研究图：[general-research.mjs](src/general-research.mjs)。模型与搜索适配：[research-providers.mjs](src/research-providers.mjs)。分支校验与计算：[decision-schema.mjs](src/decision-schema.mjs)。检查点：[jobs.mjs](src/jobs.mjs)。
+图中的三条路径是应用分流，不是三个独立 Agent。
+
+</details>
+
+**改条件不等于重新搜索。** 例如把预算改为 5,000 元，会先用当前分支已收集的资料重算；要求“继续找其他方案”或补充新的比较依据时，再进入研究。没有匹配结果，只表示现有资料中没有符合条件的选择。
+
+| 层次 | 实现 | 职责 |
+| --- | --- | --- |
+| 研究编排 | LangGraph `StateGraph` 与独立子图 | 协调、研究、审查、分析四个角色按契约交接 |
+| 模型与工具 | ChatOllama / 兼容 HTTP；tofu-search / Tavily；原生公开页读取器 | 研究和必要的对话理解按需调用，不是用户操作的串行步骤 |
+| 证据校验 | Zod 与来源／引文校验器 | 核对字段类型、单位、原文和对应图片 |
+| 条件推演 | 确定性评估器 | 校验条件、重算候选、解释分支变化，保留原始情况 |
+| 持久化 | SQLite、JSON 版本、浏览器草稿；可选 Redis | 分别恢复研究进度、保存业务快照、保留未提交操作和缓存搜索结果 |
+
+<details>
+<summary>展开真实 LangGraph 阶段与代码入口</summary>
+
+```mermaid
+flowchart LR
+  understand --> search --> read --> extract --> corroborate --> review --> recover --> review_after_recovery --> complete --> analyze
+```
+
+这些是执行阶段，不是十个 Agent。`understand` 属于协调角色；`search / read / extract / corroborate / recover` 属于研究角色；两个审查阶段属于同一个审查角色，第二次仅在证据或观察变化后执行；`analyze` 属于分析角色。`complete` 是程序整理与评估阶段。
+
+研究图：[general-research.mjs](src/general-research.mjs)。角色子图与权限：[specialist.mjs](src/agents/specialist.mjs)。证据审查：[evidence-review.mjs](src/agents/evidence-review.mjs)。[实现、测试与限制 →](docs/MULTI-AGENT.md)
 
 </details>
 
@@ -144,6 +174,7 @@ flowchart LR
 | [安装与配置](docs/SETUP.md) | 本机启动、Ollama、搜索服务、配置与故障排查 |
 | [使用工作区](docs/WORKSPACE.md) | 对话、条件、资料依据、判断记录、导入与删除 |
 | [架构说明](docs/ARCHITECTURE.md) | Agent 图、计算、存储与信任边界 |
+| [多 Agent 实现](docs/MULTI-AGENT.md) | 四角色分工、上下文与工具权限、审查补查、真实验证范围 |
 | [技术实现报告](docs/TECHNICAL-REPORT.md) | 搜索与 BM25、Agent 执行、Redis 缓存、实现细节与测评 |
 | [开发指南](docs/DEVELOPMENT.md) | 隔离测试、真实研究验证与 Docker 状态 |
 | [GitHub 发布指南](docs/PUBLISHING.md) · [版本说明](docs/releases/v0.4.0.md) | 上传准备、仓库设置与公开预览版范围 |
@@ -157,7 +188,7 @@ flowchart LR
 npm run test:release
 ```
 
-本轮本地验证：**235 项单元／HTTP 测试、56 项 Edge 浏览器测试通过**；此前另有 **3 项真实 Redis 集成测试记录**。受控测试验证产品行为，独立的真实调用验证资料获取；完整批次及版本范围见[质量报告](docs/reports/PREVIEW-QUALITY-2026-11-18.md)，Chrome／Chromium 设置和分项命令见[开发指南](docs/DEVELOPMENT.md)。
+最近一次完整本地回归：**299 项单元／HTTP 测试、71 项 Edge 浏览器测试通过**。多 Agent 的真实模型／租房研究验证见[协作实现报告](docs/MULTI-AGENT.md)；此前的 **11 项真实服务连续操作检查**保留在[使用实测报告](docs/reports/USER-JOURNEY-2026-11-21.md)。受控回归与真实研究结果分开记录。此前的 **3 项真实 Redis 集成测试**及历史批次保留原有范围，见[质量报告](docs/reports/PREVIEW-QUALITY-2026-11-18.md)；分项命令见[开发指南](docs/DEVELOPMENT.md)。
 
 `npm run check:project` 检查完整工作区源码；`npm run package:source` 生成排除本地配置、决策数据和实验目录的源码包。详见[项目结构与打包](docs/PROJECT-STRUCTURE.md)。
 

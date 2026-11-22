@@ -15,7 +15,7 @@ test('housing labels, natural-language branches, baseline and evidence persist a
   await page.keyboard.press('Escape');
   await page.locator('[data-tree-compose]').first().click();
   await page.locator('#conversation-message').fill('租金增加1000，面积至少50平米');
-  await page.locator('#u-conversation').evaluate(form=>form.requestSubmit());await expect(page.locator('#u-conversation button')).toBeEnabled();
+  await page.locator('#u-conversation').evaluate(form=>form.requestSubmit());await expect(page.getByRole('button',{name:'发送消息',exact:true})).toBeEnabled();
   await expect(page.locator('.tree-branch.is-active')).toContainText('近公司两居');
   await page.getByRole('button',{name:'收起对话记录'}).click();
   await page.locator('.tree-branch.is-active .tree-choice').first().click();
@@ -65,7 +65,7 @@ test('a housing workspace remains usable with more than six branches and custom 
   for(let i=0;i<8;i++){
     await page.locator('[data-tree-compose]').first().click();
     await page.locator('#conversation-message').fill('租金增加500');
-    await page.locator('#u-conversation').evaluate(form=>form.requestSubmit());await expect(page.locator('#u-conversation button')).toBeEnabled();
+    await page.locator('#u-conversation').evaluate(form=>form.requestSubmit());await expect(page.getByRole('button',{name:'发送消息',exact:true})).toBeEnabled();
   }
   await expect(page.locator('.tree-branch')).toHaveCount(8);
   await expect(page.locator('.tree-origin .tree-scenario')).toHaveAttribute('title',/4,000/);

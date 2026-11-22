@@ -131,3 +131,5 @@
   .compact-studio .flow-footer{font-size:8px;padding:8px}
   .compact-studio .flow-scene{padding:40px 28px;gap:60px}.compact-studio .flow-row{gap:50px}
 }
+.compact-studio .is-path-focused .condition-node .node-face,
+.compact-studio .tree-origin.is-path-focused .tree-scenario{outline:3px solid #73aaa0;outline-offset:5px}

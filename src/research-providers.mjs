@@ -46,9 +46,9 @@ export function providers(env = process.env, { searchCache = createSearchCache(e
     : null;
   const adapter = {
     publicCatalogs:[{platform:'suning',input:'keywords',capabilities:['price-range','price-ascending','configuration-attributes'],description:'公开商品目录；keywords只写商品类别及明确配置，不写用途、预算或重量；价格上限由应用映射到平台控件，原页参数可用于保守配置分组'},
-      {platform:'fang-rentals',input:'location',description:'公开租房目录；location只写城市名。根据房天下公开城市索引找到实际目录，再沿观察到的价格和租赁方式筛选链接找具体房源。不填猜测的房源和通勤。'}],
+      {platform:'fang-rentals',input:'location',capabilities:['geographic-scope'],description:'公开租房目录；location只写城市名。根据房天下公开城市索引找到实际目录，明确要求的行政区沿原页实际面包屑进入，并逐个核对详情中的城市和区域。不填猜测的房源和通勤。'}],
     searchCatalog:async request=>{
-      if(request?.platform==='fang-rentals')return discoverPublicRentalCatalog(request.location);
+      if(request?.platform==='fang-rentals')return discoverPublicRentalCatalog(request.location,request);
       if(request?.platform!=='suning'||typeof request.keywords!=='string'||!request.keywords.trim()||request.keywords.length>40)throw new Error('无效的公开目录请求');
       return readPublicMerchantPage('https://search.suning.com/'+encodeURIComponent(request.keywords.trim())+'/',env,{priceRange:request.priceRange,sort:request.sort});
     },

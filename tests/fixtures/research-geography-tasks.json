@@ -1,0 +1,19 @@
+{
+  "id": "geography-regression-2026-11-20",
+  "purpose": "Separate district compliance from city routing, source counts and picture loading. These are regression tasks, not a holdout set.",
+  "tasks": [
+    {
+      "id": "G01",
+      "question": "在杭州滨江租房，月租不超过4000元，面积至少30平方米，只看整租，需要原房源图片。不限制通勤，请找几个具体房源进行比较。",
+      "domain": "rental",
+      "cityCodes": ["hz"],
+      "geography": {"city": "杭州", "district": "滨江"},
+      "rentalType": "整租",
+      "sourceImages": true,
+      "criteria": [
+        {"kind": "rent", "maximum": 4000, "unit": "元/月"},
+        {"kind": "area", "minimum": 30, "unit": "㎡"}
+      ]
+    }
+  ]
+}

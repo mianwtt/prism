@@ -27,7 +27,7 @@ test('source-bound images and facts follow actual field semantics and never fill
 test('the actual LangGraph accepts typed public rental observations without asking a model to invent values or replacing photos with metadata art',async()=>{
  const o=parseRentalPage(rentalHtml,rentalUrl);let enrichCalls=0,extractionCalls=0;
  const space=await runGeneralResearch('月租不超过4000元/月，面积至少30㎡，另比较地铁站距离',{
-  async model(messages){const prompt=messages[0].content;if(prompt.startsWith('Analyze this individual'))return rentalPlan;if(prompt.startsWith('Analyze ONLY'))return {summary:'',insights:[]};if(prompt.startsWith('The first sources'))return {queries:[]};extractionCalls++;throw new Error('No generative fact extraction is needed for this structured page');},
+  async model(messages){const prompt=messages[0].content;if(prompt.startsWith('Analyze this individual'))return rentalPlan;if(prompt.startsWith('Analyze ONLY'))return {summary:'',insights:[]};if(prompt.startsWith('Independently review'))return {findings:[]};if(prompt.startsWith('The first sources'))return {queries:[]};extractionCalls++;throw new Error('No generative fact extraction is needed for this structured page');},
   async search(){return [{url:rentalUrl,title:o.title,raw_content:o.text}];},
   async fetchSource(){return {text:o.text,title:o.title,pageIdentity:{name:o.name},rentalObservation:o};},
   async enrichImages(){enrichCalls++;return [{sourceUrl:rentalUrl,url:'https://static.soufunimg.com/logo.png'}];}

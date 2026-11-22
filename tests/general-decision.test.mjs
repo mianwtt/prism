@@ -48,8 +48,8 @@ test('real general LangGraph executes search/read/extraction and resumes from it
   const text='沿河一居 月租3200元/月，面积32㎡，通勤42分钟。';
   const io={search:async()=>{searches++;return [{url:'https://example.org/property/1',title:'沿河一居',content:text}]},fetchSource:async()=>text,model:async messages=>{models++;if(messages[0].content.startsWith('Analyze'))return {schema:housingDemo().schema,queries:['杭州具体房源','杭州公开租房详情']};if(messages[0].content.startsWith('The first sources'))return {queries:[]};const source=JSON.parse(messages[1].content).sources[0];return {candidates:[{name:'沿河一居',sourceId:source.id,facts:Object.fromEntries([['price',3200,'月租3200元/月'],['area',32,'面积32㎡'],['commute',42,'通勤42分钟']].map(([k,value,quote])=>[k,{value,quote,sourceId:source.id}]))}]};}};
   const events=[],result=await runGeneralResearch('杭州租房，预算4000元，面积至少30平米，通勤最多45分钟',io,e=>events.push(e));
-  assert.equal(searches,2);assert.equal(models,5);assert.equal(result.candidates.length,1);assert.equal(result.agent.framework,'LangGraph');assert.equal(result.sources[0].kind,'page');
-  assert.equal(evaluateDecision(result.candidates,result.settings,result.schema)[0].status,'eligible');assert.deepEqual(events.map(e=>e.node).filter((x,i,a)=>a.indexOf(x)===i),['understand','search','read','extract','recover','complete','analyze']);
+  assert.equal(searches,2);assert.equal(models,6);assert.equal(result.candidates.length,1);assert.equal(result.agent.framework,'LangGraph');assert.equal(result.sources[0].kind,'page');
+  assert.equal(evaluateDecision(result.candidates,result.settings,result.schema)[0].status,'eligible');assert.deepEqual(events.map(e=>e.node).filter((x,i,a)=>a.indexOf(x)===i),['understand','search','read','extract','review','recover','complete','analyze']);
   const saver=new MemorySaver(),graph=createGeneralResearchGraph(io,{checkpointer:saver}),config={configurable:{thread_id:'housing-resume'},interruptBefore:['extract']};
   await graph.invoke({question:result.question},config);const before=searches;
   const output=await graph.invoke(null,{configurable:config.configurable});

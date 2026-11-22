@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="664" viewBox="0 0 1280 664" role="img" aria-labelledby="title desc" lang="zh" font-family="Segoe UI, Microsoft YaHei, Arial, sans-serif" font-style="normal"><title id="title">从真实资料，到可追溯的决策</title><desc id="desc">四种职责通过结构化任务交接；用户条件始终由程序规则约束。 四类是职责划分，不代表四个模型，也不代表四次调用。</desc><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#638b82"/></marker></defs><rect width="1280" height="664" rx="16" fill="#ffffff"/>
+<text x="40" y="36" fill="#247260" font-size="12" font-weight="600" letter-spacing="1.6">PRISM / MULTI-AGENT RESEARCH</text>
+<text x="1240" y="36" fill="#526773" font-size="14" font-weight="400" text-anchor="end">同一模型服务 · 顺序执行</text>
+<text x="40" y="79" fill="#183e37" font-size="30" font-weight="650" >从真实资料，到可追溯的决策</text>
+<text x="40" y="111" fill="#526773" font-size="17" font-weight="400" >四种职责通过结构化任务交接；用户条件始终由程序规则约束。</text>
+<rect x="28" y="190" width="1232" height="210" rx="16" fill="#f5f8fa" stroke="#e1e9ee"/>
+<rect x="40" y="133" width="232" height="38" rx="9" fill="#eaf5f0" stroke="#c5ded3"/>
+<text x="156" y="158" fill="#246e5e" font-size="16" font-weight="600" text-anchor="middle">用户问题 / 继续研究</text>
+<path d="M 156 171 L 156 210" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 780 210 L 780 178 L 468 178 L 468 210" fill="none" stroke="#638b82" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow)"/>
+<rect x="439" y="137" width="370" height="32" rx="8" fill="#ffffff" stroke="#ffffff"/>
+<text x="624" y="159" fill="#246e5e" font-size="15" font-weight="500" text-anchor="middle">证据不足时定向补查 · 最多一轮</text>
+<rect x="40" y="210" width="232" height="170" rx="12" fill="#fff" stroke="#d6e1e7"/>
+<path d="M 52 211 H 260" stroke="#2b806c" stroke-width="3"/>
+<text x="60" y="241" fill="#688c81" font-size="13" font-weight="600" >01</text>
+<text x="60" y="273" fill="#183e37" font-size="22" font-weight="650" >协调 Agent</text>
+<text x="60" y="305" fill="#526773" font-size="16" font-weight="400" >明确比较字段与条件</text>
+<text x="60" y="330" fill="#526773" font-size="16" font-weight="400" >形成有界的检索任务</text>
+<text x="60" y="355" fill="#526773" font-size="16" font-weight="400" >不自行放宽用户要求</text>
+<rect x="352" y="210" width="232" height="170" rx="12" fill="#fff" stroke="#d6e1e7"/>
+<path d="M 364 211 H 572" stroke="#2b806c" stroke-width="3"/>
+<text x="372" y="241" fill="#688c81" font-size="13" font-weight="600" >02</text>
+<text x="372" y="273" fill="#183e37" font-size="22" font-weight="650" >资料研究 Agent</text>
+<text x="372" y="305" fill="#526773" font-size="16" font-weight="400" >搜索公开资料与详情页</text>
+<text x="372" y="330" fill="#526773" font-size="16" font-weight="400" >提取绑定原文的事实</text>
+<text x="372" y="355" fill="#526773" font-size="16" font-weight="400" >缺失信息保留未知</text>
+<rect x="664" y="210" width="232" height="170" rx="12" fill="#fff" stroke="#d6e1e7"/>
+<path d="M 676 211 H 884" stroke="#2b806c" stroke-width="3"/>
+<text x="684" y="241" fill="#688c81" font-size="13" font-weight="600" >03</text>
+<text x="684" y="273" fill="#183e37" font-size="22" font-weight="650" >证据审查 Agent</text>
+<text x="684" y="305" fill="#526773" font-size="16" font-weight="400" >核对实体、配置与报价</text>
+<text x="684" y="330" fill="#526773" font-size="16" font-weight="400" >暂缓采用有问题的字段</text>
+<text x="684" y="355" fill="#526773" font-size="16" font-weight="400" >反馈必须有来源依据</text>
+<rect x="1016" y="210" width="232" height="170" rx="12" fill="#fff" stroke="#d6e1e7"/>
+<path d="M 1028 211 H 1236" stroke="#2b806c" stroke-width="3"/>
+<text x="1036" y="241" fill="#688c81" font-size="13" font-weight="600" >04</text>
+<text x="1036" y="273" fill="#183e37" font-size="22" font-weight="650" >决策分析 Agent</text>
+<text x="1036" y="305" fill="#526773" font-size="16" font-weight="400" >解释已评估方案的取舍</text>
+<text x="1036" y="330" fill="#526773" font-size="16" font-weight="400" >保留事实与引用关系</text>
+<text x="1036" y="355" fill="#526773" font-size="16" font-weight="400" >不改写条件或资格</text>
+<path d="M 272 290 L 352 290" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 584 290 L 664 290" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="912" y="255" width="88" height="70" rx="10" fill="#eaf5f0" stroke="#a8cbbc"/>
+<text x="956" y="284" fill="#246e5e" font-size="15" font-weight="600" text-anchor="middle">程序规则</text>
+<text x="956" y="307" fill="#246e5e" font-size="15" font-weight="600" text-anchor="middle">校验资格</text>
+<path d="M 896 290 L 912 290" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1000 290 L 1016 290" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 468 380 L 468 422 L 216 422 L 216 446" fill="none" stroke="#638b82" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<path d="M 1132 380 L 1132 446" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="446" width="340" height="110" rx="12" fill="#f8fafc" stroke="#d6e1e7"/>
+<text x="60" y="478" fill="#183e37" font-size="20" font-weight="600" >公开资料工具</text>
+<text x="60" y="509" fill="#526773" font-size="16" font-weight="400" >tofu-search / Tavily · 目录与详情页</text>
+<text x="60" y="535" fill="#526773" font-size="15" font-weight="400" >可选 Redis：复用搜索结果</text>
+<rect x="420" y="446" width="340" height="110" rx="12" fill="#f8fafc" stroke="#d6e1e7"/>
+<text x="440" y="478" fill="#183e37" font-size="20" font-weight="600" >SQLite 阶段检查点</text>
+<text x="440" y="509" fill="#526773" font-size="16" font-weight="400" >父图保存已完成阶段的产物</text>
+<text x="440" y="535" fill="#526773" font-size="15" font-weight="400" >中断请求可能重试；不是从零重做</text>
+<rect x="800" y="446" width="448" height="110" rx="12" fill="#f8fafc" stroke="#d6e1e7"/>
+<text x="820" y="478" fill="#183e37" font-size="20" font-weight="600" >What-if 决策画布</text>
+<text x="820" y="509" fill="#526773" font-size="16" font-weight="400" >全部匹配方案 · 来源浮窗 · 持续对话</text>
+<text x="820" y="535" fill="#526773" font-size="15" font-weight="400" >改已知条件：直接重算，无需模型或搜索</text>
+<path d="M 1024 556 L 1024 578" fill="none" stroke="#638b82" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="800" y="578" width="448" height="40" rx="10" fill="#eaf5f0" stroke="#c5ded3"/>
+<text x="1024" y="604" fill="#246e5e" font-size="16" font-weight="500" text-anchor="middle">保存决策版本：选择 · 理由 · 证据</text>
+<text x="40" y="589" fill="#526773" font-size="15" font-weight="400" >最多两次模型审查；不可用时明确记录降级。</text>
+<text x="40" y="618" fill="#526773" font-size="15" font-weight="400" >四类是职责划分，不代表四个模型，也不代表四次调用。</text>
+</svg>

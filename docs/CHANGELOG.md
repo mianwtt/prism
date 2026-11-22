@@ -1,3 +1,8 @@
+## Illustrated system architecture — 2026-11-22
+
+- Replace text-heavy architecture cards with an original vector illustration: a schematic canvas/composer/evidence popover, distinct specialist avatars, source tools, model chip and storage symbols.
+- Keep the component and data boundaries unchanged. Mark the small browser example as an illustration, retain short role labels and publish matching Chinese/English diagrams without generating listing photographs.
+
 ## System architecture overview — 2026-11-22
 
 - Make the main Chinese and English README diagram a compact system overview with four groups: workspace, decision service, models/sources and local data/cache. Keep Node.js, specialist research, evidence checks and What-if inside their owning component.

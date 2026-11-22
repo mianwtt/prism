@@ -96,7 +96,7 @@ npm start
 
 Prism 由四部分组成：**决策工作区、决策服务、模型与资料、本地数据与缓存**。多 Agent 负责研究资料，确定性内核负责条件推演，两者共同支撑有依据、可回溯的决策。
 
-![Prism 整体架构：决策工作区通过 HTTP 连接决策服务；服务组合多 Agent 研究、证据校验和 What-if 计算，接入模型与资料，并保存本地数据与缓存](docs/assets/system-architecture.svg)
+![Prism 整体架构示意：左侧画布、对话和引用浮窗，中间四个专职 Agent、证据校验与条件推演，右侧模型及检索工具，下方 JSON、SQLite 检查点和可选 Redis 缓存](docs/assets/system-architecture.svg)
 
 改已知条件，直接复用已有依据重算；需要新资料，再由 Agent 继续研究。
 

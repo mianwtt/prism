@@ -96,9 +96,11 @@ npm start
 
 Prism 由四部分组成：**决策工作区、决策服务、模型与资料、本地数据与缓存**。多 Agent 负责研究资料，确定性内核负责条件推演，两者共同支撑有依据、可回溯的决策。
 
-![Prism 整体架构示意：左侧画布、对话和引用浮窗，中间四个专职 Agent、证据校验与条件推演，右侧模型及检索工具，下方 JSON、SQLite 检查点和可选 Redis 缓存](docs/assets/system-architecture.svg)
+![Prism 详版整体架构：画布与对话上下文、请求分流、LangGraph 四角色交接和有界审查补查、程序校验、统一决策模型、What-if 与决策回溯；模型与搜索读页分别接入，JSON、SQLite、Redis 分别负责业务版本、研究恢复和搜索缓存](docs/assets/system-architecture.svg)
 
 改已知条件，直接复用已有依据重算；需要新资料，再由 Agent 继续研究。
+
+图中实线表示主要交接与依赖，虚线表示按条件触发的补查、重算、恢复与缓存路径；浏览器画面为交互示意。
 
 <details>
 <summary>展开模块职责与数据边界</summary>

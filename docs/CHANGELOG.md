@@ -1,3 +1,10 @@
+## Detailed architecture relationships — 2026-11-22
+
+- Expand the illustrated overview with conversation context, request routing, specialist task/artifact handoffs, one bounded repair round, at most two model reviews and program validation before interpretation.
+- Show the typed decision model, shared What-if/history components, conditional recalculation path, separate model/tool dependencies, JSON business versions, SQLite stage recovery and search-only Redis caching.
+- Preserve graphical component symbols and short labels; document conditional paths and keep the browser example explicitly illustrative.
+- Align the workspace, decision service and provider columns to the same top/bottom boundaries. Use three equal-width storage cards across the full bottom row; group workspace context/history and source evidence within their respective columns.
+
 ## Illustrated system architecture — 2026-11-22
 
 - Replace text-heavy architecture cards with an original vector illustration: a schematic canvas/composer/evidence popover, distinct specialist avatars, source tools, model chip and storage symbols.

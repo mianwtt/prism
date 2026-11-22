@@ -1,17 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="712" viewBox="0 0 1280 712" role="img" aria-labelledby="title desc" lang="en" font-family="Segoe UI, Microsoft YaHei, Arial, sans-serif" font-style="normal"><title id="title">Prism system architecture</title><desc id="desc">An illustrated overview of the workspace, four specialist agents, evidence checks and What-if evaluation, model and retrieval tools, JSON, SQLite, and optional Redis. The browser is a schematic, not a live research screenshot.</desc><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#71958b"/></marker><pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.8" fill="#dae4e9"/></pattern></defs><rect width="1280" height="712" rx="16" fill="#fff"/>
-<text x="32" y="39" fill="#183e37" font-size="27" font-weight="700" >PRISM</text>
-<text x="137" y="38" fill="#7a8f96" font-size="12" font-weight="600" letter-spacing="1.6">SYSTEM ARCHITECTURE</text>
-<circle cx="49" cy="79" r="16" fill="#f1f6f3" stroke="#d3e4da" stroke-width="1"/>
-<circle cx="49" cy="74" r="4" fill="#6b9185" stroke="#6b9185" stroke-width="0"/>
-<path d="M 41 85 Q 49 77 57 85" fill="none" stroke="#6b9185" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
-<rect x="77" y="59" width="304" height="40" rx="14" fill="#f6f9f7" stroke="#e1eae5" />
-<text x="92" y="85" fill="#395f54" font-size="16" font-weight="500" >Development laptop, budget ¥7,000</text>
-<text x="32" y="130" fill="#183e37" font-size="23" font-weight="650" >Decision workspace</text>
-<text x="410" y="130" fill="#183e37" font-size="23" font-weight="650" >Decision service</text>
-<text x="960" y="130" fill="#183e37" font-size="23" font-weight="650" >Models and sources</text>
-<path d="M 800 109 L 811 115 V 128 L 800 134 L 789 128 V 115 Z" fill="#e6f3e9" stroke="#68a17a" stroke-width="1.7"/>
-<text x="800" y="126" fill="#477d5c" font-size="10" font-weight="700" text-anchor="middle">JS</text>
-<text x="820" y="128" fill="#6d8a7d" font-size="14" font-weight="500" >Node.js</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1040" viewBox="0 0 1440 1040" role="img" aria-labelledby="title desc" lang="en" font-family="Segoe UI, Microsoft YaHei, Arial, sans-serif" font-style="normal"><title id="title">Prism system architecture</title><desc id="desc">Detailed Prism system architecture: workspace/context, request routing, bounded specialist research and review, typed decision artifacts, evidence validation, What-if and decision memory; model/source adapters; JSON business versions, SQLite checkpoints and optional Redis search caching. The browser is an illustration.</desc><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#71958b"/></marker><pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.8" fill="#dae4e9"/></pattern></defs><rect width="1440" height="1040" rx="16" fill="#fff"/>
+<text x="32" y="40" fill="#183e37" font-size="29" font-weight="700" >PRISM</text>
+<text x="143" y="39" fill="#7a8f96" font-size="13" font-weight="600" letter-spacing="1.8">SYSTEM ARCHITECTURE</text>
+<circle cx="49" cy="81" r="16" fill="#f1f6f3" stroke="#d3e4da" stroke-width="1"/>
+<circle cx="49" cy="76" r="4" fill="#6b9185" stroke="#6b9185" stroke-width="0"/>
+<path d="M 41 87 Q 49 79 57 87" fill="none" stroke="#6b9185" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="77" y="61" width="314" height="40" rx="14" fill="#f6f9f7" stroke="#e1eae5" />
+<text x="92" y="87" fill="#395f54" font-size="16" font-weight="500" >Development laptop, budget ¥7,000</text>
+<text x="32" y="142" fill="#183e37" font-size="24" font-weight="650" >Decision workspace</text>
+<text x="404" y="142" fill="#183e37" font-size="24" font-weight="650" >Decision service</text>
+<text x="1100" y="142" fill="#183e37" font-size="24" font-weight="650" >Models and sources</text>
+<text x="1014" y="141" fill="#729388" font-size="16" font-weight="500" text-anchor="end">Node.js / HTTP</text>
+<rect x="32" y="164" width="304" height="626" rx="16" fill="#f8fafb" stroke="#d8e5e9" />
+<g transform="translate(42 182) scale(0.86)">
+<g transform="translate(-32 -151)">
 <rect x="32" y="151" width="330" height="303" rx="12" fill="#fff" stroke="#ccdce2" />
 <rect x="32" y="151" width="330" height="30" rx="12" fill="#f0f5f7" stroke="#ccdce2" />
 <rect x="33" y="167" width="328" height="15" fill="#f0f5f7"/>
@@ -59,15 +60,29 @@
 <text x="98" y="432" fill="#6c8b81" font-size="11" font-weight="400" >What if the budget is ¥5,000?</text>
 <circle cx="331" cy="427" r="9" fill="#2b806a" stroke="#2b806a" stroke-width="0"/>
 <path d="M 331 432 V 422 M 327 426 L 331 422 L 335 426" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
-<path d="M 43 472 L 38 480 H 44 L 41 488 L 52 477 H 46 L 49 472" fill="none" stroke="#71a590" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-<text x="61" y="486" fill="#3f8069" font-size="15" font-weight="500" >Edit conditions · Recalculate locally</text>
-<text x="360" y="474" fill="#8b9da4" font-size="12" font-weight="400" text-anchor="end">Illustration</text>
-<rect x="410" y="151" width="480" height="303" rx="16" fill="#f3f8f5" stroke="#cbded4" />
-<rect x="428" y="169" width="444" height="159" rx="12" fill="#fff" stroke="#d2e3d9" />
-<text x="447" y="194" fill="#2a725e" font-size="19" font-weight="600" >Multi-agent collaboration</text>
-<text x="851" y="193" fill="#729388" font-size="14" font-weight="500" text-anchor="end">LangGraph</text>
-<path d="M 479 215 H 815 M 479 215 V 223 M 591 215 V 223 M 703 215 V 223 M 815 215 V 223" fill="none" stroke="#ccddd6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-<g transform="translate(479 262) scale(1)">
+</g>
+</g>
+<text x="322" y="460" fill="#8b9da4" font-size="13" font-weight="400" text-anchor="end">Illustration</text>
+<rect x="42" y="480" width="284" height="100" rx="12" fill="#fff" stroke="#d8e5e9" />
+<rect x="50" y="504" width="31" height="22" rx="6" fill="#fff" stroke="#86a9bb" />
+<path d="M 55 526 L 55 533 L 64 526 M 58 513 H 74 M 58 519 H 68" fill="none" stroke="#86a9bb" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+<text x="96" y="516" fill="#395f78" font-size="19" font-weight="600" >Active path and context</text>
+<text x="50" y="552" fill="#7595aa" font-size="16" font-weight="400" >Conditions · Drafts · History</text>
+<rect x="404" y="164" width="628" height="626" rx="16" fill="#f2f8f4" stroke="#cbded4" />
+<rect x="422" y="182" width="592" height="70" rx="11" fill="#fff" stroke="#cfdfd6" />
+<text x="440" y="208" fill="#3d7966" font-size="18" font-weight="600" >Intent · Context · Research jobs</text>
+<rect x="440" y="222" width="172" height="22" rx="7" fill="#dfefe6" stroke="#dfefe6" />
+<text x="526" y="238" fill="#5a746b" font-size="15" font-weight="500" text-anchor="middle">Research</text>
+<rect x="628" y="222" width="172" height="22" rx="7" fill="#edf1f8" stroke="#edf1f8" />
+<text x="714" y="238" fill="#5a746b" font-size="15" font-weight="500" text-anchor="middle">Explain</text>
+<rect x="816" y="222" width="172" height="22" rx="7" fill="#f8f0df" stroke="#f8f0df" />
+<text x="902" y="238" fill="#5a746b" font-size="15" font-weight="500" text-anchor="middle">Edit conditions</text>
+<rect x="422" y="284" width="592" height="264" rx="13" fill="#fff" stroke="#cee2d5" />
+<text x="440" y="315" fill="#2a725e" font-size="24" font-weight="650" >LangGraph</text>
+<text x="995" y="314" fill="#7a998d" font-size="15" font-weight="400" text-anchor="end">Scoped context / Tools</text>
+<path d="M 772 371 C 772 342 620 342 620 371" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="5 5"/>
+<text x="696" y="336" fill="#a38650" font-size="15" font-weight="500" text-anchor="middle">Targeted repair ≤ 1 round</text>
+<g transform="translate(468 412) scale(1)">
 <path d="M 0 -28 V -38" fill="none" stroke="#4b8b78" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
 <circle cx="0" cy="-41" r="4" fill="#e6f4ec" stroke="#4b8b78" stroke-width="2"/>
 <rect x="-27" y="-27" width="54" height="48" rx="14" fill="#e6f4ec" stroke="#4b8b78" />
@@ -81,8 +96,9 @@
 <path d="M 20 29 L 23 18 L 32 16 L 29 26 Z" fill="none" stroke="#4b8b78" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
 <circle cx="26" cy="23" r="1" fill="#4b8b78" stroke="#4b8b78" stroke-width="1"/>
 </g>
-<text x="479" y="317" fill="#355d51" font-size="16" font-weight="500" text-anchor="middle">Coordinate</text>
-<g transform="translate(591 262) scale(1)">
+<text x="468" y="477" fill="#355d51" font-size="19" font-weight="600" text-anchor="middle">Coordinator</text>
+<text x="468" y="504" fill="#7a998d" font-size="14" font-weight="400" text-anchor="middle">Fields / Limits</text>
+<g transform="translate(620 412) scale(1)">
 <path d="M 0 -28 V -38" fill="none" stroke="#558cb3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
 <circle cx="0" cy="-41" r="4" fill="#e8f1fa" stroke="#558cb3" stroke-width="2"/>
 <rect x="-27" y="-27" width="54" height="48" rx="14" fill="#e8f1fa" stroke="#558cb3" />
@@ -98,8 +114,9 @@
 <path d="M 5 5 L 17 17" fill="none" stroke="#558cb3" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
 </g>
 </g>
-<text x="591" y="317" fill="#355d51" font-size="16" font-weight="500" text-anchor="middle">Research</text>
-<g transform="translate(703 262) scale(1)">
+<text x="620" y="477" fill="#355d51" font-size="19" font-weight="600" text-anchor="middle">Researcher</text>
+<text x="620" y="504" fill="#7a998d" font-size="14" font-weight="400" text-anchor="middle">Search / Read</text>
+<g transform="translate(772 412) scale(1)">
 <path d="M 0 -28 V -38" fill="none" stroke="#8a79ac" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
 <circle cx="0" cy="-41" r="4" fill="#f0eafb" stroke="#8a79ac" stroke-width="2"/>
 <rect x="-27" y="-27" width="54" height="48" rx="14" fill="#f0eafb" stroke="#8a79ac" />
@@ -115,8 +132,9 @@
 <path d="M -10 0 L -3 8 L 11 -8" fill="none" stroke="#8a79ac" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
 </g>
 </g>
-<text x="703" y="317" fill="#355d51" font-size="16" font-weight="500" text-anchor="middle">Review</text>
-<g transform="translate(815 262) scale(1)">
+<text x="772" y="477" fill="#355d51" font-size="19" font-weight="600" text-anchor="middle">Reviewer</text>
+<text x="772" y="504" fill="#7a998d" font-size="14" font-weight="400" text-anchor="middle">Challenge facts</text>
+<g transform="translate(948 412) scale(1)">
 <path d="M 0 -28 V -38" fill="none" stroke="#b28c50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
 <circle cx="0" cy="-41" r="4" fill="#fbf1dc" stroke="#b28c50" stroke-width="2"/>
 <rect x="-27" y="-27" width="54" height="48" rx="14" fill="#fbf1dc" stroke="#b28c50" />
@@ -129,29 +147,94 @@
 <circle cx="26" cy="23" r="15" fill="#fff" stroke="#b28c50" stroke-width="1.7"/>
 <path d="M 19 29 V 24 M 25 29 V 20 M 31 29 V 16" fill="none" stroke="#b28c50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
 </g>
-<text x="815" y="317" fill="#355d51" font-size="16" font-weight="500" text-anchor="middle">Analyze</text>
-<rect x="428" y="347" width="212" height="89" rx="12" fill="#fff" stroke="#d1e1d7" />
-<g transform="translate(459 389) scale(0.77)">
+<text x="948" y="477" fill="#355d51" font-size="19" font-weight="600" text-anchor="middle">Analyst</text>
+<text x="948" y="504" fill="#7a998d" font-size="14" font-weight="400" text-anchor="middle">Explain choices</text>
+<path d="M 506 404 H 581" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="544" y="390" fill="#729388" font-size="14" font-weight="400" text-anchor="middle">Contract</text>
+<path d="M 658 404 H 733" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="696" y="390" fill="#729388" font-size="14" font-weight="400" text-anchor="middle">Observations</text>
+<path d="M 810 404 H 837" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<g transform="translate(860 404) scale(0.51)">
 <path d="M 0 -24 L 20 -16 V 0 C 20 13 9 22 0 27 C -9 22 -20 13 -20 0 V -16 Z" fill="#edf7f1" stroke="#3c8872" stroke-width="2.4"/>
 <path d="M -10 0 L -3 8 L 11 -8" fill="none" stroke="#3c8872" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
 </g>
-<text x="491" y="382" fill="#2d6855" font-size="15" font-weight="600" >Evidence checks</text>
-<text x="491" y="408" fill="#729388" font-size="13" font-weight="400" >Quotes · Fields</text>
-<rect x="660" y="347" width="212" height="89" rx="12" fill="#fff" stroke="#d1e1d7" />
-<path d="M 680 391 H 688 M 688 391 V 377 H 702 M 688 391 V 405 H 702" fill="none" stroke="#5b91b5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-<circle cx="680" cy="391" r="4" fill="#f1f7fc" stroke="#5b91b5" stroke-width="1.7"/>
-<circle cx="705" cy="377" r="5" fill="#e7f2fa" stroke="#5b91b5" stroke-width="1.7"/>
-<circle cx="705" cy="405" r="5" fill="#f7f0df" stroke="#c2a263" stroke-width="1.7"/>
-<text x="724" y="382" fill="#2d6855" font-size="20" font-weight="600" >What-if</text>
-<path d="M 726 408 H 849" fill="none" stroke="#c6dbd1" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
-<circle cx="775" cy="408" r="5" fill="#79b39a" stroke="#fff" stroke-width="1.5"/>
-<rect x="960" y="151" width="288" height="303" rx="16" fill="#fafafa" stroke="#dde3e5" />
-<g transform="translate(1009 210) scale(1)">
-<rect x="-23" y="-23" width="46" height="46" rx="10" fill="#f1ebfa" stroke="#9b88b5" />
-<path d="M -14 -29 V -23 M 0 -29 V -23 M 14 -29 V -23" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-<path d="M -14 23 V 29 M 0 23 V 29 M 14 23 V 29" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-<path d="M -29 -14 H -23 M -29 0 H -23 M -29 14 H -23" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-<path d="M 23 -14 H 29 M 23 0 H 29 M 23 14 H 29" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 881 404 H 909" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="860" y="457" fill="#3c8872" font-size="14" font-weight="500" text-anchor="middle">Rules</text>
+<rect x="642" y="518" width="151" height="22" rx="7" fill="#f8f5ec" stroke="#eee6d2" />
+<text x="717" y="534" fill="#a38650" font-size="14" font-weight="400" text-anchor="middle">Model reviews ≤ 2</text>
+<path d="M 718 548 V 578" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="735" y="568" fill="#729388" font-size="15" font-weight="400" >Structured artifacts</text>
+<rect x="422" y="578" width="592" height="58" rx="10" fill="#edf3f7" stroke="#d4e1e7" />
+<g transform="translate(447 607) scale(0.51)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7e9fb1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#7e9fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#7e9fb1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<text x="474" y="602" fill="#395f78" font-size="18" font-weight="600" >Typed decision model</text>
+<text x="474" y="624" fill="#7595aa" font-size="16" font-weight="400" >Fields · Facts · Citations · Branches · Chat</text>
+<path d="M 512 636 V 666" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<path d="M 708 636 V 666" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<path d="M 914 636 V 666" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<rect x="422" y="666" width="180" height="106" rx="12" fill="#fff" stroke="#d3e2da" />
+<text x="436" y="744" fill="#3d7966" font-size="18" font-weight="600" >What-if</text>
+<text x="436" y="766" fill="#7a998d" font-size="14" font-weight="400" >Inherit · Recalculate</text>
+<rect x="618" y="666" width="180" height="106" rx="12" fill="#fff" stroke="#d3e2da" />
+<text x="632" y="744" fill="#3d7966" font-size="18" font-weight="600" >Evidence checks</text>
+<text x="632" y="766" fill="#7a998d" font-size="14" font-weight="400" >Conflicts / Unknowns</text>
+<rect x="814" y="666" width="200" height="106" rx="12" fill="#fff" stroke="#d3e2da" />
+<text x="828" y="744" fill="#3d7966" font-size="18" font-weight="600" >Decision history</text>
+<text x="828" y="766" fill="#7a998d" font-size="14" font-weight="400" >Versions · Reasons · Evidence</text>
+<path d="M 448 707 H 461 M 461 707 V 691 H 481 M 461 707 V 723 H 481" fill="none" stroke="#5b91b5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="448" cy="707" r="4" fill="#f2f7fb" stroke="#5b91b5" stroke-width="1.7"/>
+<circle cx="485" cy="691" r="5" fill="#e7f3ee" stroke="#79a995" stroke-width="1.7"/>
+<circle cx="485" cy="723" r="5" fill="#fbf2df" stroke="#c6a66d" stroke-width="1.7"/>
+<path d="M 506 708 H 583" fill="none" stroke="#c6dbd1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="540" cy="708" r="5" fill="#79b39a" stroke="#fff" stroke-width="1.5"/>
+<g transform="translate(649 707) scale(0.69)">
+<path d="M 0 -24 L 20 -16 V 0 C 20 13 9 22 0 27 C -9 22 -20 13 -20 0 V -16 Z" fill="#edf7f1" stroke="#3c8872" stroke-width="2.4"/>
+<path d="M -10 0 L -3 8 L 11 -8" fill="none" stroke="#3c8872" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<circle cx="750" cy="699" r="5" fill="#b2d3c0" stroke="#fff" stroke-width="1"/>
+<text x="764" y="704" fill="#4f8e72" font-size="16" font-weight="500" >✓</text>
+<circle cx="750" cy="718" r="5" fill="#e3e8ec" stroke="#fff" stroke-width="1"/>
+<text x="764" y="723" fill="#8ea0aa" font-size="16" font-weight="500" >?</text>
+<g transform="translate(846 704) scale(0.63)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#b2c6d1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#b2c6d1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#b2c6d1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<g transform="translate(863 711) scale(0.63)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7e9fb1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#7e9fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#7e9fb1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<path d="M 901 701 H 987 M 901 715 H 970" fill="none" stroke="#d2e1e7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 336 530 H 370 V 718 H 422" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="5 5"/>
+<text x="370" y="641" fill="#548e77" font-size="12" font-weight="500" text-anchor="middle">Recalculate</text>
+<rect x="42" y="632" width="284" height="140" rx="13" fill="#fff" stroke="#dce5ea" />
+<text x="60" y="664" fill="#183e37" font-size="20" font-weight="600" >Decisions and history</text>
+<g transform="translate(78 713) scale(0.65)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#b1c5d1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#b1c5d1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#b1c5d1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<g transform="translate(101 727) scale(0.65)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7e9fb1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#7e9fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#7e9fb1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<path d="M 145 704 H 307 M 145 721 H 278" fill="none" stroke="#d3e1e7" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="159" cy="752" r="5" fill="#a3c5b6" stroke="#fff" stroke-width="1"/>
+<circle cx="208" cy="752" r="5" fill="#769cae" stroke="#fff" stroke-width="1"/>
+<path d="M 164 752 H 203" fill="none" stroke="#bed0d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+<text x="226" y="758" fill="#7595aa" font-size="13" font-weight="400" >Version history</text>
+<rect x="1100" y="164" width="308" height="626" rx="16" fill="#fafafa" stroke="#dde3e5" />
+<g transform="translate(1148 232) scale(1)">
+<rect x="-24" y="-24" width="48" height="48" rx="10" fill="#f1ebfa" stroke="#9b88b5" />
+<path d="M -14 -30 V -24 M 0 -30 V -24 M 14 -30 V -24" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -14 24 V 30 M 0 24 V 30 M 14 24 V 30" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -30 -14 H -24 M -30 0 H -24 M -30 14 H -24" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 24 -14 H 30 M 24 0 H 30 M 24 14 H 30" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 <path d="M -10 -8 L 9 -11 L 0 10 Z M -10 -8 L 10 9 M 9 -11 L -11 9" fill="none" stroke="#9b88b5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
 <circle cx="-10" cy="-8" r="3.2" fill="#c9bbdd" stroke="#9b88b5" stroke-width="1"/>
 <circle cx="9" cy="-11" r="3.2" fill="#c9bbdd" stroke="#9b88b5" stroke-width="1"/>
@@ -159,9 +242,11 @@
 <circle cx="-11" cy="9" r="3.2" fill="#c9bbdd" stroke="#9b88b5" stroke-width="1"/>
 <circle cx="10" cy="9" r="3.2" fill="#c9bbdd" stroke="#9b88b5" stroke-width="1"/>
 </g>
-<text x="1055" y="204" fill="#4e4562" font-size="20" font-weight="600" >Ollama / LLM</text>
-<text x="1055" y="230" fill="#8d80a0" font-size="16" font-weight="400" >Model adapter</text>
-<g transform="translate(1007 309) scale(1)">
+<text x="1194" y="226" fill="#4e4562" font-size="21" font-weight="600" >Ollama / API</text>
+<text x="1194" y="253" fill="#8d80a0" font-size="17" font-weight="400" >Model adapter</text>
+<text x="1122" y="294" fill="#8d80a0" font-size="17" font-weight="400" >Shared configured model service</text>
+<path d="M 1120 316 H 1388" fill="none" stroke="#e7e4ec" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+<g transform="translate(1148 392) scale(1)">
 <rect x="-27" y="-24" width="54" height="47" rx="7" fill="#fff" stroke="#7da4bc" />
 <path d="M -26 -12 H 26" fill="none" stroke="#b1cad9" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
 <circle cx="-18" cy="-18" r="1.5" fill="#b1cad9" stroke="none" stroke-width="0"/>
@@ -169,58 +254,96 @@
 <circle cx="-4" cy="-18" r="1.5" fill="#b1cad9" stroke="none" stroke-width="0"/>
 <path d="M -18 -4 H 9 M -18 5 H 2" fill="none" stroke="#c6d7e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 </g>
-<g transform="translate(1024 325) scale(0.9)">
+<g transform="translate(1165 408) scale(0.9)">
 <circle cx="-4" cy="-4" r="12" fill="none" stroke="#5e96b6" stroke-width="2.7"/>
 <path d="M 5 5 L 17 17" fill="none" stroke="#5e96b6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
 </g>
-<text x="1055" y="301" fill="#3c6d88" font-size="20" font-weight="600" >Public search</text>
-<text x="1055" y="328" fill="#7b9aad" font-size="16" font-weight="400" >tofu / Tavily</text>
-<g transform="translate(999 403) scale(0.65)">
+<text x="1194" y="382" fill="#3c6d88" font-size="21" font-weight="600" >Public search</text>
+<text x="1194" y="410" fill="#7b9aad" font-size="17" font-weight="400" >tofu / Tavily</text>
+<g transform="translate(1134 497) scale(0.68)">
 <path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#9eb4bd" stroke-width="2.2"/>
 <path d="M 9 -30 V -15 H 24" fill="none" stroke="#9eb4bd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 <path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#9eb4bd" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
 </g>
-<g transform="translate(1014 404) scale(0.65)">
+<g transform="translate(1151 498) scale(0.68)">
 <path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7e9fb1" stroke-width="2.2"/>
 <path d="M 9 -30 V -15 H 24" fill="none" stroke="#7e9fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 <path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#7e9fb1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
 </g>
-<rect x="1013" y="399" width="22" height="16" rx="3" fill="#e9f2e6" stroke="#a7c3ac" />
-<path d="M 1017 411 L 1023 405 L 1027 409 L 1031 406" fill="none" stroke="#a0b999" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
-<text x="1055" y="409" fill="#648493" font-size="17" font-weight="500" >Quotes and photos</text>
-<path d="M 363 235 H 410" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
-<text x="386" y="221" fill="#769188" font-size="13" font-weight="500" text-anchor="middle">Ask</text>
-<path d="M 410 396 H 374" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
-<text x="391" y="381" fill="#769188" font-size="13" font-weight="500" text-anchor="middle">Result</text>
-<path d="M 890 285 H 960" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
-<text x="925" y="270" fill="#769188" font-size="14" font-weight="500" text-anchor="middle">Use</text>
-<path d="M 810 454 V 552" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
-<text x="826" y="506" fill="#769188" font-size="16" font-weight="400" >Save / Resume</text>
-<text x="410" y="541" fill="#183e37" font-size="22" font-weight="600" >Local data and caching</text>
-<rect x="410" y="553" width="838" height="120" rx="14" fill="#f7f9fb" stroke="#dce5ea" />
-<g transform="translate(456 611) scale(0.81)">
+<rect x="1150" y="493" width="22" height="16" rx="3" fill="#e9f2e6" stroke="#a7c3ac" />
+<path d="M 1154 505 L 1160 499 L 1164 503 L 1168 500" fill="none" stroke="#a0b999" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+<text x="1194" y="490" fill="#3c6d88" font-size="21" font-weight="600" >Public readers</text>
+<text x="1194" y="518" fill="#7b9aad" font-size="16" font-weight="400" >Catalogs · Details · Photos</text>
+<text x="1122" y="557" fill="#8da2ad" font-size="15" font-weight="400" >Page reads bypass the search cache</text>
+<rect x="1118" y="632" width="272" height="140" rx="12" fill="#fff" stroke="#dce5ea" />
+<text x="1138" y="664" fill="#3c6d88" font-size="22" font-weight="600" >Source evidence</text>
+<g transform="translate(1155 706) scale(0.51)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7e9fb1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#7e9fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#7e9fb1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<path d="M 1150 701 H 1160 M 1150 707 H 1164" fill="none" stroke="#8db39d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+<g transform="translate(1244 706) scale(1)">
+<rect x="-17" y="-7" width="24" height="14" rx="7" fill="none" stroke="#7e9fb1" transform="rotate(-35)"/>
+<rect x="-3" y="-7" width="24" height="14" rx="7" fill="none" stroke="#7e9fb1" transform="rotate(-35)"/>
+</g>
+<rect x="1311" y="690" width="38" height="28" rx="5" fill="#f0f6ee" stroke="#a7c3ac" />
+<path d="M 1317 712 L 1327 701 L 1334 708 L 1343 699" fill="none" stroke="#a0b999" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="1339" cy="696" r="2" fill="#d7c998" stroke="none" stroke-width="0"/>
+<text x="1155" y="745" fill="#7595aa" font-size="16" font-weight="400" text-anchor="middle">Quotes</text>
+<text x="1244" y="745" fill="#7595aa" font-size="16" font-weight="400" text-anchor="middle">URL</text>
+<text x="1330" y="745" fill="#7595aa" font-size="16" font-weight="400" text-anchor="middle">Photos</text>
+<path d="M 336 211 H 404" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="370" y="196" fill="#729388" font-size="15" font-weight="500" text-anchor="middle">HTTP</text>
+<path d="M 404 381 H 344" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="370" y="365" fill="#729388" font-size="14" font-weight="500" text-anchor="middle">Result</text>
+<path d="M 1014 310 H 1064 V 240 H 1100" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<path d="M 1014 240 H 1064" fill="none" stroke="#8d80a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="1064" cy="240" r="3" fill="#a597bb" stroke="#fff" stroke-width="1"/>
+<text x="1064" y="221" fill="#8d80a0" font-size="14" font-weight="400" text-anchor="middle">On demand</text>
+<path d="M 1014 440 H 1100" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<text x="1057" y="425" fill="#729388" font-size="12" font-weight="400" text-anchor="middle">Research tools</text>
+<text x="32" y="843" fill="#183e37" font-size="22" font-weight="600" >Storage &amp; cache</text>
+<path d="M 540 790 V 814 H 252 V 876" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<text x="270" y="859" fill="#7595aa" font-size="15" font-weight="400" >Business versions</text>
+<path d="M 1014 530 H 1050 V 858 H 720 V 876" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)" stroke-dasharray="5 5"/>
+<text x="1066" y="813" fill="#7595aa" font-size="14" font-weight="400" >Stage recovery</text>
+<path d="M 1388 392 H 1424 V 852 H 1188 V 876" fill="none" stroke="#bb8c89" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="1210" y="838" fill="#b18380" font-size="15" font-weight="400" >Search results only</text>
+<rect x="32" y="876" width="440" height="144" rx="13" fill="#f7f9fb" stroke="#dce5ea" />
+<rect x="500" y="876" width="440" height="144" rx="13" fill="#f7f9fb" stroke="#dce5ea" />
+<rect x="968" y="876" width="440" height="144" rx="13" fill="#fcf8f7" stroke="#e7d9d6" />
+<g transform="translate(80 934) scale(0.85)">
 <path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7595aa" stroke-width="2.2"/>
 <path d="M 9 -30 V -15 H 24" fill="none" stroke="#7595aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 <text x="1" y="12" fill="#7595aa" font-size="23" font-weight="600" text-anchor="middle">{ }</text>
 </g>
-<text x="497" y="605" fill="#395f78" font-size="21" font-weight="600" >JSON</text>
-<text x="497" y="633" fill="#7595aa" font-size="16" font-weight="400" >Decision versions</text>
-<g transform="translate(747 611) scale(1)">
+<text x="128" y="922" fill="#395f78" font-size="23" font-weight="600" >JSON</text>
+<text x="128" y="949" fill="#7595aa" font-size="18" font-weight="400" >Decision versions</text>
+<text x="54" y="997" fill="#7595aa" font-size="17" font-weight="400" >Candidates · Sources · Chat</text>
+<g transform="translate(548 936) scale(1)">
 <path d="M -24 -22 V 22 C -24 33 24 33 24 22 V -22" fill="#e9f2f8" stroke="#739eba" stroke-width="2.2"/>
 <ellipse cx="0" cy="-22" rx="24" ry="9" fill="#f3f8fb" stroke="#739eba" stroke-width="2.2"/>
 <path d="M -24 -6 C -24 5 24 5 24 -6 M -24 9 C -24 20 24 20 24 9" fill="none" stroke="#739eba" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
 <circle cx="22" cy="20" r="11" fill="#fff" stroke="#739eba" stroke-width="1.7"/>
 <path d="M 22 14 V 20 L 27 23" fill="none" stroke="#739eba" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
 </g>
-<text x="791" y="605" fill="#395f78" font-size="21" font-weight="600" >SQLite</text>
-<text x="791" y="633" fill="#7595aa" font-size="15" font-weight="400" >Research checkpoints</text>
-<g transform="translate(1042 610) scale(1)">
+<text x="596" y="922" fill="#395f78" font-size="23" font-weight="600" >SQLite</text>
+<text x="596" y="949" fill="#7595aa" font-size="18" font-weight="400" >Research checkpoints</text>
+<text x="522" y="997" fill="#7595aa" font-size="17" font-weight="400" >Resume completed graph stages</text>
+<g transform="translate(1016 934) scale(1)">
 <path d="M -27 14 L -2 2 L 25 12 V 19 L 0 31 L -27 21 Z" fill="#cc7c7b" stroke="#b86869" stroke-width="1.5"/>
 <path d="M -27 2 L -2 -10 L 25 0 V 7 L 0 19 L -27 9 Z" fill="#cc7c7b" stroke="#b86869" stroke-width="1.5"/>
 <path d="M -27 -10 L -2 -22 L 25 -12 V -5 L 0 7 L -27 -3 Z" fill="#dc9290" stroke="#b86869" stroke-width="1.5"/>
 <path d="M -7 -14 L 1 -17 L 8 -14 L 0 -11 Z" fill="#f9e7dd"/>
 </g>
-<text x="1084" y="605" fill="#936460" font-size="21" font-weight="600" >Redis</text>
-<text x="1146" y="604" fill="#ad8986" font-size="13" font-weight="400" >Optional</text>
-<text x="1084" y="633" fill="#ad8986" font-size="16" font-weight="400" >Search cache</text>
+<text x="1062" y="922" fill="#936460" font-size="23" font-weight="600" >Redis</text>
+<text x="1132" y="920" fill="#ad8986" font-size="15" font-weight="400" >Optional</text>
+<text x="1062" y="949" fill="#ad8986" font-size="19" font-weight="400" >Search cache</text>
+<rect x="989" y="977" width="116" height="26" rx="7" fill="#fff" stroke="#eddfdc" />
+<text x="1047" y="995" fill="#ad8986" font-size="15" font-weight="400" text-anchor="middle">TTL</text>
+<rect x="1122" y="977" width="116" height="26" rx="7" fill="#fff" stroke="#eddfdc" />
+<text x="1180" y="995" fill="#ad8986" font-size="15" font-weight="400" text-anchor="middle">Single-flight</text>
+<rect x="1255" y="977" width="116" height="26" rx="7" fill="#fff" stroke="#eddfdc" />
+<text x="1313" y="995" fill="#ad8986" font-size="15" font-weight="400" text-anchor="middle">Fallback</text>
 </svg>

@@ -90,9 +90,11 @@ For a ready-made canvas without a model, import an [example decision](../../exam
 
 Prism has four main parts: **the decision workspace, decision service, models and sources, and local data and caching**. Specialist agents research the evidence; a deterministic evaluator handles What-if changes. Together they support decisions that can be explained and revisited.
 
-![Illustrated Prism architecture: a canvas, conversation and quotation popover; four specialist agents, evidence checks and What-if evaluation; model and retrieval tools; JSON versions, SQLite checkpoints and optional Redis caching](../assets/system-architecture.en.svg)
+![Detailed Prism architecture: workspace context and request routing; four LangGraph specialists, bounded review/repair and program validation; typed decision artifacts, What-if and decision history; model/source adapters; separate JSON business records, SQLite recovery and optional Redis search caching](../assets/system-architecture.en.svg)
 
 Known condition edits reuse saved evidence; requests for new evidence return to research.
+
+Solid lines show principal handoffs and dependencies; dashed lines show conditional repair, recalculation, recovery and cache paths. The browser is an interaction illustration.
 
 <details>
 <summary>View module responsibilities and data boundaries</summary>

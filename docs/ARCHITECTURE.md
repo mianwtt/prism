@@ -6,6 +6,8 @@ Prism's useful unit is a decision space, not a chat answer. A space contains a q
 
 ![Prism system architecture: the browser workspace, local API, application services, multi-agent research, model/source adapters and separate local stores](assets/system-architecture.en.svg)
 
+The detailed diagram exposes scoped specialist handoffs, review-driven repair, the program eligibility gate and typed decision artifacts. Solid edges show principal handoffs/dependencies; dashed edges distinguish conditional repair, known-condition recalculation, checkpoint recovery and optional search caching. The illustrated workspace is schematic.
+
 The native JavaScript/SVG browser workspace uses the HTTP API in `src/server.mjs` for research, conversation and version operations. Application services combine the LangGraph research subsystem, conversation context, source/schema validation and a deterministic evaluator shared with the browser. Model and source adapters are dependencies of those services. Local JSON snapshots/job records, SQLite checkpoints, optional Redis search entries and browser drafts have separate ownership; the arrows show component dependencies rather than requiring every edit to pass through research.
 
 ## Interaction routes come before research

@@ -1,3 +1,8 @@
+import {decisionGuidance} from '/decision-guidance.mjs';
+import {productOffersView,offerLink} from '/product-offers-view.mjs';
+import {decisionGuidanceView} from '/decision-guidance-view.mjs';
+import {decisionReport} from '/decision-report.mjs';
+import {taskOverview,taskStrip} from '/task-workbench.mjs';
 import {branchComparisonView} from '/branch-comparison-view.mjs';
 import {branchCanvas,connectBranches} from '/branch-canvas.mjs';
 import {researchView,evidenceView,memoryView,versionDiffView} from '/workflow-view.mjs';
@@ -6,38 +11,43 @@ import {readWorkspaceDraft,writeWorkspaceDraft,clearWorkspaceDraft,exportWorkspa
 import {decisionScenarios,evaluateDecision,parseDecisionChange,summarizeConditions,validateDecisionSettings,formatDecisionValue,hasDecisionValue,changeScenarioSettings,resolveScenarioInheritance} from '/decision-schema.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const amount=formatDecisionValue;
-const tabIcon=key=>'<svg viewBox="0 0 20 20" aria-hidden="true">'+({canvas:'<path d="M4 10h5m0 0c4 0 3-5 7-5m-7 5c4 0 3 5 7 5"/><circle cx="3" cy="10" r="1.5"/><circle cx="17" cy="5" r="1.5"/><circle cx="17" cy="15" r="1.5"/>',research:'<circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/>',evidence:'<path d="M5 2h7l4 4v12H5zM12 2v5h4M8 10h5M8 13h5"/>',memory:'<path d="M5 3h10v15l-5-4-5 4z"/>'}[key]||'')+'</svg>';
+const tabIcon=key=>'<svg viewBox="0 0 20 20" aria-hidden="true">'+({overview:'<path d="M4 2h8l4 4v12H4zM12 2v5h4M7 10h6M7 13h4"/>',canvas:'<path d="M4 10h5m0 0c4 0 3-5 7-5m-7 5c4 0 3 5 7 5"/><circle cx="3" cy="10" r="1.5"/><circle cx="17" cy="5" r="1.5"/><circle cx="17" cy="15" r="1.5"/>',research:'<circle cx="8" cy="8" r="5"/><path d="m12 12 5 5"/>',evidence:'<path d="M5 2h7l4 4v12H5zM12 2v5h4M8 10h5M8 13h5"/>',memory:'<path d="M5 3h10v15l-5-4-5 4z"/>'}[key]||'')+'</svg>';
 export function mountUniversal(root,space,{api,onLoad,onResearch,toast,onBackgroundResult=async()=>{}}){
   root.__disconnectBranches?.();
   const mountToken={};root.__universalMount=mountToken;
   root.dataset.displaySpace=space.id;
-  if(root.dataset.flowRoot!==(space.rootId||space.id)){delete root.dataset.flowZoom;delete root.dataset.workflowPane;delete root.dataset.evidenceCandidate;delete root.dataset.canvasInspectorOpen;delete root.dataset.canvasDock;delete root.dataset.canvasThreadOpen;root.dataset.flowRoot=space.rootId||space.id;}
+  if(root.dataset.flowRoot!==(space.rootId||space.id)){delete root.dataset.flowZoom;delete root.dataset.workflowPane;delete root.dataset.evidenceCandidate;delete root.dataset.canvasInspectorOpen;delete root.dataset.canvasDock;delete root.dataset.canvasThreadOpen;delete root.dataset.answerCandidate;root.dataset.flowRoot=space.rootId||space.id;}
   document.documentElement.classList.remove('option-dialog-open');
   if(!root.dataset.imageErrorsHandled){root.addEventListener('error',event=>{if(event.target.tagName==='IMG')event.target.hidden=true;},true);root.dataset.imageErrorsHandled='true';}
   const draft=readWorkspaceDraft(space);
-  let scenarios=draft?.scenarios||decisionScenarios(space),active=draft?.activeScenarioId||(scenarios.some(s=>s.id===space.activeScenarioId)?space.activeScenarioId:'scenario-baseline'),pane=draft?.pane||root.dataset.workflowPane||'canvas',dirty=draft?.dirty||false,saving=false,panel=false,panelMode='option',composer=false,disconnect=()=>{};
+  const viewKey='prism:workspace-view:'+space.id;
+  const rememberedPane=()=>{try{const value=sessionStorage.getItem(viewKey);return ['canvas','overview','evidence','memory','research'].includes(value)?value:null;}catch{return null;}};
+  let scenarios=draft?.scenarios||decisionScenarios(space),active=draft?.activeScenarioId||(scenarios.some(s=>s.id===space.activeScenarioId)?space.activeScenarioId:'scenario-baseline'),pane=draft?.pane||rememberedPane()||root.dataset.workflowPane||'canvas',dirty=draft?.dirty||false,saving=false,panel=false,panelMode='option',composer=false,disconnect=()=>{};
   const schema=space.schema,baseline=scenarios[0],inspected=new Map(),reactions=new Map();
   const sizePrompt=input=>{if(input){input.style.height='26px';input.style.height=Math.min(90,Math.max(26,input.scrollHeight))+'px';}};
-  let conditionEditor=null,editSession=null,modalEvidence=false,threadOpen=root.dataset.canvasThreadOpen==='true',compareOpen=false,compareLeft=baseline.id,compareRight=active,compareCategory='auto';
-  let dockTab='conditions',dockOpen=root.dataset.canvasInspectorOpen!==undefined?root.dataset.canvasInspectorOpen==='true':innerWidth>760&&(space.canvasScenarioIds||[]).filter(id=>id!=='scenario-baseline').length<4;
+  let conditionEditor=null,editSession=null,modalEvidence=false,threadOpen=root.dataset.canvasThreadOpen==='true',compareOpen=false,compareLeft=baseline.id,compareRight=active,compareCategory='auto',offersOpen=false,offerCandidate=null;
+  let dockTab=root.dataset.canvasDock==='guidance'?'guidance':'conditions',dockOpen=root.dataset.canvasInspectorOpen!==undefined?root.dataset.canvasInspectorOpen==='true':innerWidth>760&&(space.canvasScenarioIds||[]).filter(id=>id!=='scenario-baseline').length<4;
   let evidenceCandidate=root.dataset.evidenceCandidate||space.candidates[0]?.id,researchDraft=draft?.researchDraft||'',workflowBusy=false,decisionDraft=draft?.decisionDraft||{candidateId:space.decision?.candidateId||'',rationale:space.decision?.rationale||''};
   let visibleIds=draft?.canvasScenarioIds||[...new Set(['scenario-baseline',...(space.canvasScenarioIds||[active])])],messages=structuredClone(space.conversation||[]),chatBusy=false,chatDraft=draft?.chatDraft||'',draftStored=true;
-  const draftState=()=>({scenarios,activeScenarioId:active,canvasScenarioIds:visibleIds,dirty,pane,chatDraft,researchDraft,decisionDraft});
-  const hasDraft=()=>dirty||Boolean(chatDraft||researchDraft)||decisionDraft.candidateId!==(space.decision?.candidateId||'')||decisionDraft.rationale!==(space.decision?.rationale||'');
+  const draftState=()=>({scenarios,activeScenarioId:active,canvasScenarioIds:visibleIds,dirty,pane,chatDraft,researchDraft,decisionDraft,taskNoteDraft:taskNote});
+  const hasDraft=()=>dirty||noteChanged()||Boolean(chatDraft||researchDraft)||decisionDraft.candidateId!==(space.decision?.candidateId||'')||decisionDraft.rationale!==(space.decision?.rationale||'');
   function persistDraft(){if(hasDraft())draftStored=writeWorkspaceDraft(space,draftState());else{clearWorkspaceDraft(space.id);draftStored=true;}}
   root.__hasUnsavedUniversal=()=>hasDraft()&&!draftStored;
-  function accepted(result,{decisionSaved=false}={}){
+  function accepted(result,{decisionSaved=false,noteSaved=false}={}){
     clearWorkspaceDraft(space.id);dirty=false;
     const pendingDecision=!decisionSaved&&(decisionDraft.candidateId!==(result.decision?.candidateId||'')||decisionDraft.rationale!==(result.decision?.rationale||''));
-    if(pendingDecision||researchDraft||chatDraft)writeWorkspaceDraft(result,{...draftState(),scenarios:result.scenarios,activeScenarioId:result.activeScenarioId,canvasScenarioIds:result.canvasScenarioIds||[],dirty:false,decisionDraft:decisionSaved?{candidateId:result.decision?.candidateId||'',rationale:result.decision?.rationale||''}:decisionDraft});
+    if(pendingDecision||researchDraft||chatDraft||(!noteSaved&&taskNote!==(result.taskMemory?.text||'')))writeWorkspaceDraft(result,{...draftState(),scenarios:result.scenarios,activeScenarioId:result.activeScenarioId,canvasScenarioIds:result.canvasScenarioIds||[],dirty:false,taskNoteDraft:noteSaved?result.taskMemory?.text||'':taskNote,decisionDraft:decisionSaved?{candidateId:result.decision?.candidateId||'',rationale:result.decision?.rationale||''}:decisionDraft});
   }
+  let taskNote=draft?.taskNoteDraft??space.taskMemory?.text??'';
+  const noteChanged=()=>taskNote!==(space.taskMemory?.text||'');
   let chatFocus=space.conversationState?.focus;
   const focusedField=()=>chatFocus?.scenarioId===active&&chatFocus.fields?.length===1?chatFocus.fields[0]:null;
   function setThread(open){
     threadOpen=open;root.dataset.canvasThreadOpen=String(open);
+    if(open&&innerWidth<=760&&dockOpen){dockOpen=false;root.dataset.canvasInspectorOpen='false';const studio=root.querySelector('.compact-studio');if(studio)studio.dataset.inspectorOpen='false';}
     const panel=root.querySelector('.canvas-thread');if(panel)panel.hidden=!open;
     root.querySelector('.prompt-history')?.setAttribute('aria-expanded',String(open));
-    if(open)requestAnimationFrame(()=>{const list=root.querySelector('.conversation-messages');if(list)list.scrollTop=list.scrollHeight;});
+    if(open)requestAnimationFrame(()=>{const list=root.querySelector('.conversation-messages'),last=list?.querySelector('.chat-message.assistant:last-child');if(list){if(last?.querySelector('.decision-answer'))list.scrollTop+=last.getBoundingClientRect().top-list.getBoundingClientRect().top-10;else list.scrollTop=list.scrollHeight;}});
   }
   function closeComparison(){compareOpen=false;render();root.querySelector('[data-compare-open]')?.focus({preventScroll:true});}
   function showPath(id){
@@ -98,9 +108,9 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast,onBackgro
     const reasons=row?[...row.reasons,...row.missing.map(label=>label+'缺少可用依据')]:[];
     const explanation=row&&row.status!=='eligible'?'<p class="tree-reference-note">这是已有参考方案，未作为符合条件的推荐。'+esc(reasons.join('；'))+'</p>':'';
     const tabs='<nav class="option-dialog-tabs" aria-label="方案详情视图"><button type="button" data-option-tab="overview" aria-pressed="'+!modalEvidence+'">方案信息</button><button type="button" data-option-tab="evidence" aria-pressed="'+modalEvidence+'">来源依据</button></nav>';
-    const details=tabs+(modalEvidence?optionEvidence(candidate):explanation+option(candidate,'方案信息'));
+    const details=tabs+(modalEvidence?optionEvidence(candidate):explanation+option(candidate,'方案信息')+offerLink(space,candidate));
     root.__flowParents=Object.fromEntries(scenarios.map(s=>[s.id,s.parentScenarioId||baseline.id]));
-    return branchCanvas(space,scenarios,active,inspected,{panel,composer,details,editor:conditionEditor,reactions,visibleIds,messages,chatBusy,chatDraft,dockTab,dockOpen,threadOpen,focusField:focusedField()});
+    return branchCanvas(space,scenarios,active,inspected,{panel,composer,details,editor:conditionEditor,reactions,visibleIds,messages,chatDraft,dockTab,dockOpen,threadOpen,chatBusy:chatBusy||workflowBusy,answerCandidate:root.dataset.answerCandidate||'',guidance:dockTab==='guidance'?decisionGuidanceView(space,selected,{busy:chatBusy||workflowBusy}):'',focusField:focusedField()});
   }
   async function sendConversation(message,extra={}){
     if(chatBusy||message.length<2)return;
@@ -123,19 +133,33 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast,onBackgro
       if(result.nextAction?.type==='research')await onResearch(result.nextAction.jobId,{inline:true});
     }catch(error){chatBusy=false;if(root.__universalMount===mountToken&&!root.closest('[hidden]')){render();root.querySelector('#conversation-message')?.focus({preventScroll:true});}throw error;}
   }
+  async function generateProposal(){
+    if(chatBusy||workflowBusy)return;
+    const originalScenario=active;
+    chatBusy=true;render();
+    try{
+      const result=await api('/api/spaces/'+space.id+'/conversation',{method:'POST',body:JSON.stringify({message:'请基于当前候选和条件生成选型解读，说明建议、备选与取舍，引用已有依据；不要修改条件，也不要启动新的研究。',purpose:'proposal',scenarios,scenarioId:originalScenario,canvasScenarioIds:visibleIds,autoResearch:false})});
+      accepted(result);
+      if(root.__universalMount!==mountToken||root.closest('[hidden]')){await onBackgroundResult();toast('选型建议已保存在原来的任务中。');return;}
+      const selectedResult=result.scenarios.find(s=>s.id===active);
+      const displayed=active===originalScenario||!selectedResult?result:{...result,activeScenarioId:active,settings:structuredClone(selectedResult.settings),canvasScenarioIds:[...visibleIds]};
+      await onLoad(displayed);
+      toast(active===originalScenario?'当前建议书已更新，条件和来源保留。':'原分支的选型解读已保存。');
+    }finally{chatBusy=false;if(root.__universalMount===mountToken&&!root.closest('[hidden]'))render();}
+  }
   async function save(decision,extra={}){
     if(saving)return;saving=true;
-    try{const result=await api('/api/spaces/'+space.id+'/versions',{method:'POST',body:JSON.stringify({adaptive:true,scenarios,activeScenarioId:active,canvasScenarioIds:visibleIds,...extra,...(decision?{decision}:{})})});accepted(result,{decisionSaved:Boolean(decision)});await onLoad(result);if(pane!=='canvas')root.querySelector('[data-u-pane="'+pane+'"]')?.click();toast('已保存，当前情况和旧版本都已保留。');return result;}finally{saving=false;}
+    try{const result=await api('/api/spaces/'+space.id+'/versions',{method:'POST',body:JSON.stringify({adaptive:true,scenarios,activeScenarioId:active,canvasScenarioIds:visibleIds,...extra,...(decision?{decision}:{})})});accepted(result,{decisionSaved:Boolean(decision),noteSaved:extra?.taskMemory!==undefined});await onLoad(result);if(pane!=='canvas')root.querySelector('[data-u-pane="'+pane+'"]')?.click();toast('已保存，当前情况和旧版本都已保留。');return result;}finally{saving=false;}
   }
-  async function continueResearch(request,{refresh=false}={}){
+  async function continueResearch(request,{refresh=false,investigationId}={}){
     if(workflowBusy)return;
     if(space.mode==='demo')throw new Error('演示使用虚构资料。请从首页创建真实研究。');
     workflowBusy=true;render();
     try{
-      const parent=await api('/api/spaces/'+space.id+'/versions',{method:'POST',body:JSON.stringify({adaptive:true,scenarios,activeScenarioId:active,canvasScenarioIds:visibleIds})});
-      const job=await api('/api/spaces/'+parent.id+(refresh?'/refresh':'/adapt'),{method:'POST',body:JSON.stringify(refresh?{adaptive:true}:{change:request,scenarios:parent.scenarios,scenarioId:active})});
-      await onResearch(job.id);
-    }catch(error){workflowBusy=false;render();throw error;}finally{workflowBusy=false;}
+      const parent=await api('/api/spaces/'+space.id+'/versions',{method:'POST',body:JSON.stringify({adaptive:true,scenarios,activeScenarioId:active,canvasScenarioIds:visibleIds,...(noteChanged()?{taskMemory:{text:taskNote}}:{})})});
+      const job=await api('/api/spaces/'+parent.id+(investigationId?'/investigate':refresh?'/refresh':'/adapt'),{method:'POST',body:JSON.stringify(investigationId?{investigationId,scenarios:parent.scenarios,scenarioId:parent.activeScenarioId}:refresh?{adaptive:true}:{change:request,scenarios:parent.scenarios,scenarioId:parent.activeScenarioId})});
+      await onResearch(job.id,{inline:Boolean(investigationId)});
+    }finally{workflowBusy=false;if(root.__universalMount===mountToken&&!root.closest('[hidden]'))render();}
   }
   function recordedContext(){
     const context=space.decision?.context;if(!context)throw new Error('这条旧记录没有保存完整条件');
@@ -150,16 +174,16 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast,onBackgro
   }
   function render(keepControls=false){
     persistDraft();
-    root.dataset.canvasDock=dockTab;root.dataset.canvasThreadOpen=String(threadOpen);
+    root.dataset.canvasDock=dockTab;root.dataset.activeScenario=active;root.dataset.canvasThreadOpen=String(threadOpen);
     root.dataset.canvasInspectorOpen=String(dockOpen);
-    root.dataset.workflowPane=pane;if(evidenceCandidate)root.dataset.evidenceCandidate=evidenceCandidate;
+    root.dataset.workflowPane=pane;try{sessionStorage.setItem(viewKey,pane);}catch{}if(evidenceCandidate)root.dataset.evidenceCandidate=evidenceCandidate;
     const retainedControls=keepControls?root.querySelector('.board-controlbar'):null;
     const viewport=root.querySelector('.flow-viewport'),canvasScroll=viewport?{left:viewport.scrollLeft,top:viewport.scrollTop}:null;
     disconnect();
-    document.documentElement.classList.toggle('option-dialog-open',(panel||compareOpen)&&pane==='canvas');
-    const navigation=`<nav class="u-tabs" aria-label="决策工作区">${[['canvas','What-if 画布'],['evidence','资料依据'],['memory','我的判断']].map(([key,title])=>`<button type="button" data-u-pane="${key}" aria-current="${pane===key?'page':'false'}">${tabIcon(key)}${title}</button>`).join('')}</nav>`;
-    const menu=`<details class="space-menu" ${dirty?'data-dirty="true"':''}><summary aria-label="空间菜单" title="空间菜单"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></summary><div class="space-menu-list"><button type="button" data-u-save>${dirty?'保存修改':'另存为新版本'}</button><details class="u-original-question"><summary>查看原始问题</summary><p>${esc(space.question)}</p></details><button type="button" data-u-pane="research">更多研究选项</button><hr/><button type="button" data-space-action="settings">研究设置</button><button type="button" data-space-action="jobs">研究任务</button><hr/><button type="button" class="space-delete-action" data-delete-space="${esc(space.id)}" data-delete-title="${esc(space.title)}">删除决策空间</button></div></details>`;
-    const html=`<header class="u-heading"><div class="u-title"><h1 title="${esc(space.title)}">${esc(space.title)}</h1>${space.mode==='demo'?'<span class="u-demo-note" title="方案和数值均为虚构，用来体验条件变化。">虚构演示</span>':''}</div>${navigation}${menu}</header><div class="u-pane">${pane==='canvas'?canvas():pane==='evidence'?evidenceView(space,scenarios,current(),{candidateId:evidenceCandidate}):pane==='research'?researchView(space,scenarios,current(),{draft:researchDraft,busy:workflowBusy}):memoryView(space,scenarios,current(),{draft:decisionDraft})}</div>${compareOpen&&pane==='canvas'?branchComparisonView(space,scenarios,compareLeft,compareRight,compareCategory):''}`;
+    document.documentElement.classList.toggle('option-dialog-open',offersOpen||(panel||compareOpen)&&pane==='canvas');
+    const navigation=`<nav class="u-tabs" aria-label="决策工作区">${[['canvas','What-if 画布'],['overview','决策建议书'],['evidence','资料依据'],['memory','我的判断']].map(([key,title])=>`<button type="button" data-u-pane="${key}" aria-current="${pane===key?'page':'false'}">${tabIcon(key)}${title}</button>`).join('')}</nav>`;
+    const menu=`<details class="space-menu" ${dirty?'data-dirty="true"':''}><summary aria-label="空间菜单" title="空间菜单"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></summary><div class="space-menu-list"><button type="button" data-u-save>${dirty?'保存修改':'另存为新版本'}</button><details class="u-original-question"><summary>查看原始问题</summary><p>${esc(space.question)}</p></details><button type="button" data-export-brief>导出当前建议书</button><button type="button" data-u-pane="research">更多研究选项</button><hr/><button type="button" data-space-action="settings">研究设置</button><button type="button" data-space-action="jobs">研究任务</button><hr/><button type="button" class="space-delete-action" data-delete-space="${esc(space.id)}" data-delete-title="${esc(space.title)}">删除决策空间</button></div></details>`;
+    const html=`<header class="u-heading"><div class="u-title"><h1 title="${esc(space.title)}">${esc(space.title)}</h1>${space.mode==='demo'?'<span class="u-demo-note" title="方案和数值均为虚构，用来体验条件变化。">虚构演示</span>':''}</div>${navigation}${menu}</header>${pane==='canvas'?taskStrip(space,current(),scenarios):''}<div class="u-pane">${pane==='overview'?taskOverview(space,scenarios,current(),{note:taskNote,noteDirty:noteChanged(),busy:chatBusy||workflowBusy}):pane==='canvas'?canvas():pane==='evidence'?evidenceView(space,scenarios,current(),{candidateId:evidenceCandidate}):pane==='research'?researchView(space,scenarios,current(),{draft:researchDraft,busy:workflowBusy}):memoryView(space,scenarios,current(),{draft:decisionDraft})}</div>${compareOpen&&pane==='canvas'?branchComparisonView(space,scenarios,compareLeft,compareRight,compareCategory):''}`;
     if(retainedControls){
       const next=document.createElement('template');next.innerHTML=html;
       const oldDeck=root.querySelector('.tree-branch-deck'),newDeck=next.content.querySelector('.tree-branch-deck');
@@ -168,7 +192,7 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast,onBackgro
       disconnect=connectBranches(root);root.__disconnectBranches=disconnect;
       const chatContext=root.querySelector('#u-conversation>label'),nextContext=next.content.querySelector('#u-conversation>label');if(chatContext&&nextContext)chatContext.textContent=nextContext.textContent;
       const context=root.querySelector('.prompt-context'),freshContext=next.content.querySelector('.prompt-context');if(context&&freshContext)context.replaceWith(freshContext);
-      for(const selector of ['.inspector-impact','.inspector-references']){const old=root.querySelector(selector),fresh=next.content.querySelector(selector);if(old&&fresh)old.replaceWith(fresh);}
+      for(const selector of ['.mission-strip','.canvas-outcome','.inspector-impact','.inspector-references']){const old=root.querySelector(selector),fresh=next.content.querySelector(selector);if(old&&fresh)old.replaceWith(fresh);}
       for(const node of root.querySelectorAll('[data-tree-node]'))node.classList.toggle('is-active',node.dataset.treeNode===active);
       root.querySelector('.tree-inspector')?.remove();
       if(keepControls==='live'){retainedControls.replaceWith(next.content.querySelector('.board-controlbar'));const save=root.querySelector('[data-u-save]');if(save)save.textContent=dirty?'保存修改':'另存为新版本';root.querySelector('.space-menu')?.toggleAttribute('data-dirty',dirty);return;}
@@ -179,7 +203,10 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast,onBackgro
       return;
     }
     root.innerHTML=html;
-    for(const control of root.querySelectorAll('[data-live-input],[data-live-range],[data-live-condition],[data-u-weight]'))control.disabled=chatBusy;
+    const offerAvailable=space.candidates.some(c=>c.commerce)||space.sources.some(s=>s.productObservation||s.merchantObservation);
+    if(offerAvailable)root.querySelector('.flow-tools')?.insertAdjacentHTML('afterbegin','<button type="button" data-offers-open aria-label="同款比价"><span>同款比价</span></button>');
+    if(offersOpen){root.insertAdjacentHTML('beforeend',productOffersView(space,current(),{candidateId:offerCandidate,busy:saving||workflowBusy}));const offers=root.querySelector('.offer-dialog');offers.showModal();offers.addEventListener('cancel',e=>{e.preventDefault();offersOpen=false;render();root.querySelector('[data-offers-open]')?.focus();});}
+    for(const control of root.querySelectorAll('[data-live-input],[data-live-range],[data-live-condition],[data-u-weight]'))control.disabled=chatBusy||workflowBusy;
     if(chatBusy){const hint=root.querySelector('.board-control-context>span');if(hint)hint.textContent='这条对话正在处理，条件稍后可调整；仍可切换路径查看。';}
     sizePrompt(root.querySelector('#conversation-message'));
     const thread=root.querySelector('.conversation-messages');if(thread)thread.scrollTop=thread.scrollHeight;
@@ -202,12 +229,54 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast,onBackgro
     }
   }
   root.onclick=async e=>{
+    if(e.target.closest('[data-export-brief]')){
+      try{const report=decisionReport({...space,scenarios},current(),{hasUnsavedChanges:dirty}),url=URL.createObjectURL(new Blob([report],{type:'text/markdown;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download='Prism-决策建议书-v'+(space.version||1)+'.md';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(error){toast(error.message);}return;
+    }
     const exported=e.target.closest('[data-export-workspace]');
     if(exported){e.preventDefault();try{const snapshot=exportWorkspaceSnapshot(space,draftState()),url=URL.createObjectURL(new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='prism-'+space.id+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(error){toast(error.message);}return;}
     if(e.target.id==='conversation-message'){setThread(true);return;}
     const b=e.target.closest('button');if(!b)return;
     try{
-      if(b.hasAttribute('data-thread-close')){setThread(false);root.querySelector('.prompt-history')?.focus({preventScroll:true});}
+      if(b.hasAttribute('data-offers-open')){offerCandidate=b.dataset.offerCandidate||null;offersOpen=true;panel=false;compareOpen=false;render();}
+      else if(b.hasAttribute('data-offers-close')){offersOpen=false;render();root.querySelector('[data-offers-open]')?.focus();}
+      else if(b.dataset.offerProduct){offerCandidate=b.dataset.offerProduct;render();}
+      else if(b.dataset.selectOffer){
+        if(saving||workflowBusy||chatBusy)return;
+        pane='canvas';root.dataset.workflowPane='canvas';
+        const result=await save(undefined,{offerSelection:{candidateId:b.dataset.offerCandidate,offerId:b.dataset.selectOffer},...(noteChanged()?{taskMemory:{text:taskNote}}:{})});
+        if(result){offersOpen=false;root.dataset.workflowPane='canvas';root.dispatchEvent(new CustomEvent('prism:focus-path',{detail:{scenarioId:result.activeScenarioId,readable:true}}));}
+      }
+      else if(b.hasAttribute('data-offer-research')){offersOpen=false;pane='canvas';await continueResearch('核对当前具体商品的完整型号与配置，跨站查找同款的公开报价、运费与优惠条件；保留不同商家的价格，不将不同配置混合。');}
+      else if(b.hasAttribute('data-generate-proposal'))await generateProposal();
+      else if(b.dataset.proposalRef){const evidence=root.querySelector('[data-proposal-evidence="'+CSS.escape(b.dataset.proposalRef)+'"]');if(evidence){const appendix=evidence.closest('.proposal-source-appendix');if(appendix)appendix.open=true;evidence.open=true;evidence.scrollIntoView({behavior:'smooth',block:'center'});evidence.focus({preventScroll:true});}}
+      else if(b.dataset.proposalLocate){pane='canvas';root.dataset.answerCandidate=b.dataset.proposalLocate;showPath(active);dockOpen=false;threadOpen=false;render();requestAnimationFrame(()=>root.dispatchEvent(new CustomEvent('prism:focus-path',{detail:{scenarioId:active,readable:true}})));}
+      else if(b.dataset.proposalSelect){decisionDraft.candidateId=b.dataset.proposalSelect;pane='memory';render();root.querySelector('#u-record textarea')?.focus({preventScroll:true});}
+      else if(b.dataset.proposalPath){if(!scenarios.some(s=>s.id===b.dataset.proposalPath))return;active=b.dataset.proposalPath;showPath(active);pane='canvas';threadOpen=false;render();requestAnimationFrame(()=>root.dispatchEvent(new CustomEvent('prism:focus-path',{detail:{scenarioId:active,readable:true}})));}
+      else if(b.dataset.askDecision){await sendConversation(b.dataset.askDecision);}
+      else if(b.dataset.answerCandidate){
+        if(!scenarios.some(s=>s.id===b.dataset.answerScenario&&s.candidateIds.includes(b.dataset.answerCandidate)))return;
+        active=b.dataset.answerScenario;root.dataset.answerCandidate=b.dataset.answerCandidate;showPath(active);threadOpen=false;panel=false;dockOpen=false;render();
+        requestAnimationFrame(()=>root.dispatchEvent(new CustomEvent('prism:focus-path',{detail:{scenarioId:active,readable:true}})));
+      }
+      else if(b.hasAttribute('data-open-guidance')){threadOpen=false;dockTab='guidance';dockOpen=true;render();}
+      else if(b.dataset.guidanceSuggestion){
+        if(chatBusy||workflowBusy)return;
+        const proposal=decisionGuidance(space,current()).suggestions.find(p=>p.id===b.dataset.guidanceSuggestion);
+        if(!proposal)throw new Error('当前条件已变化，请重新查看建议。');
+        const old=current(),name='如果'+proposal.changes.map(change=>change.label+'改为'+amount(change.value,schema.fields.find(f=>f.key===change.field))).join('，')+'？';
+        const existing=scenarios.find(s=>s.parentScenarioId===old.id&&JSON.stringify(s.settings)===JSON.stringify(proposal.settings)&&JSON.stringify(s.candidateIds)===JSON.stringify(old.candidateIds));
+        if(existing){active=existing.id;showPath(active);}else fork(proposal.settings,name.slice(0,80));
+        pane='canvas';dockTab='conditions';dockOpen=true;panel=false;render();
+        requestAnimationFrame(()=>root.dispatchEvent(new CustomEvent('prism:focus-path',{detail:{scenarioId:active}})));
+        toast(existing?'已定位相同条件的分支。':'已建立假设分支，原始情况保留。');
+      }
+      else if(b.dataset.investigateDecision){
+        if(chatBusy||workflowBusy)return;
+        if(space.mode==='demo'||b.dataset.investigateKind==='review'){evidenceCandidate=b.dataset.investigateCandidate;pane='evidence';render();}
+        else await continueResearch('',{investigationId:b.dataset.investigateDecision});
+      }
+      else if(b.dataset.missionCandidate){evidenceCandidate=b.dataset.missionCandidate;pane='evidence';render();}
+      else if(b.hasAttribute('data-thread-close')){setThread(false);root.querySelector('.prompt-history')?.focus({preventScroll:true});}
       else if(b.hasAttribute('data-thread-toggle'))setThread(!threadOpen);
       else if(b.dataset.chatFocus){chatFocus={scenarioId:active,fields:[b.dataset.chatFocus]};threadOpen=true;render();root.querySelector('#conversation-message')?.focus({preventScroll:true});}
       else if(b.dataset.chatClear){const field=schema.fields.find(field=>field.key===b.dataset.chatClear);if(field)await sendConversation('取消'+(field.conditionLabel||field.label)+'限制');}
@@ -241,8 +310,8 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast,onBackgro
       else if(b.hasAttribute('data-refresh-evidence'))await continueResearch('',{refresh:true});
       else if(b.hasAttribute('data-recorded-context')){recordedContext();pane='canvas';render();}
       else if(b.hasAttribute('data-decision-research')){if(space.decision?.context)recordedContext();researchDraft=`保留当时的条件，继续核对「${space.decision?.candidateName||'当前考虑的方案'}」的公开参数和引用，说明新资料是否改变之前的判断。`.slice(0,300);pane='research';render();}
-      else if(b.dataset.dockView){dockTab=b.dataset.dockView;dockOpen=true;render();}
-      else if(b.hasAttribute('data-toggle-inspector')){dockOpen=!dockOpen;render();}
+      else if(b.dataset.dockView){threadOpen=false;dockTab=b.dataset.dockView;dockOpen=true;render();}
+      else if(b.hasAttribute('data-toggle-inspector')){threadOpen=false;dockOpen=!dockOpen;render();}
       else if(b.dataset.liveCondition){editSession=null;applyLive(b.dataset.liveCondition,JSON.parse(b.dataset.liveValue),b.dataset.liveScenario);}
       else if(b.dataset.tuneCondition){active=b.dataset.tuneScenario;dockTab='conditions';dockOpen=true;render();root.querySelector('[data-live-input="'+b.dataset.tuneCondition+'"]')?.focus({preventScroll:true});}
       else if(b.dataset.undoCondition){const change=reactions.get(b.dataset.undoCondition),branch=scenarios.find(s=>s.id===b.dataset.undoCondition);if(change&&branch&&branch.id!==baseline.id){updateBranchSettings(branch.id,change.beforeSettings,{overrides:change.beforeOverrides});reactions.delete(branch.id);active=branch.id;render('live');}}
@@ -302,13 +371,15 @@ export function mountUniversal(root,space,{api,onLoad,onResearch,toast,onBackgro
         validateDecisionSettings(next,schema);
         if(JSON.stringify(next)===JSON.stringify(current().settings))return;
         if(active===baseline.id)fork(next,'如果换成这组条件？');else updateBranchSettings(active,next);render();
-      }else if(form.id==='u-record'){const values=new FormData(form);await save({candidateId:values.get('candidateId')||null,rationale:values.get('rationale')||''});}
+      }else if(form.id==='mission-note-form'){await save(undefined,{taskMemory:{text:taskNote}});}
+      else if(form.id==='u-record'){const values=new FormData(form);await save({candidateId:values.get('candidateId')||null,rationale:values.get('rationale')||''});}
     }catch(error){toast(error.message);}
   };
   root.onpointerdown=e=>{if(e.target.id==='conversation-message')setThread(true);else if(threadOpen&&!e.target.closest('.canvas-prompt'))setThread(false);if(!e.target.closest('.space-menu')){const menu=root.querySelector('.space-menu');if(menu)menu.open=false;}if(e.target.matches('[data-live-range]'))editSession={scenarioId:active,settings:structuredClone(current().settings),overrides:structuredClone(current().overrides)};};
   root.onkeydown=e=>{if(e.key==='Escape'&&threadOpen&&!compareOpen&&!panel){setThread(false);root.querySelector('.prompt-history')?.focus({preventScroll:true});}if(e.key==='Escape'){const menu=root.querySelector('.space-menu[open]');if(menu){menu.open=false;menu.querySelector('summary').focus();}}if(e.target.id==='conversation-message'&&e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();e.target.form.requestSubmit();}};
   root.onfocusin=e=>{if(e.target.id==='conversation-message')setThread(true);if(e.target.matches('[data-live-input]')){chatFocus={scenarioId:active,fields:[e.target.dataset.liveInput]};editSession={scenarioId:active,settings:structuredClone(current().settings),overrides:structuredClone(current().overrides)};}};
   root.oninput=e=>{
+    if(e.target.id==='mission-note'){taskNote=e.target.value;persistDraft();const status=root.querySelector('.mission-note footer small');if(status)status.textContent=noteChanged()?'有未保存内容':'已随当前版本保存';return;}
     if(e.target.id==='followup-message'){researchDraft=e.target.value;persistDraft();return;}
     if(e.target.closest('#u-record')&&e.target.name==='rationale'){decisionDraft.rationale=e.target.value;persistDraft();return;}
     if(e.target.id==='conversation-message'){chatDraft=e.target.value;sizePrompt(e.target);persistDraft();return;}

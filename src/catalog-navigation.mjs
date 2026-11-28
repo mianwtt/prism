@@ -1,3 +1,4 @@
+import {attachRetailCatalog} from './retail-catalog.mjs';
 import {randomUUID} from 'node:crypto';
 import {safeUrl} from './evidence.mjs';
 import {attachRentalPage} from './public-rental-read.mjs';
@@ -46,7 +47,7 @@ export async function refineObservedCatalogs(sources,contract,io,{question='',ev
     try{
       const page=await io.fetchSource(url),text=typeof page==='string'?page:page?.text||page?.raw_content;if(!text)break;
       const source={id:'source-'+randomUUID().slice(0,12),url,title:page?.title||'筛选目录',text:text.slice(0,30000),kind:'page',retrievedAt:page?.observedAt||new Date().toISOString()};
-      attachRentalPage(source,page);attachMerchantPage(source,page);fresh.unshift(source);frontier=[source];
+      attachRentalPage(source,page);attachMerchantPage(source,page);attachRetailCatalog(source,page);fresh.unshift(source);frontier=[source];
     }catch{break;}
   }
   return {sources:fresh,calls:{selection,read}};

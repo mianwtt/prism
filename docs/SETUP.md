@@ -43,6 +43,22 @@ The measured rental runs used `qwen3.5:9b`; this records that configuration, not
 
 Compatible Chat Completions endpoints can replace Ollama. Set their Base URL, exact model ID and provider key in the same screen. Tavily is an optional search backend requiring its own key.
 
+### SearXNG and additional page reading
+
+With Docker Desktop running, start the bundled local search service:
+
+```sh
+npm run search:up
+```
+
+This starts a pinned SearXNG image on **http://127.0.0.1:4330**, enables its JSON API, and checks an actual search response before reporting success. Select **SearXNG** in 研究设置 and enter that URL. Set `SEARXNG_ENGINES=bingrss` in `.env` to explicitly select the bundled Bing public RSS reader; restart the app after changing `.env`. No tofu Python environment or Tavily key is required. The service reads Bing's public RSS search results, not a paid search API. Its results are discovery leads, never price evidence. Shop-native catalogues supplement missing or irrelevant results.
+
+The generated service secret stays in ignored `work/search-service/settings.yml`. Existing settings are preserved. Stop the service with `npm run search:down`. For another instance, enable JSON (`search.formats: [html, json]`); some public instances disable JSON, and `403` means that API is unavailable. Native engine availability varies by network; the checked local setup uses `bingrss` rather than assuming every engine works.
+
+Set `SEARXNG_URL` alongside tofu/Tavily settings to add another discovery service. Optional dynamic rendering uses an existing Crawl4AI service via `CRAWL4AI_URL` and `CRAWL4AI_API_TOKEN`; these services are not silently installed. See [same-product offers](MULTI-SOURCE-OFFERS.md).
+
+An actually verified task is: `预算2000元，购买树莓派5的8GB单板，不要配件套装，比较不同商家的公开报价。` DFRobot and Waveshare readers follow public catalogue links, verify the detail's selected RAM and bundle, and retain original photographs. Waveshare's JavaScript price uses Microsoft Edge: install Edge and set `PRISM_BROWSER_CHANNEL=msedge` if needed. Public prices can change; the dated acceptance record is an observation, not a price guarantee.
+
 Do not put credentials in questions, exported decisions, screenshots or issue reports.
 
 ## Configuration and storage
@@ -52,7 +68,9 @@ The UI stores provider settings in ignored `data/provider-settings.json`. Altern
 | Variable | Purpose |
 | --- | --- |
 | `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` | Model connection |
-| `SEARCH_PROVIDER` | `tofu` or `tavily` |
+| `SEARCH_PROVIDER` | `tofu`, `tavily` or `searxng` |
+| `SEARXNG_URL`, `SEARXNG_ENGINES` | SearXNG instance and optional engines; enable JSON format |
+| `CRAWL4AI_URL`, `CRAWL4AI_API_TOKEN` | Optional existing Crawl4AI renderer |
 | `TAVILY_API_KEY` | Required only for Tavily |
 | `PORT`, `HOST` | Defaults: `4317`, `127.0.0.1` |
 | `PRISM_DATA_DIR` | Separate decision/configuration directory |

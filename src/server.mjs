@@ -24,6 +24,7 @@ import {
 } from "./research.mjs";
 import { loadSettings, publicSettings, saveSettings } from "./config.mjs";
 import { createSearchCache } from './search-cache.mjs';
+import {prepareDecisionInvestigation} from './decision-investigation.mjs';
 import packageInfo from "../package.json" with { type: "json" };
 const root = fileURLToPath(new URL("../", import.meta.url));
 async function body(req, limit = 100000) {
@@ -92,7 +93,7 @@ export function createApp({
           agent: { ...adaptiveAgentInfo, checkpointStorage: "sqlite",legacy:agentInfo },
           searchProvider: publicSettings(env).searchProvider,
           searchCache: searchCache.info(),
-          capabilities:{scenarioResearch:true,spaceDeletion:true},
+          capabilities:{scenarioResearch:true,spaceDeletion:true,decisionInvestigation:true},
         });
       if (req.method === "GET" && path === "/api/agent")
         return json(200, { ...adaptiveAgentInfo, checkpointStorage: "sqlite",legacy:agentInfo });
@@ -107,7 +108,7 @@ export function createApp({
       if(req.method==='POST'&&path==='/api/spaces/demo/housing')return json(201,await store.save(housingDemo()));
       if(req.method==='POST'&&path==='/api/spaces/demo/rental-showcase')return json(201,await store.save(rentalShowcase()));
       const match = path.match(
-        /^\/api\/spaces\/([a-f0-9-]{36})(\/versions|\/export|\/diff|\/refresh|\/research|\/explore|\/adapt|\/conversation)?$/,
+        /^\/api\/spaces\/([a-f0-9-]{36})(\/versions|\/export|\/diff|\/refresh|\/research|\/explore|\/adapt|\/investigate|\/conversation)?$/,
       );
       if (match) {
         let previous = await store.get(match[1]);
@@ -116,7 +117,7 @@ export function createApp({
         if(req.method==='POST'&&match[2]==='/conversation'){
           if(jobs.busy)return json(409,{error:'助手正在研究，请等这轮完成后继续对话'});
           const input=await body(req);
-          const automaticResearch=input.autoResearch===true&&previous.mode!=='demo'&&asksForResearch(input.message||'');
+          const automaticResearch=input.purpose!=='proposal'&&input.autoResearch===true&&previous.mode!=='demo'&&asksForResearch(input.message||'');
           if(automaticResearch&&!liveConfigured(env)&&!io)return json(503,{error:'请先连接研究助手，再继续核对公开资料'});
           previous=adaptLegacyDecision(previous);
           const next=await converse(previous,input,previous.mode==='demo'?null:researchIO());
@@ -127,6 +128,14 @@ export function createApp({
             return json(201,{...saved,nextAction:{type:'research',jobId:job.id}});
           }
           return json(201,saved);
+        }
+        if(req.method==='POST'&&match[2]==='/investigate'){
+          const input=await body(req);
+          previous=adaptLegacyDecision(previous);
+          const {scenarios,scenario,focus}=prepareDecisionInvestigation(previous,input);
+          if(!liveConfigured(env)&&!io)return json(503,{error:'请先连接研究助手'});
+          return json(202,jobs.start({type:'adapt',adaptive:true,parentId:previous.id,question:previous.question,
+            change:focus.request,scenarios,scenarioId:scenario.id,researchFocus:focus}));
         }
         if(req.method==='POST'&&match[2]==='/adapt'){
           const input=await body(req);
@@ -223,6 +232,21 @@ export function createApp({
         "/": ["public/index.html", "text/html"],
         "/classic": ["public/index.html", "text/html"],
         "/app.mjs": ["public/app.mjs", "text/javascript"],
+        "/task-workbench.mjs": ["public/task-workbench.mjs", "text/javascript"],
+        "/task-start.mjs": ["public/task-start.mjs", "text/javascript"],
+        "/task-studio.css": ["public/task-studio.css", "text/css"],
+        "/decision-report.mjs": ["src/decision-report.mjs", "text/javascript"],
+        "/decision-guidance.mjs": ["src/decision-guidance.mjs", "text/javascript"],
+        "/decision-guidance-view.mjs": ["public/decision-guidance-view.mjs", "text/javascript"],
+        "/decision-answer.mjs": ["src/decision-answer.mjs", "text/javascript"],
+        "/decision-proposal.mjs": ["src/decision-proposal.mjs", "text/javascript"],
+        "/product-offers.mjs": ["src/product-offers.mjs", "text/javascript"],
+        "/product-offers-view.mjs": ["public/product-offers-view.mjs", "text/javascript"],
+        "/product-offers.css": ["public/product-offers.css", "text/css"],
+        "/decision-proposal-view.mjs": ["public/decision-proposal-view.mjs", "text/javascript"],
+        "/selection-workspace.css": ["public/selection-workspace.css", "text/css"],
+        "/decision-answer-view.mjs": ["public/decision-answer-view.mjs", "text/javascript"],
+        "/decision-studio-upgrade.css": ["public/decision-studio-upgrade.css", "text/css"],
         "/style.css": ["public/style.css", "text/css"],
         "/studio.css": ["public/studio.css", "text/css"],
         "/decision-schema.mjs": ["src/decision-schema.mjs", "text/javascript"],

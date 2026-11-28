@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {suningMobileUrl} from './merchant-browser.mjs';
+import {productDescriptor,sameProduct,offerPriceField} from './product-offers.mjs';
 const clean = value => String(value || '').normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim();
 const key = value => clean(value).replace(/[\s._-]/g, '');
 export function validatedIdentity(raw, candidateName, source) {
@@ -13,6 +14,8 @@ export function validatedIdentity(raw, candidateName, source) {
   return {namespace:raw.namespace,value,quote:raw.quote,sourceId:source.id,scope:raw.namespace==='product-model'?'global':host};
 }
 export function candidateIdentityKey(candidate, sources) {
+  const descriptor=productDescriptor(sources.find(s=>s.id===candidate.sourceId));
+  if(descriptor?.identity)return 'verified-product:'+descriptor.identity+':'+JSON.stringify(Object.entries(descriptor.configuration).sort());
   if (candidate.identity) return `identity:${candidate.identity.namespace}:${candidate.identity.scope}:${key(candidate.identity.value)}`;
   const source = sources.find(s => s.id === candidate.sourceId);
   const productUrl=suningMobileUrl(source?.url);if(productUrl)return 'product-page:'+productUrl;
@@ -33,7 +36,8 @@ export function reconcileCandidates(candidates, sources, schema) {
   for(const candidate of candidates){
     const group=candidateIdentityKey(candidate,sources), previous=groups.get(group);
     if(!previous){groups.set(group,structuredClone(candidate));continue;}
-    for(const field of schema.fields)previous.facts[field.key]=combineFacts(previous.facts[field.key],candidate.facts[field.key]);
+    const differentOffers=sameProduct(productDescriptor(sources.find(s=>s.id===previous.sourceId)),productDescriptor(sources.find(s=>s.id===candidate.sourceId))),price=offerPriceField(schema);
+    for(const field of schema.fields)if(!differentOffers||field.key!==price?.key)previous.facts[field.key]=combineFacts(previous.facts[field.key],candidate.facts[field.key]);
     previous.sourceIds=[...new Set([...(previous.sourceIds||[previous.sourceId]),...(candidate.sourceIds||[candidate.sourceId])])];
     previous.identityEvidence=[...(previous.identityEvidence||[previous.identity].filter(Boolean)),...(candidate.identityEvidence||[candidate.identity].filter(Boolean))];
     if(candidate.name!==previous.name)previous.aliases=[...new Set([...(previous.aliases||[]),candidate.name])];

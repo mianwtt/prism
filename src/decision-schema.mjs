@@ -1,5 +1,6 @@
 // The agent supplies the dimensions. This module validates data, never chooses a domain template.
 import {convertQuantity} from './decision-evidence.mjs';
+import {offerPriceCurrent} from './product-offers.mjs';
 export function validateDecisionSchema(raw) {
   if(!raw||!Array.isArray(raw.fields)||raw.fields.length<1||raw.fields.length>8)throw new Error('比较维度应为 1–8 项');
   const ids=new Set();
@@ -90,12 +91,12 @@ export function summarizeConditions(settings,schema) {
 }
 export function evaluateDecision(candidates,settings,schema) {
   const valid=validateDecisionSettings(settings,schema),total=Object.values(valid.weights).reduce((a,b)=>a+b,0);
-  const ranges=Object.fromEntries(schema.fields.map(f=>{const nums=candidates.map(c=>c.facts[f.key]?.value).filter(Number.isFinite);return [f.key,[Math.min(...nums),Math.max(...nums)]];}));
+  const ranges=Object.fromEntries(schema.fields.map(f=>{const nums=candidates.filter(c=>['cited','confirmed','example'].includes(c.facts[f.key]?.status)&&offerPriceCurrent(c,f)).map(c=>c.facts[f.key]?.value).filter(Number.isFinite);return [f.key,[Math.min(...nums),Math.max(...nums)]];}));
   return candidates.map(c=>{
     const reasons=[],missing=[];let score=0;
     for(const f of schema.fields){
       const fact=c.facts[f.key],v=fact?.value,needed=valid.limits[f.key]!==null||valid.weights[f.key]>0;
-      if(!hasDecisionValue(v,f)||!['cited','confirmed','example'].includes(fact?.status)||(valid.evidenceMode==='reviewed'&&fact?.status==='cited')){if(needed)missing.push(f.label);continue;}
+      if(!hasDecisionValue(v,f)||!['cited','confirmed','example'].includes(fact?.status)||!offerPriceCurrent(c,f)||(valid.evidenceMode==='reviewed'&&fact?.status==='cited')){if(needed)missing.push(f.label);continue;}
       const limit=valid.limits[f.key];
       if(f.type==='boolean'||f.type==='enum'){
         if(limit!==null&&v!==limit)reasons.push(`${f.label}不符合要求`);
@@ -183,7 +184,7 @@ export function validateDecisionScenarios(space,raw) {
     const preview=s.previewCandidateId??prior?.previewCandidateId;
     if(preview!==undefined&&(!candidateIds.includes(preview)||!space.candidates.some(c=>c.id===preview)))throw new Error('请选择该分支内已有的方案');
     const parentScenarioId=s.parentScenarioId??prior?.parentScenarioId??baseline.id;
-    scenarios.push({id:s.id,parentScenarioId,name:s.name.trim(),settings:validateDecisionSettings(s.settings,space.schema),candidateIds,...(s.overrides!==undefined?{overrides:overrideMask(s.overrides,space.schema)}:{}),...(preview?{previewCandidateId:preview}:{}),...(prior?.suggestedBy?{suggestedBy:prior.suggestedBy}:{}),...(prior?.research?{research:structuredClone(prior.research)}:{})});
+    scenarios.push({id:s.id,parentScenarioId,name:s.name.trim(),settings:validateDecisionSettings(s.settings,space.schema),candidateIds,...(s.overrides!==undefined?{overrides:overrideMask(s.overrides,space.schema)}:{}),...(preview?{previewCandidateId:preview}:{}),...(prior?.suggestedBy?{suggestedBy:prior.suggestedBy}:{}),...(prior?.research?{research:structuredClone(prior.research)}:{}),...(prior?.offerChoice?{offerChoice:structuredClone(prior.offerChoice)}:{})});
   }
   if(scenarios.length>24)throw new Error('最多保存 24 个情景');
   for(const branch of scenarios.slice(1)){

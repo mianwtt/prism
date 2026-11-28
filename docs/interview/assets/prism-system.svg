@@ -1,0 +1,349 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1040" viewBox="0 0 1440 1040" role="img" aria-labelledby="title desc" lang="zh" font-family="Segoe UI, Microsoft YaHei, Arial, sans-serif" font-style="normal"><title id="title">Prism 整体架构</title><desc id="desc">Prism 详版整体架构：工作区与对话上下文、请求分流、LangGraph 四角色交接与有界审查补查、结构化决策模型、证据校验、What-if、决策记忆、模型与公开来源，以及分别保存业务版本、检查点和搜索缓存的 JSON、SQLite、Redis。画布为交互示意。</desc><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#71958b"/></marker><pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.8" fill="#dae4e9"/></pattern></defs><rect width="1440" height="1040" rx="16" fill="#fff"/>
+<text x="32" y="40" fill="#183e37" font-size="29" font-weight="700" >PRISM</text>
+<text x="143" y="39" fill="#7a8f96" font-size="13" font-weight="600" letter-spacing="1.8">SYSTEM ARCHITECTURE</text>
+<circle cx="49" cy="81" r="16" fill="#f1f6f3" stroke="#d3e4da" stroke-width="1"/>
+<circle cx="49" cy="76" r="4" fill="#6b9185" stroke="#6b9185" stroke-width="0"/>
+<path d="M 41 87 Q 49 79 57 87" fill="none" stroke="#6b9185" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="77" y="61" width="281" height="40" rx="14" fill="#f6f9f7" stroke="#e1eae5" />
+<text x="92" y="87" fill="#395f54" font-size="18" font-weight="500" >开发电脑，预算 7000 元</text>
+<text x="32" y="142" fill="#183e37" font-size="24" font-weight="650" >决策工作区</text>
+<text x="404" y="142" fill="#183e37" font-size="24" font-weight="650" >决策服务</text>
+<text x="1100" y="142" fill="#183e37" font-size="24" font-weight="650" >模型与资料</text>
+<text x="1014" y="141" fill="#729388" font-size="16" font-weight="500" text-anchor="end">Node.js / HTTP</text>
+<rect x="32" y="164" width="304" height="626" rx="16" fill="#f8fafb" stroke="#d8e5e9" />
+<g transform="translate(42 182) scale(0.86)">
+<g transform="translate(-32 -151)">
+<rect x="32" y="151" width="330" height="303" rx="12" fill="#fff" stroke="#ccdce2" />
+<rect x="32" y="151" width="330" height="30" rx="12" fill="#f0f5f7" stroke="#ccdce2" />
+<rect x="33" y="167" width="328" height="15" fill="#f0f5f7"/>
+<circle cx="47" cy="166" r="2.5" fill="#e4a7a0" stroke="none" stroke-width="0"/>
+<circle cx="59" cy="166" r="2.5" fill="#e5cb91" stroke="none" stroke-width="0"/>
+<circle cx="71" cy="166" r="2.5" fill="#a7cbbb" stroke="none" stroke-width="0"/>
+<rect x="100" y="158" width="191" height="15" rx="5" fill="#fff" stroke="#dfe7eb" />
+<path d="M 119 166 H 240" fill="none" stroke="#c8d8dd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="33" y="182" width="39" height="271" fill="#183e37"/><rect x="72" y="182" width="289" height="271" fill="#f5f8fb"/><rect x="72" y="182" width="289" height="271" fill="url(#dots)"/>
+<path d="M 52 198 L 63 216 H 41 Z M 52 205 L 57 214 H 47 Z" fill="none" stroke="#c5dcb9" stroke-width="1.4"/>
+<path d="M 44 239 H 60" fill="none" stroke="#6b9185" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 44 266 H 60" fill="none" stroke="#6b9185" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 44 293 H 60" fill="none" stroke="#6b9185" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 145 292 C 175 292 176 271 196 271 M 231 267 C 253 267 251 234 279 234 M 231 275 C 253 275 251 311 279 311" fill="none" stroke="#8cb5a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="99" y="267" width="47" height="49" rx="8" fill="#fff" stroke="#d3e1e8" />
+<g transform="translate(122 289) scale(0.83)">
+<rect x="-16" y="-13" width="32" height="22" rx="2" fill="#ecf1fb" stroke="#7d91aa" />
+<path d="M -21 13 H 21 L 16 9 H -16 Z" fill="none" stroke="#7d91aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -10 -7 L 0 -1 L 9 -5" fill="none" stroke="#abbcd5" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<circle cx="213" cy="271" r="18" fill="#edf6f0" stroke="#8cb5a8" stroke-width="1.8"/>
+<path d="M 207 264 L 218 271 L 207 278 M 205 271 H 219" fill="none" stroke="#729b8f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+<rect x="178" y="228" width="72" height="24" rx="6" fill="#fff" stroke="#cde0d5" />
+<text x="214" y="245" fill="#3d7966" font-size="12" font-weight="600" text-anchor="middle">¥5,000</text>
+<rect x="279" y="209" width="58" height="52" rx="8" fill="#fff" stroke="#cddfe7" />
+<g transform="translate(308 232) scale(0.88)">
+<rect x="-16" y="-13" width="32" height="22" rx="2" fill="#ecf1fb" stroke="#7d91aa" />
+<path d="M -21 13 H 21 L 16 9 H -16 Z" fill="none" stroke="#7d91aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -10 -7 L 0 -1 L 9 -5" fill="none" stroke="#abbcd5" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<circle cx="331" cy="214" r="5" fill="#9fcebc" stroke="#fff" stroke-width="1.5"/>
+<rect x="279" y="286" width="58" height="52" rx="8" fill="#fff" stroke="#cddfe7" />
+<g transform="translate(308 309) scale(0.88)">
+<rect x="-16" y="-13" width="32" height="22" rx="2" fill="#ecf1fb" stroke="#7d91aa" />
+<path d="M -21 13 H 21 L 16 9 H -16 Z" fill="none" stroke="#7d91aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -10 -7 L 0 -1 L 9 -5" fill="none" stroke="#abbcd5" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<circle cx="331" cy="291" r="5" fill="#9fcebc" stroke="#fff" stroke-width="1.5"/>
+<rect x="249" y="337" width="124" height="63" rx="9" fill="#fff" stroke="#b9d3df" />
+<rect x="259" y="349" width="72" height="8" rx="2" fill="#e7f0cd" stroke="#e7f0cd" />
+<path d="M 260 369 H 357 M 260 379 H 335" fill="none" stroke="#c2d3dc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="353" cy="352" r="9" fill="#e7f2f8" stroke="#c1dbe8" stroke-width="1"/>
+<text x="353" y="356" fill="#53819b" font-size="11" font-weight="600" text-anchor="middle">1</text>
+<rect x="86" y="412" width="260" height="30" rx="12" fill="#fff" stroke="#d4e3df" />
+<text x="98" y="432" fill="#6c8b81" font-size="13" font-weight="400" >如果预算改为 5000？</text>
+<circle cx="331" cy="427" r="9" fill="#2b806a" stroke="#2b806a" stroke-width="0"/>
+<path d="M 331 432 V 422 M 327 426 L 331 422 L 335 426" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+</g>
+<text x="322" y="460" fill="#8b9da4" font-size="13" font-weight="400" text-anchor="end">交互示意</text>
+<rect x="42" y="480" width="284" height="100" rx="12" fill="#fff" stroke="#d8e5e9" />
+<rect x="50" y="504" width="31" height="22" rx="6" fill="#fff" stroke="#86a9bb" />
+<path d="M 55 526 L 55 533 L 64 526 M 58 513 H 74 M 58 519 H 68" fill="none" stroke="#86a9bb" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+<text x="96" y="516" fill="#395f78" font-size="22" font-weight="600" >当前路径与对话</text>
+<text x="50" y="552" fill="#7595aa" font-size="18" font-weight="400" >条件 · 草稿 · 完整记录</text>
+<rect x="404" y="164" width="628" height="626" rx="16" fill="#f2f8f4" stroke="#cbded4" />
+<rect x="422" y="182" width="592" height="70" rx="11" fill="#fff" stroke="#cfdfd6" />
+<text x="440" y="208" fill="#3d7966" font-size="20" font-weight="600" >请求理解 · 上下文 · 研究任务</text>
+<rect x="440" y="222" width="172" height="22" rx="7" fill="#dfefe6" stroke="#dfefe6" />
+<text x="526" y="238" fill="#5a746b" font-size="15" font-weight="500" text-anchor="middle">继续研究</text>
+<rect x="628" y="222" width="172" height="22" rx="7" fill="#edf1f8" stroke="#edf1f8" />
+<text x="714" y="238" fill="#5a746b" font-size="15" font-weight="500" text-anchor="middle">解释取舍</text>
+<rect x="816" y="222" width="172" height="22" rx="7" fill="#f8f0df" stroke="#f8f0df" />
+<text x="902" y="238" fill="#5a746b" font-size="15" font-weight="500" text-anchor="middle">修改条件</text>
+<rect x="422" y="284" width="592" height="264" rx="13" fill="#fff" stroke="#cee2d5" />
+<text x="440" y="315" fill="#2a725e" font-size="24" font-weight="650" >LangGraph</text>
+<text x="995" y="314" fill="#7a998d" font-size="17" font-weight="400" text-anchor="end">独立上下文 / 工具权限</text>
+<path d="M 772 371 C 772 342 620 342 620 371" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="5 5"/>
+<text x="696" y="336" fill="#a38650" font-size="17" font-weight="500" text-anchor="middle">定向补查 ≤ 1 轮</text>
+<g transform="translate(468 412) scale(1)">
+<path d="M 0 -28 V -38" fill="none" stroke="#4b8b78" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="0" cy="-41" r="4" fill="#e6f4ec" stroke="#4b8b78" stroke-width="2"/>
+<rect x="-27" y="-27" width="54" height="48" rx="14" fill="#e6f4ec" stroke="#4b8b78" />
+<rect x="-34" y="-10" width="7" height="17" rx="3" fill="#e6f4ec" stroke="#4b8b78" />
+<rect x="27" y="-10" width="7" height="17" rx="3" fill="#e6f4ec" stroke="#4b8b78" />
+<circle cx="-10" cy="-7" r="3.8" fill="#4b8b78" stroke="#4b8b78" stroke-width="0"/>
+<circle cx="10" cy="-7" r="3.8" fill="#4b8b78" stroke="#4b8b78" stroke-width="0"/>
+<path d="M -9 8 Q 0 14 9 8" fill="none" stroke="#4b8b78" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -13 24 H 13 M -20 31 Q 0 21 20 31" fill="none" stroke="#4b8b78" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="26" cy="23" r="15" fill="#fff" stroke="#4b8b78" stroke-width="1.7"/>
+<path d="M 20 29 L 23 18 L 32 16 L 29 26 Z" fill="none" stroke="#4b8b78" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="26" cy="23" r="1" fill="#4b8b78" stroke="#4b8b78" stroke-width="1"/>
+</g>
+<text x="468" y="477" fill="#355d51" font-size="21" font-weight="600" text-anchor="middle">协调</text>
+<text x="468" y="504" fill="#7a998d" font-size="16" font-weight="400" text-anchor="middle">字段与约束</text>
+<g transform="translate(620 412) scale(1)">
+<path d="M 0 -28 V -38" fill="none" stroke="#558cb3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="0" cy="-41" r="4" fill="#e8f1fa" stroke="#558cb3" stroke-width="2"/>
+<rect x="-27" y="-27" width="54" height="48" rx="14" fill="#e8f1fa" stroke="#558cb3" />
+<rect x="-34" y="-10" width="7" height="17" rx="3" fill="#e8f1fa" stroke="#558cb3" />
+<rect x="27" y="-10" width="7" height="17" rx="3" fill="#e8f1fa" stroke="#558cb3" />
+<circle cx="-10" cy="-7" r="3.8" fill="#558cb3" stroke="#558cb3" stroke-width="0"/>
+<circle cx="10" cy="-7" r="3.8" fill="#558cb3" stroke="#558cb3" stroke-width="0"/>
+<path d="M -9 8 Q 0 14 9 8" fill="none" stroke="#558cb3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -13 24 H 13 M -20 31 Q 0 21 20 31" fill="none" stroke="#558cb3" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="26" cy="23" r="15" fill="#fff" stroke="#558cb3" stroke-width="1.7"/>
+<g transform="translate(26 23) scale(0.43)">
+<circle cx="-4" cy="-4" r="12" fill="none" stroke="#558cb3" stroke-width="2.7"/>
+<path d="M 5 5 L 17 17" fill="none" stroke="#558cb3" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+</g>
+<text x="620" y="477" fill="#355d51" font-size="21" font-weight="600" text-anchor="middle">研究</text>
+<text x="620" y="504" fill="#7a998d" font-size="16" font-weight="400" text-anchor="middle">搜索 / 读页</text>
+<g transform="translate(772 412) scale(1)">
+<path d="M 0 -28 V -38" fill="none" stroke="#8a79ac" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="0" cy="-41" r="4" fill="#f0eafb" stroke="#8a79ac" stroke-width="2"/>
+<rect x="-27" y="-27" width="54" height="48" rx="14" fill="#f0eafb" stroke="#8a79ac" />
+<rect x="-34" y="-10" width="7" height="17" rx="3" fill="#f0eafb" stroke="#8a79ac" />
+<rect x="27" y="-10" width="7" height="17" rx="3" fill="#f0eafb" stroke="#8a79ac" />
+<circle cx="-10" cy="-7" r="3.8" fill="#8a79ac" stroke="#8a79ac" stroke-width="0"/>
+<circle cx="10" cy="-7" r="3.8" fill="#8a79ac" stroke="#8a79ac" stroke-width="0"/>
+<path d="M -9 8 Q 0 14 9 8" fill="none" stroke="#8a79ac" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -13 24 H 13 M -20 31 Q 0 21 20 31" fill="none" stroke="#8a79ac" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="26" cy="23" r="15" fill="#fff" stroke="#8a79ac" stroke-width="1.7"/>
+<g transform="translate(26 23) scale(0.35)">
+<path d="M 0 -24 L 20 -16 V 0 C 20 13 9 22 0 27 C -9 22 -20 13 -20 0 V -16 Z" fill="#edf7f1" stroke="#8a79ac" stroke-width="2.4"/>
+<path d="M -10 0 L -3 8 L 11 -8" fill="none" stroke="#8a79ac" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+</g>
+<text x="772" y="477" fill="#355d51" font-size="21" font-weight="600" text-anchor="middle">审查</text>
+<text x="772" y="504" fill="#7a998d" font-size="16" font-weight="400" text-anchor="middle">质疑证据</text>
+<g transform="translate(948 412) scale(1)">
+<path d="M 0 -28 V -38" fill="none" stroke="#b28c50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="0" cy="-41" r="4" fill="#fbf1dc" stroke="#b28c50" stroke-width="2"/>
+<rect x="-27" y="-27" width="54" height="48" rx="14" fill="#fbf1dc" stroke="#b28c50" />
+<rect x="-34" y="-10" width="7" height="17" rx="3" fill="#fbf1dc" stroke="#b28c50" />
+<rect x="27" y="-10" width="7" height="17" rx="3" fill="#fbf1dc" stroke="#b28c50" />
+<circle cx="-10" cy="-7" r="3.8" fill="#b28c50" stroke="#b28c50" stroke-width="0"/>
+<circle cx="10" cy="-7" r="3.8" fill="#b28c50" stroke="#b28c50" stroke-width="0"/>
+<path d="M -9 8 Q 0 14 9 8" fill="none" stroke="#b28c50" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -13 24 H 13 M -20 31 Q 0 21 20 31" fill="none" stroke="#b28c50" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="26" cy="23" r="15" fill="#fff" stroke="#b28c50" stroke-width="1.7"/>
+<path d="M 19 29 V 24 M 25 29 V 20 M 31 29 V 16" fill="none" stroke="#b28c50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<text x="948" y="477" fill="#355d51" font-size="21" font-weight="600" text-anchor="middle">分析</text>
+<text x="948" y="504" fill="#7a998d" font-size="16" font-weight="400" text-anchor="middle">解释取舍</text>
+<path d="M 506 404 H 581" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="544" y="390" fill="#729388" font-size="14" font-weight="400" text-anchor="middle">比较契约</text>
+<path d="M 658 404 H 733" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="696" y="390" fill="#729388" font-size="14" font-weight="400" text-anchor="middle">来源观察</text>
+<path d="M 810 404 H 837" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<g transform="translate(860 404) scale(0.51)">
+<path d="M 0 -24 L 20 -16 V 0 C 20 13 9 22 0 27 C -9 22 -20 13 -20 0 V -16 Z" fill="#edf7f1" stroke="#3c8872" stroke-width="2.4"/>
+<path d="M -10 0 L -3 8 L 11 -8" fill="none" stroke="#3c8872" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<path d="M 881 404 H 909" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="860" y="457" fill="#3c8872" font-size="14" font-weight="500" text-anchor="middle">程序校验</text>
+<rect x="642" y="518" width="151" height="22" rx="7" fill="#f8f5ec" stroke="#eee6d2" />
+<text x="717" y="534" fill="#a38650" font-size="14" font-weight="400" text-anchor="middle">独立审查 ≤ 2 次</text>
+<path d="M 718 548 V 578" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="735" y="568" fill="#729388" font-size="15" font-weight="400" >结构化产物</text>
+<rect x="422" y="578" width="592" height="58" rx="10" fill="#edf3f7" stroke="#d4e1e7" />
+<g transform="translate(447 607) scale(0.51)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7e9fb1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#7e9fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#7e9fb1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<text x="474" y="602" fill="#395f78" font-size="21" font-weight="600" >统一决策模型</text>
+<text x="474" y="624" fill="#7595aa" font-size="18" font-weight="400" >字段 · 事实 · 引文 · 分支 · 对话</text>
+<path d="M 512 636 V 666" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<path d="M 708 636 V 666" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<path d="M 914 636 V 666" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<rect x="422" y="666" width="180" height="106" rx="12" fill="#fff" stroke="#d3e2da" />
+<text x="436" y="744" fill="#3d7966" font-size="21" font-weight="600" >条件推演</text>
+<text x="436" y="766" fill="#7a998d" font-size="16" font-weight="400" >继承 · 联动</text>
+<rect x="618" y="666" width="180" height="106" rx="12" fill="#fff" stroke="#d3e2da" />
+<text x="632" y="744" fill="#3d7966" font-size="21" font-weight="600" >证据校验</text>
+<text x="632" y="766" fill="#7a998d" font-size="16" font-weight="400" >引文 · 冲突 · 未知</text>
+<rect x="814" y="666" width="200" height="106" rx="12" fill="#fff" stroke="#d3e2da" />
+<text x="828" y="744" fill="#3d7966" font-size="21" font-weight="600" >决策回溯</text>
+<text x="828" y="766" fill="#7a998d" font-size="16" font-weight="400" >版本 · 理由 · 证据</text>
+<path d="M 448 707 H 461 M 461 707 V 691 H 481 M 461 707 V 723 H 481" fill="none" stroke="#5b91b5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="448" cy="707" r="4" fill="#f2f7fb" stroke="#5b91b5" stroke-width="1.7"/>
+<circle cx="485" cy="691" r="5" fill="#e7f3ee" stroke="#79a995" stroke-width="1.7"/>
+<circle cx="485" cy="723" r="5" fill="#fbf2df" stroke="#c6a66d" stroke-width="1.7"/>
+<path d="M 506 708 H 583" fill="none" stroke="#c6dbd1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="540" cy="708" r="5" fill="#79b39a" stroke="#fff" stroke-width="1.5"/>
+<g transform="translate(649 707) scale(0.69)">
+<path d="M 0 -24 L 20 -16 V 0 C 20 13 9 22 0 27 C -9 22 -20 13 -20 0 V -16 Z" fill="#edf7f1" stroke="#3c8872" stroke-width="2.4"/>
+<path d="M -10 0 L -3 8 L 11 -8" fill="none" stroke="#3c8872" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<circle cx="750" cy="699" r="5" fill="#b2d3c0" stroke="#fff" stroke-width="1"/>
+<text x="764" y="704" fill="#4f8e72" font-size="16" font-weight="500" >✓</text>
+<circle cx="750" cy="718" r="5" fill="#e3e8ec" stroke="#fff" stroke-width="1"/>
+<text x="764" y="723" fill="#8ea0aa" font-size="16" font-weight="500" >?</text>
+<g transform="translate(846 704) scale(0.63)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#b2c6d1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#b2c6d1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#b2c6d1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<g transform="translate(863 711) scale(0.63)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7e9fb1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#7e9fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#7e9fb1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<path d="M 901 701 H 987 M 901 715 H 970" fill="none" stroke="#d2e1e7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 336 530 H 370 V 718 H 422" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="5 5"/>
+<text x="370" y="641" fill="#548e77" font-size="15" font-weight="500" text-anchor="middle">仅重算</text>
+<rect x="42" y="632" width="284" height="140" rx="13" fill="#fff" stroke="#dce5ea" />
+<text x="60" y="664" fill="#183e37" font-size="22" font-weight="600" >判断与历史</text>
+<g transform="translate(78 713) scale(0.65)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#b1c5d1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#b1c5d1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#b1c5d1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<g transform="translate(101 727) scale(0.65)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7e9fb1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#7e9fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#7e9fb1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<path d="M 145 704 H 307 M 145 721 H 278" fill="none" stroke="#d3e1e7" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="159" cy="752" r="5" fill="#a3c5b6" stroke="#fff" stroke-width="1"/>
+<circle cx="208" cy="752" r="5" fill="#769cae" stroke="#fff" stroke-width="1"/>
+<path d="M 164 752 H 203" fill="none" stroke="#bed0d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+<text x="226" y="758" fill="#7595aa" font-size="16" font-weight="400" >版本回溯</text>
+<rect x="1100" y="164" width="308" height="626" rx="16" fill="#fafafa" stroke="#dde3e5" />
+<g transform="translate(1148 232) scale(1)">
+<rect x="-24" y="-24" width="48" height="48" rx="10" fill="#f1ebfa" stroke="#9b88b5" />
+<path d="M -14 -30 V -24 M 0 -30 V -24 M 14 -30 V -24" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -14 24 V 30 M 0 24 V 30 M 14 24 V 30" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -30 -14 H -24 M -30 0 H -24 M -30 14 H -24" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M 24 -14 H 30 M 24 0 H 30 M 24 14 H 30" fill="none" stroke="#9b88b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -10 -8 L 9 -11 L 0 10 Z M -10 -8 L 10 9 M 9 -11 L -11 9" fill="none" stroke="#9b88b5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="-10" cy="-8" r="3.2" fill="#c9bbdd" stroke="#9b88b5" stroke-width="1"/>
+<circle cx="9" cy="-11" r="3.2" fill="#c9bbdd" stroke="#9b88b5" stroke-width="1"/>
+<circle cx="0" cy="10" r="3.2" fill="#c9bbdd" stroke="#9b88b5" stroke-width="1"/>
+<circle cx="-11" cy="9" r="3.2" fill="#c9bbdd" stroke="#9b88b5" stroke-width="1"/>
+<circle cx="10" cy="9" r="3.2" fill="#c9bbdd" stroke="#9b88b5" stroke-width="1"/>
+</g>
+<text x="1194" y="226" fill="#4e4562" font-size="21" font-weight="600" >Ollama / API</text>
+<text x="1194" y="253" fill="#8d80a0" font-size="17" font-weight="400" >模型接口</text>
+<text x="1122" y="294" fill="#8d80a0" font-size="17" font-weight="400" >各角色共用配置的模型服务</text>
+<path d="M 1120 316 H 1388" fill="none" stroke="#e7e4ec" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+<g transform="translate(1148 392) scale(1)">
+<rect x="-27" y="-24" width="54" height="47" rx="7" fill="#fff" stroke="#7da4bc" />
+<path d="M -26 -12 H 26" fill="none" stroke="#b1cad9" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="-18" cy="-18" r="1.5" fill="#b1cad9" stroke="none" stroke-width="0"/>
+<circle cx="-11" cy="-18" r="1.5" fill="#b1cad9" stroke="none" stroke-width="0"/>
+<circle cx="-4" cy="-18" r="1.5" fill="#b1cad9" stroke="none" stroke-width="0"/>
+<path d="M -18 -4 H 9 M -18 5 H 2" fill="none" stroke="#c6d7e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<g transform="translate(1165 408) scale(0.9)">
+<circle cx="-4" cy="-4" r="12" fill="none" stroke="#5e96b6" stroke-width="2.7"/>
+<path d="M 5 5 L 17 17" fill="none" stroke="#5e96b6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<text x="1194" y="382" fill="#3c6d88" font-size="21" font-weight="600" >公开检索</text>
+<text x="1194" y="410" fill="#7b9aad" font-size="17" font-weight="400" >tofu / Tavily</text>
+<g transform="translate(1134 497) scale(0.68)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#9eb4bd" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#9eb4bd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#9eb4bd" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<g transform="translate(1151 498) scale(0.68)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7e9fb1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#7e9fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#7e9fb1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<rect x="1150" y="493" width="22" height="16" rx="3" fill="#e9f2e6" stroke="#a7c3ac" />
+<path d="M 1154 505 L 1160 499 L 1164 503 L 1168 500" fill="none" stroke="#a0b999" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+<text x="1194" y="490" fill="#3c6d88" font-size="21" font-weight="600" >公开读页</text>
+<text x="1194" y="518" fill="#7b9aad" font-size="18" font-weight="400" >目录 · 详情 · 原图</text>
+<text x="1122" y="557" fill="#8da2ad" font-size="17" font-weight="400" >读页与复核独立取数</text>
+<rect x="1118" y="632" width="272" height="140" rx="12" fill="#fff" stroke="#dce5ea" />
+<text x="1138" y="664" fill="#3c6d88" font-size="22" font-weight="600" >来源证据</text>
+<g transform="translate(1155 706) scale(0.51)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7e9fb1" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#7e9fb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M -12 -3 H 13 M -12 7 H 13 M -12 17 H 3" fill="none" stroke="#7e9fb1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<path d="M 1150 701 H 1160 M 1150 707 H 1164" fill="none" stroke="#8db39d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+<g transform="translate(1244 706) scale(1)">
+<rect x="-17" y="-7" width="24" height="14" rx="7" fill="none" stroke="#7e9fb1" transform="rotate(-35)"/>
+<rect x="-3" y="-7" width="24" height="14" rx="7" fill="none" stroke="#7e9fb1" transform="rotate(-35)"/>
+</g>
+<rect x="1311" y="690" width="38" height="28" rx="5" fill="#f0f6ee" stroke="#a7c3ac" />
+<path d="M 1317 712 L 1327 701 L 1334 708 L 1343 699" fill="none" stroke="#a0b999" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="1339" cy="696" r="2" fill="#d7c998" stroke="none" stroke-width="0"/>
+<text x="1155" y="745" fill="#7595aa" font-size="16" font-weight="400" text-anchor="middle">原文</text>
+<text x="1244" y="745" fill="#7595aa" font-size="16" font-weight="400" text-anchor="middle">URL</text>
+<text x="1330" y="745" fill="#7595aa" font-size="16" font-weight="400" text-anchor="middle">配图</text>
+<path d="M 336 211 H 404" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="370" y="196" fill="#729388" font-size="15" font-weight="500" text-anchor="middle">HTTP</text>
+<path d="M 404 381 H 344" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" />
+<text x="370" y="365" fill="#729388" font-size="14" font-weight="500" text-anchor="middle">结果</text>
+<path d="M 1014 310 H 1064 V 240 H 1100" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<path d="M 1014 240 H 1064" fill="none" stroke="#8d80a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="1064" cy="240" r="3" fill="#a597bb" stroke="#fff" stroke-width="1"/>
+<text x="1064" y="221" fill="#8d80a0" font-size="14" font-weight="400" text-anchor="middle">按需推理</text>
+<path d="M 1014 440 H 1100" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<text x="1057" y="425" fill="#729388" font-size="14" font-weight="400" text-anchor="middle">研究工具</text>
+<text x="32" y="843" fill="#183e37" font-size="22" font-weight="600" >本地数据与缓存</text>
+<path d="M 540 790 V 814 H 252 V 876" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<text x="270" y="859" fill="#7595aa" font-size="15" font-weight="400" >业务版本</text>
+<path d="M 1014 530 H 1050 V 858 H 720 V 876" fill="none" stroke="#71958b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)" stroke-dasharray="5 5"/>
+<text x="1066" y="813" fill="#7595aa" font-size="16" font-weight="400" >阶段恢复</text>
+<path d="M 1388 392 H 1424 V 852 H 1188 V 876" fill="none" stroke="#bb8c89" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="1210" y="838" fill="#b18380" font-size="17" font-weight="400" >仅缓存搜索结果</text>
+<rect x="32" y="876" width="440" height="144" rx="13" fill="#f7f9fb" stroke="#dce5ea" />
+<rect x="500" y="876" width="440" height="144" rx="13" fill="#f7f9fb" stroke="#dce5ea" />
+<rect x="968" y="876" width="440" height="144" rx="13" fill="#fcf8f7" stroke="#e7d9d6" />
+<g transform="translate(80 934) scale(0.85)">
+<path d="M -22 -30 H 9 L 24 -15 V 31 H -22 Z" fill="#fff" stroke="#7595aa" stroke-width="2.2"/>
+<path d="M 9 -30 V -15 H 24" fill="none" stroke="#7595aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<text x="1" y="12" fill="#7595aa" font-size="23" font-weight="600" text-anchor="middle">{ }</text>
+</g>
+<text x="128" y="922" fill="#395f78" font-size="23" font-weight="600" >JSON</text>
+<text x="128" y="949" fill="#7595aa" font-size="19" font-weight="400" >决策版本</text>
+<text x="54" y="997" fill="#7595aa" font-size="18" font-weight="400" >候选 / 来源 / 会话 / 判断</text>
+<g transform="translate(548 936) scale(1)">
+<path d="M -24 -22 V 22 C -24 33 24 33 24 22 V -22" fill="#e9f2f8" stroke="#739eba" stroke-width="2.2"/>
+<ellipse cx="0" cy="-22" rx="24" ry="9" fill="#f3f8fb" stroke="#739eba" stroke-width="2.2"/>
+<path d="M -24 -6 C -24 5 24 5 24 -6 M -24 9 C -24 20 24 20 24 9" fill="none" stroke="#739eba" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="22" cy="20" r="11" fill="#fff" stroke="#739eba" stroke-width="1.7"/>
+<path d="M 22 14 V 20 L 27 23" fill="none" stroke="#739eba" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+</g>
+<text x="596" y="922" fill="#395f78" font-size="23" font-weight="600" >SQLite</text>
+<text x="596" y="949" fill="#7595aa" font-size="19" font-weight="400" >研究检查点</text>
+<text x="522" y="997" fill="#7595aa" font-size="18" font-weight="400" >已完成阶段可继续恢复</text>
+<g transform="translate(1016 934) scale(1)">
+<path d="M -27 14 L -2 2 L 25 12 V 19 L 0 31 L -27 21 Z" fill="#cc7c7b" stroke="#b86869" stroke-width="1.5"/>
+<path d="M -27 2 L -2 -10 L 25 0 V 7 L 0 19 L -27 9 Z" fill="#cc7c7b" stroke="#b86869" stroke-width="1.5"/>
+<path d="M -27 -10 L -2 -22 L 25 -12 V -5 L 0 7 L -27 -3 Z" fill="#dc9290" stroke="#b86869" stroke-width="1.5"/>
+<path d="M -7 -14 L 1 -17 L 8 -14 L 0 -11 Z" fill="#f9e7dd"/>
+</g>
+<text x="1062" y="922" fill="#936460" font-size="23" font-weight="600" >Redis</text>
+<text x="1132" y="920" fill="#ad8986" font-size="15" font-weight="400" >可选</text>
+<text x="1062" y="949" fill="#ad8986" font-size="19" font-weight="400" >搜索缓存</text>
+<rect x="989" y="977" width="116" height="26" rx="7" fill="#fff" stroke="#eddfdc" />
+<text x="1047" y="995" fill="#ad8986" font-size="15" font-weight="400" text-anchor="middle">TTL</text>
+<rect x="1122" y="977" width="116" height="26" rx="7" fill="#fff" stroke="#eddfdc" />
+<text x="1180" y="995" fill="#ad8986" font-size="15" font-weight="400" text-anchor="middle">请求合并</text>
+<rect x="1255" y="977" width="116" height="26" rx="7" fill="#fff" stroke="#eddfdc" />
+<text x="1313" y="995" fill="#ad8986" font-size="15" font-weight="400" text-anchor="middle">故障降级</text>
+</svg>

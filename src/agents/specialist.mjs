@@ -1,5 +1,8 @@
 import {StateGraph,StateSchema,START,END} from '@langchain/langgraph';
 import {z} from 'zod';
+import {selectSkills} from '../skills.mjs';
+import {taskMemoryContext} from '../task-memory.mjs';
+import {executionGuard} from './execution-guard.mjs';
 
 export const specialistPolicies={
  coordinator:{label:'协调 Agent',tools:['model'],instruction:'Plan the requested comparison and hand off a typed research contract. You cannot search, read pages, approve source facts or rewrite the baseline.'},
@@ -8,25 +11,26 @@ export const specialistPolicies={
  analyst:{label:'决策分析 Agent',tools:['model'],instruction:'Explain the supplied evaluated choices. You cannot fetch sources, change facts, change conditions, alter eligibility or replace the baseline.'},
 };
 
-function scopedTools(provider,role){
- const policy=specialistPolicies[role],usage={role,modelCalls:0,toolCalls:{},inputCharacters:0,outputCharacters:0};
+function scopedTools(provider,role,task,phase){
+ const skills=selectSkills(role,task);
+ const policy=specialistPolicies[role],usage={role,modelCalls:0,toolCalls:{},inputCharacters:0,outputCharacters:0,skills:skills.map(({name,sha256})=>({name,sha256})),toolTransport:provider.toolTransport||'injected-adapter'};
  const io={};
+ const guard=executionGuard(role,phase,policy.tools,usage,provider.executionLimits);
  if(role==='coordinator'||role==='researcher'){
   io.publicCatalogs=structuredClone(provider.publicCatalogs||[]);io.publicReadHints=structuredClone(provider.publicReadHints||[]);
   io.supportsCatalogs=typeof provider.searchCatalog==='function';
  }
  for(const name of policy.tools)if(typeof provider[name]==='function')io[name]=async(...args)=>{
   if(name==='model'){
-   usage.modelCalls++;
    const messages=structuredClone(args[0]);
    const system=messages.find(message=>message.role==='system');
-   if(system)system.content+='\nPrism specialist role: '+role+'. '+policy.instruction;
-   usage.inputCharacters+=JSON.stringify(messages).length;
-   const result=await provider.model(messages,{agent:role});usage.outputCharacters+=JSON.stringify(result??null).length;return result;
+   const guidance='\nPrism specialist role: '+role+'. '+policy.instruction+skills.map(skill=>'\n<skill name="'+skill.name+'">\n'+skill.body+'\n</skill>').join('');
+   if(system)system.content+=guidance;else messages.unshift({role:'system',content:guidance});
+   return guard.call(name,messages,()=>provider.model(messages,{agent:role}));
   }
-  usage.toolCalls[name]=(usage.toolCalls[name]||0)+1;return provider[name](...args);
+  return guard.call(name,args,()=>provider[name](...args));
  };
- return {io:Object.freeze(io),usage};
+ return {io:Object.freeze(io),usage,guard};
 }
 
 // A specialist is a compiled subgraph with its own state and a scoped adapter.
@@ -38,8 +42,9 @@ export function createSpecialist(role,steps,provider){
  for(const [phase,run] of Object.entries(steps)){
   routes[phase]=phase;
   graph.addNode(phase,async s=>{
-   const started=Date.now(),{io,usage}=scopedTools(provider,role);
+   const started=Date.now(),{io,usage,guard}=scopedTools(provider,role,s.task,phase);
    const artifact=await run(structuredClone(s.task),io);
+   guard.handoff(s.task,artifact);
    return {artifact,usage:{...usage,phase,milliseconds:Date.now()-started}};
   }).addEdge(phase,END);
  }
@@ -49,11 +54,11 @@ export function createSpecialist(role,steps,provider){
 
 export function specialistTask(role,state){
  const question=state.previous?.question||state.question;
- if(role==='coordinator')return {question,adaptation:state.adaptation,previous:state.previous?{question:state.previous.question,schema:state.previous.schema,evidenceRequirements:state.previous.evidenceRequirements,sources:(state.previous.sources||[]).slice(-12).map(source=>({url:source.url,title:source.title,kind:source.kind}))}:null,scenario:state.scenario?{id:state.scenario.id,settings:state.scenario.settings}:null};
- if(role==='researcher'||role==='reviewer')return {question,contract:state.contract,sources:state.sources,raw:state.raw,trace:state.trace,recovery:state.recovery,agentReviews:state.agentReviews||[]};
+ if(role==='coordinator')return {question,researchFocus:state.researchFocus||null,adaptation:state.adaptation,previous:state.previous?{taskMemory:state.previous.taskMemory,question:state.previous.question,schema:state.previous.schema,evidenceRequirements:state.previous.evidenceRequirements,sources:(state.previous.sources||[]).slice(-12).map(source=>({url:source.url,title:source.title,kind:source.kind}))}:null,scenario:state.scenario?{id:state.scenario.id,settings:state.scenario.settings}:null};
+ if(role==='researcher'||role==='reviewer')return {question,taskMemory:taskMemoryContext(state.previous),contract:state.contract,sources:state.sources,raw:state.raw,trace:state.trace,recovery:state.recovery,agentReviews:state.agentReviews||[]};
  if(role==='analyst'){
   const result=state.result,selected=result.scenarios.find(s=>s.id===result.activeScenarioId)||result.scenarios[0];
-  return {adaptation:state.adaptation,result:{question:result.question,schema:result.schema,settings:selected.settings,activeScenarioId:selected.id,scenarios:[selected],candidates:result.candidates.filter(c=>selected.candidateIds.includes(c.id)),trace:[],agent:{nodes:[...(result.agent.nodes||[])]}}};
+  return {adaptation:state.adaptation,result:{taskMemory:result.taskMemory,question:result.question,schema:result.schema,settings:selected.settings,activeScenarioId:selected.id,scenarios:[selected],candidates:result.candidates.filter(c=>selected.candidateIds.includes(c.id)),trace:[],agent:{nodes:[...(result.agent.nodes||[])]}}};
  }
  throw new Error('无效的 Agent 角色');
 }

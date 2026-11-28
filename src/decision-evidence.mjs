@@ -31,6 +31,10 @@ export function observationIssue(field, observation, source) {
   if (!source || source.refreshStatus === 'failed' || quote.length < 3 || !normalize(source.text).includes(quote)) return '引文未在保存的来源中找到';
   if (field.type === 'boolean') {
     if (typeof value !== 'boolean') return '该条件需要明确的是或否';
+    // An explicitly selected single-board bundle / complete one-item packing
+    // list is evidence of no accessory kit. Keep the original literal quote.
+    const bundle=source.productObservation?.attributes?.find(a=>/^(套餐|套件|包装内容)$/.test(a.label)&&normalize(a.quote)===quote);
+    if(source.productObservation?.category==='single-board-computer'&&bundle&&/套装|套件|套餐/.test([field.label,...(field.aliases||[])].join(' '))&&!/单板|裸板|仅主板/.test(field.label)&&(/^(单独主机无套餐|裸板|单主板|仅主板)$/.test(bundle.value)||/^Raspberry\s*Pi\s*树莓派\s*\d+\s*开发板\s*[-（(]?\s*\d+\s*GB[）)]?\s*[×x]\s*1$/i.test(bundle.value)))return value===false?null:'引文明确为单板，不能标注为配件套装';
     const terms = [field.label, ...(field.aliases || []), field.label.replace(/^(?:是否|允许|支持|提供|具备|包含|可否|可以)/, '')].filter(Boolean);
     const term = terms.find(term => quote.includes(term));
     if (!term) return '引文没有明确提到这个条件';

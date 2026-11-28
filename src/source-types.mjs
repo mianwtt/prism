@@ -8,7 +8,9 @@ export function isMerchantProduct(raw){
     || /(^|\.)apple\.com\.cn$/.test(h)&&/^\/shop\/(?:buy-|product)/.test(p)
     || /^(?:detail(?:\.m)?\.tmall|item\.taobao)\.com$/.test(h)&&/item/.test(p)
     || h==='h5.m.taobao.com'&&/\/awp\/core\/detail/.test(p)
-    || /(^|\.)hpstore\.cn$/.test(h)&&/product|item/.test(p);
+    || /(^|\.)hpstore\.cn$/.test(h)&&/product|item/.test(p)
+    || h==='www.dfrobot.com.cn'&&/^\/goods-\d+\.html$/.test(p)
+    || /^(?:www\.)?waveshare\.net$/.test(h)&&/^\/shop\/[^/]+\.htm$/.test(p);
 }
 export function merchantPlatform(raw){
  let h='';try{h=new URL(typeof raw==='string'?raw:raw.url).hostname;}catch{return '未知平台';}

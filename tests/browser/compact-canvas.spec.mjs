@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {completeFixture} from './complete-space.fixture.mjs';
 
-test('canvas owns the workspace, nodes stay compact and ordinary clicks never alter zoom',async({page,request})=>{
+test('canvas owns the workspace, evidence cards stay readable and ordinary clicks never alter zoom',async({page,request})=>{
  const stored=await(await request.post('/api/spaces/demo')).json(),data={...stored,...completeFixture()};data.canvasScenarioIds=data.scenarios.map(s=>s.id);data.activeScenarioId='scenario-commute';
  await page.route('**/api/spaces/'+data.id,r=>r.fulfill({json:data}));
  await page.route('https://example.com/fixture-product-*.svg',r=>r.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="100" height="80"><rect width="100" height="80" fill="#dde8d4"/></svg>'}));
@@ -9,13 +9,13 @@ test('canvas owns the workspace, nodes stay compact and ordinary clicks never al
  const studio=page.locator('.compact-studio'),view=page.locator('.flow-viewport'),root=page.locator('.universal-root');
  await expect(root).toHaveAttribute('data-flow-zoom','1');
  const stage=await studio.boundingBox(),canvas=await view.boundingBox();
- expect(canvas.width/stage.width).toBeGreaterThan(.7);expect(canvas.height/stage.height).toBeGreaterThan(.7);
+ const outcome=await page.locator('.canvas-outcome').boundingBox();expect(canvas.width/stage.width).toBeGreaterThan(.7);expect((canvas.height+outcome.height)/stage.height).toBeGreaterThan(.7);
  await expect(view.locator('input,textarea,select,form')).toHaveCount(0);
  await expect(studio.locator('.canvas-prompt #conversation-message')).toBeVisible();
  await expect(studio.locator('#u-conversation button[type=submit]')).toHaveCount(1);
  await expect(studio.locator('.prompt-context [data-chat-focus]')).toHaveCount(data.schema?.fields.length||4);
  const face=await view.locator('.node-face').first().boundingBox();expect(face.width).toBeLessThanOrEqual(88);expect(face.height).toBeLessThanOrEqual(88);
- expect(await view.locator('.tree-node').first().evaluate(el=>getComputedStyle(el).borderTopWidth)).toBe('0px');
+ expect(await view.locator('.tree-node').first().evaluate(el=>getComputedStyle(el).borderTopWidth)).toBe('1px');await expect(view.locator('.tree-choice-facts').first()).toContainText('预算');
  await page.locator('[data-flow-condition="scenario-commute"] [data-tree-condition]').click();await expect(root).toHaveAttribute('data-flow-zoom','1');
  await page.locator('.canvas-inspector [data-live-condition=price][data-live-value="5000"]').click();await expect(root).toHaveAttribute('data-flow-zoom','1');
  await page.locator('.tree-origin .tree-choice').first().click();await expect(page.locator('.option-dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(root).toHaveAttribute('data-flow-zoom','1');

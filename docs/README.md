@@ -8,6 +8,7 @@ Start with [setup](SETUP.md), then [using the workspace](WORKSPACE.md). The inte
 | --- | --- |
 | [Setup](SETUP.md) | Native installation, model/search providers and troubleshooting |
 | [Workspace](WORKSPACE.md) | Conversation, What-if, evidence, saved decisions and deletion |
+| [Recorded same-product task](examples/SAME-PRODUCT-2026-11-27.md) | From a question without item URLs to two checked seller quotes, price branches, a budget experiment and a proposal |
 | [Architecture](ARCHITECTURE.md) | Data flow, evaluator, persistence and trust boundaries |
 | [Agent](AGENT.md) | Current adaptive graph and research limits |
 | [Multi-agent implementation](MULTI-AGENT.md) | Four specialist subgraphs, scoped contexts/tools, independent review, bounded repair and actual verification |

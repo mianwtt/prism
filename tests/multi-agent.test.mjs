@@ -4,6 +4,7 @@ import {createSpecialist,specialistTask} from '../src/agents/specialist.mjs';
 import {reviewEvidence} from '../src/agents/evidence-review.mjs';
 import {runGeneralResearch,checkDecisionCandidates} from '../src/general-research.mjs';
 import {evaluateDecision,validateDecisionSchema,validateDecisionSettings} from '../src/decision-schema.mjs';
+import {createMcpResearchAdapter} from '../src/mcp-research.mjs';
 
 const schema=validateDecisionSchema({label:'具体方案比较',optionLabel:'方案',fields:[{key:'price',label:'价格',unit:'元',direction:-1},{key:'area',label:'面积',unit:'㎡',direction:1}]});
 const question='比较价格不超过4500元、面积至少30㎡的具体方案';
@@ -70,6 +71,16 @@ test('the actual multi-agent graph invokes four roles with scoped handoffs and t
  assert.equal(space.candidates.length,3);assert(space.candidates.every(c=>c.facts.price.value===4000));assert.equal(space.settings.limits.price,4500);
  assert.equal(space.agent.reviews[0].status,'completed');assert.equal(r.reviewerCalls,1);assert.equal(space.agent.recovery.stopReason,'not-needed');
  assert(space.agent.runs.some(run=>run.role==='researcher'&&run.toolCalls.search>0));assert.equal(space.agent.runs.filter(run=>run.role==='reviewer').length,1);
+ assert.equal(evaluateDecision(space.candidates,space.settings,space.schema).filter(row=>row.status==='eligible').length,3);
+});
+
+test('the full four-role graph really consumes MCP tool results and records selected Skills',async()=>{
+ const r=runtime(),io=createMcpResearchAdapter(r.io),space=await runGeneralResearch(question,io);
+ assert.equal(space.candidates.length,3);
+ assert(io.mcpTrace().some(item=>item.name==='search_public_sources'));
+ assert(io.mcpTrace().some(item=>item.name==='read_public_source'));
+ assert(space.agent.runs.every(run=>run.toolTransport==='mcp-in-memory'));
+ assert(space.agent.runs.some(run=>run.skills.some(skill=>skill.name==='evidence-review')));
  assert.equal(evaluateDecision(space.candidates,space.settings,space.schema).filter(row=>row.status==='eligible').length,3);
 });
 

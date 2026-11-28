@@ -1,8 +1,10 @@
 import {mountUniversal} from '/universal-view.mjs';
+import {setupTaskStart,taskQuestion,clearTaskStart} from '/task-start.mjs';
 import {clearWorkspaceDrafts} from '/workspace-draft.mjs';
 import {adaptLegacyDecision} from '/legacy-decision.mjs';
 const classicView=location.pathname.startsWith('/classic');
 document.body.classList.toggle('adaptive-studio',!classicView);
+setupTaskStart();
 if(classicView)document.getElementById('question').value='帮我选一台 7000 元以内适合 Java 开发的笔记本，至少 16GB 内存，重点关注便携性。';
 import {
   dimensions,
@@ -141,11 +143,13 @@ function updateConnection(config) {
 }
 function updateSearchFields() {
   const tofu = $("search-provider").value === "tofu";
-  $("search-key-field").hidden = tofu;
-  $("search-key").required = !tofu && $("search-key").dataset.saved !== "true";
+  const searxng=$("search-provider").value==='searxng';
+  $("search-key-field").hidden = tofu||searxng;
+  $("search-key").required = !tofu&&!searxng && $("search-key").dataset.saved !== "true";
+  $("searxng-field").hidden=!searxng;$("searxng-url").required=searxng;
   $("search-provider-help").textContent = tofu
     ? "无需搜索密钥。首次安装请运行 npm run setup:search；结果可能受网络和搜索引擎限流影响。"
-    : "使用 Tavily 的搜索接口，需要有效 API Key。";
+    : searxng?'使用已有 SearXNG 实例；需要在实例配置中启用 JSON 格式。无需安装 tofu 或填写 Tavily 密钥。':"使用 Tavily 的搜索接口，需要有效 API Key。";
 }
 $("search-provider").onchange = updateSearchFields;
 async function openSettings() {
@@ -154,6 +158,7 @@ async function openSettings() {
     $("model-url").value = config.baseUrl;
     $("model-name").value = config.model;
     $("search-provider").value = config.searchProvider || "tavily";
+    $("searxng-url").value=config.searxngUrl||'';
     for (const [id, stored] of [
       ["model-key", config.hasModelKey],
       ["search-key", config.hasSearchKey],
@@ -195,6 +200,7 @@ $("settings-form").onsubmit = async (e) => {
         modelKey: $("model-key").value,
         searchKey: $("search-key").value,
         searchProvider: $("search-provider").value,
+        searxngUrl:$("searxng-url").value,
       }),
     });
     updateConnection(config);
@@ -794,8 +800,9 @@ $("research-form").onsubmit = async (e) => {
     }
     const job = await api("/api/research", {
       method: "POST",
-      body: JSON.stringify({ question: $("question").value,adaptive:!classicView }),
+      body: JSON.stringify({ question: classicView?$("question").value:taskQuestion($("question").value),adaptive:!classicView }),
     });
+    clearTaskStart();
     await watchJob(job.id);
   } catch (error) {
     toast(error.message);
@@ -1022,6 +1029,7 @@ async function watchExploration(initial){
 }
 async function watchJob(id,{inline=false}={}) {
   const initial=await api("/api/jobs/"+id);
+  const focusedOrigin=inline&&initial.researchFocus?{spaceId:universalRoot.dataset.displaySpace,scenarioId:universalRoot.dataset.activeScenario}:null;
   if(initial.type==='scenario'){
     const parent=await api('/api/spaces/'+initial.parentId);
     if(!parent.schema)return watchExploration(initial);
@@ -1061,7 +1069,13 @@ async function watchJob(id,{inline=false}={}) {
       jobActivity.querySelector('p').textContent=['failed','interrupted'].includes(job.status)?'这轮研究暂停了，进度已经保留。':phase==='search'?'我在寻找符合需求的具体方案。':phase==='extract'?'我在整理方案和原文依据。':phase==='verify'?'我在核对配置，排除不一致的信息。':'我在确定需要查找的资料。';
       jobActivity.classList.toggle('is-active',job.status==='running');
       if (job.status === "complete") {
-        await load(await api("/api/spaces/" + job.spaceId));
+        const result=await api("/api/spaces/" + job.spaceId);
+        if(focusedOrigin&&(universalRoot.dataset.displaySpace!==focusedOrigin.spaceId||universalRoot.closest('[hidden]'))){await refreshSidebar();toast('依据核对已完成，结果保存在原来的决策空间。');}
+        else{
+          const active=universalRoot.dataset.activeScenario;
+          if(focusedOrigin&&active!==focusedOrigin.scenarioId){const selected=result.scenarios?.find(s=>s.id===active);if(selected){result.activeScenarioId=active;result.settings=structuredClone(selected.settings);}}
+          await load(result);
+        }
         break;
       }
       if (["failed", "interrupted"].includes(job.status)) {

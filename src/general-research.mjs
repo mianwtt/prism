@@ -1,3 +1,6 @@
+import {attachRetailCatalog} from './retail-catalog.mjs';
+import {taskMemoryContext} from './task-memory.mjs';
+import {planFocusedInvestigation,matchesResearchFocus,mergeFocusedEvidence,focusedEvidenceStatus} from './decision-investigation.mjs';
 import {StateGraph,StateSchema,START,END,MemorySaver} from '@langchain/langgraph';
 import {z} from 'zod';
 import {randomUUID,createHash} from 'node:crypto';
@@ -19,8 +22,11 @@ import {refineObservedCatalogs,catalogRequestForConditions,readCatalogWithRetry}
 import {repairPlanConstraints,normalizeCatalogRequests,pruneUnrequestedDimensions} from './plan-constraints.mjs';
 import {selectDiverseCandidates,observedConfigurationKey} from './candidate-diversity.mjs';
 import {bindRentalScope,explicitRentalRegion} from './rental-scope.mjs';
+import {attachProductPage,structuredProductCandidate} from './public-product-page.mjs';
+import {attachOfferComparisons,offerPriceField} from './product-offers.mjs';
+import {researchComparableOffers,explicitProductUrls} from './offer-research.mjs';
 
-export const adaptiveAgentInfo=Object.freeze({framework:'LangGraph',architecture:'bounded-specialist-subgraphs',graphVersion:26,roles:Object.entries(specialistPolicies).map(([id,p])=>({id,label:p.label,tools:p.tools})),limits:{reviewPasses:2,recoveryRounds:1},execution:'sequential'});
+export const adaptiveAgentInfo=Object.freeze({framework:'LangGraph',architecture:'bounded-specialist-subgraphs',graphVersion:29,roles:Object.entries(specialistPolicies).map(([id,p])=>({id,label:p.label,tools:p.tools})),limits:{reviewPasses:2,recoveryRounds:1},execution:'sequential'});
 
 // Repair representational mistakes without changing a user's actual preferences.
 // Evidence collection requirements must never turn into unknown eligibility facts.
@@ -51,7 +57,7 @@ Choose 2–4 dimensions appropriate to the user's EXPLICIT priorities, including
   let answer,schema,repair='';
   for(let attempt=0;attempt<2;attempt++){
     try{
-      answer=await io.model([{role:'system',content:prompt+' Do not invent a brand/model shortlist before discovery. Unless explicitly requested by the user or already observed in previousSources, product brands/models MUST NOT narrow initial catalog queries. Choose a relevant public-reader capability supplied by the user message when available.'+(io.publicCatalogs?.length?' 优先选择适用的公开目录工具，在顶层JSON增加catalogRequests数组。每项含platform及该平台声明的input字段：商品keywords只写简短类别，可带明确要求的配置；租房location只写用户的城市名。最多2项。不要把用途、预算、重量、图片要求放进keywords。没有适用工具时返回空数组。目录返回实际链接，不生成候选数据。':'')+(attempt?' Repair the invalid plan. Validation error: '+repair+'. Keep output shorter than 2500 characters. Only valid JSON.':'')},{role:'user',content:JSON.stringify({question,change:adaptation,existingSchema:previous?.schema||null,currentSettings:scenario?.settings||null,availablePublicReaders:io.publicReadHints||[],availablePublicCatalogs:io.publicCatalogs||[],previousSources:previous?.sources?.slice(-12).map(s=>({url:s.url,title:s.title,readable:s.kind==='page'}))||[]})}]);
+      answer=await io.model([{role:'system',content:prompt+' Do not invent a brand/model shortlist before discovery. Unless explicitly requested by the user or already observed in previousSources, product brands/models MUST NOT narrow initial catalog queries. Choose a relevant public-reader capability supplied by the user message when available.'+(io.publicCatalogs?.length?' 优先选择适用的公开目录工具，在顶层JSON增加catalogRequests数组。每项含platform及该平台声明的input字段：商品keywords只写简短类别，可带明确要求的配置；租房location只写用户的城市名。最多2项。不要把用途、预算、重量、图片要求放进keywords。没有适用工具时返回空数组。目录返回实际链接，不生成候选数据。':'')+(attempt?' Repair the invalid plan. Validation error: '+repair+'. Keep output shorter than 2500 characters. Only valid JSON.':'')},{role:'user',content:JSON.stringify({question,change:adaptation,taskMemory:taskMemoryContext(previous),existingSchema:previous?.schema||null,currentSettings:scenario?.settings||null,availablePublicReaders:io.publicReadHints||[],availablePublicCatalogs:io.publicCatalogs||[],previousSources:previous?.sources?.slice(-12).map(s=>({url:s.url,title:s.title,readable:s.kind==='page'}))||[]})}]);
       answer=repairPlanConstraints(normalizeResearchPlan(answer),adaptation||question);
       if(!previous)answer=pruneUnrequestedDimensions(answer,question);
       schema=validateDecisionSchema(answer.schema);
@@ -161,16 +167,20 @@ export function checkDecisionCandidates(raw,sources,schema) {
     const identifier=validatedIdentity(item.identity,item.name.trim(),identity);if(identifier)candidate.identity=identifier;
     if(Object.values(facts).some(f=>f.value!==null))candidates.push(candidate);else drafts.push({name:item.name,reason:'来源未支持所需的比较参数'});
   }
-  return {...reconcileCandidates(candidates,sources,schema),drafts};
+  // Reconcile evidence first, then separate seller offers from intrinsic facts.
+  // A price difference between verified sellers is not a specification conflict.
+  const reconciled=reconcileCandidates(candidates,sources,schema);
+  const price=offerPriceField(schema),heldSourceIds=price?raw.filter(c=>c?.facts?.[price.key]?.reviewHold).map(c=>c.facts[price.key].sourceId||c.sourceId):[];
+  return {...reconciled,candidates:attachOfferComparisons(reconciled.candidates,sources,schema,{heldSourceIds}),drafts};
 }
-const researchState=new StateSchema({question:z.string(),adaptation:z.string().nullable().default(null),contract:z.unknown().nullable().default(null),sources:z.array(z.unknown()).default(()=>[]),raw:z.unknown().nullable().default(null),trace:z.array(z.unknown()).default(()=>[]),result:z.unknown().nullable().default(null),previous:z.unknown().nullable().default(null),scenario:z.unknown().nullable().default(null),scenarios:z.unknown().nullable().default(null),recovery:z.unknown().nullable().default(null),agentRuns:z.array(z.unknown()).default(()=>[]),agentReviews:z.array(z.unknown()).default(()=>[]),evidenceReview:z.unknown().nullable().default(null)});
+const researchState=new StateSchema({question:z.string(),researchFocus:z.unknown().nullable().default(null),adaptation:z.string().nullable().default(null),contract:z.unknown().nullable().default(null),sources:z.array(z.unknown()).default(()=>[]),raw:z.unknown().nullable().default(null),trace:z.array(z.unknown()).default(()=>[]),result:z.unknown().nullable().default(null),previous:z.unknown().nullable().default(null),scenario:z.unknown().nullable().default(null),scenarios:z.unknown().nullable().default(null),recovery:z.unknown().nullable().default(null),agentRuns:z.array(z.unknown()).default(()=>[]),agentReviews:z.array(z.unknown()).default(()=>[]),evidenceReview:z.unknown().nullable().default(null)});
 function assessResearch(raw,sources,contract){
  const {candidates}=checkDecisionCandidates(raw,sources,contract.schema),rows=evaluateDecision(candidates,contract.settings,contract.schema);
  const eligible=new Set(rows.filter(row=>row.status==='eligible').map(row=>row.id));
- const supported=candidates.filter(c=>!contract.evidenceRequirements?.unresolvedRentalRegion&&eligible.has(c.id)&&(!contract.evidenceRequirements?.sourcePhotos||c.media?.url||sources.find(source=>source.id===c.sourceId)?.rentalObservation?.images?.length||sources.find(source=>source.id===c.sourceId)?.merchantObservation?.images?.length));
+ const supported=candidates.filter(c=>!contract.evidenceRequirements?.unresolvedRentalRegion&&eligible.has(c.id)&&(!contract.evidenceRequirements?.sourcePhotos||c.media?.url||sources.find(source=>source.id===c.sourceId)?.rentalObservation?.images?.length||sources.find(source=>source.id===c.sourceId)?.merchantObservation?.images?.length||sources.find(source=>source.id===c.sourceId)?.productObservation?.image));
  const verified=contract.evidenceRequirements?.distinctConfigurations?supported.filter(c=>observedConfigurationKey(c,sources,contract.schema,{question:contract.question||''})):supported;
  const diverse=selectDiverseCandidates(verified,sources,contract.schema,contract.settings,{question:contract.question||''});
- const comparable=diverse.candidates.length;
+ const comparable=contract.researchFocus?Number(candidates.some(c=>matchesResearchFocus(c,sources,contract.researchFocus)&&contract.researchFocus.fieldKeys.every(key=>['cited','confirmed'].includes(c.facts[key]?.status)))):diverse.candidates.length;
  const missingFields=contract.schema.fields.map(field=>({field:field.key,label:field.label,
   candidates:rows.filter(row=>row.missing.includes(field.label)).length,
   reasons:[...new Set(candidates.map(c=>c.facts[field.key]?.reviewReason).filter(Boolean))].slice(0,3)})).filter(field=>field.candidates>0);
@@ -183,25 +193,28 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
   const stages={
     understand:async(s,io)=>{
       let contract;
-      contract=await planDecision(s.previous?.question||s.question,io,{previous:s.previous,scenario:s.scenario,adaptation:s.adaptation});
+      contract=s.researchFocus?await planFocusedInvestigation(s.researchFocus,s.previous,s.scenario,io):await planDecision(s.previous?.question||s.question,io,{previous:s.previous,scenario:s.scenario,adaptation:s.adaptation});
       return {contract,trace:[event('understand',`这次比较${contract.schema.optionLabel}，先查找${contract.schema.fields.map(f=>f.label).join('、')}的公开依据。`)]};
     },
     search:async(s,io)=>{
       const queries=s.contract.queries;
       const sources=[],trace=[...s.trace];let catalogRetries=0,contract=s.contract;
+      for(const url of explicitProductUrls(s.question))sources.push({id:'source-'+randomUUID().slice(0,12),url,title:'用户提供的详情来源',text:'',kind:'snippet',retrievedAt:new Date().toISOString(),focusSeed:true});
+      for(const url of contract.researchFocus?.sourceUrls||[])sources.push({id:'source-'+randomUUID().slice(0,12),url,title:contract.researchFocus.candidateName,text:'',kind:'snippet',retrievedAt:new Date().toISOString(),focusSeed:true});
       for(const request of s.contract.catalogRequests||[]){
         if(typeof io.searchCatalog!=='function')break;
         trace.push(event('search','正在查找公开目录：'+(request.keywords||request.location)));
         try{const page=await readCatalogWithRetry(catalogRequestForConditions(request,contract,io.publicCatalogs),io,{attempts:catalogRetries<1?2:1,onRetry:()=>{catalogRetries++;trace.push(event('search','公开目录暂时连接超时，在本轮预算内重试一次。'));}});if(page?.url&&page?.text){
           contract=bindRentalScope(contract,page);
           const source={id:'source-'+randomUUID().slice(0,12),url:page.url,title:page.title||'公开目录',text:page.text.slice(0,30000),kind:'page',retrievedAt:page.observedAt||new Date().toISOString(),retrieval:{catalogRequest:request}};
-          attachRentalPage(source,page);attachMerchantPage(source,page);sources.push(source);
+          attachRentalPage(source,page);attachMerchantPage(source,page);attachProductPage(source,page);attachRetailCatalog(source,page);sources.push(source);
           for(const seed of page.seedPages||[])if(seed.rentalObservation&&seed.text&&!sources.some(s=>s.url===seed.url)){
             const detail={id:'source-'+randomUUID().slice(0,12),url:seed.url,title:seed.title,text:seed.text,kind:'page',retrievedAt:seed.observedAt};attachRentalPage(detail,seed);sources.push(detail);
           }
         }}catch{trace.push(event('search','本次公开目录未能读取，继续使用搜索来源。'));}
       }
-      if(sources.some(source=>source.observedLinks?.length>=4))return {contract,sources,trace};
+      // A single platform's catalog is only a discovery seed, not market coverage.
+      if(sources.some(source=>source.observedLinks?.length>=4)&&contract.catalogRequests?.every(r=>io.publicCatalogs?.find(p=>p.platform===r.platform)?.capabilities?.includes('geographic-scope')))return {contract,sources,trace};
       for(const q of queries){
         trace.push(event('search',`正在查找：${q.slice(0,160)}`));
         try{
@@ -230,27 +243,28 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
     read:async(s,io)=>{
       const sources=structuredClone(s.sources),trace=[...s.trace];
       let priceReads=0;const priceUrls=new Set();
-      const selectedSources=prioritizeSources(sources,s.contract.schema);
+      const selectedSources=[...sources.filter(source=>source.focusSeed),...prioritizeSources(sources.filter(source=>!source.focusSeed),s.contract.schema)];
       for(const source of [...selectedSources,...sources.filter(source=>rentalDetailUrl(source.url)&&!selectedSources.includes(source))].slice(0,8)){
         if(typeof io.fetchSource!=='function')break;
         if(source.kind==='page'&&source.observedLinks?.length)continue;
         trace.push(event('read',`正在阅读：${source.title.slice(0,100)}`));
-        try{const page=await io.fetchSource(source.url);const text=typeof page==='string'?page:page?.text||page?.raw_content;if(text){source.text=text.slice(0,30000);source.kind='page';attachRentalPage(source,page);attachMerchantPage(source,page);}}catch{trace.push(event('read','该页面未能公开读取，保留搜索摘要并注明来源。'));}
+        try{const page=await io.fetchSource(source.url);const text=typeof page==='string'?page:page?.text||page?.raw_content;if(text){source.text=text.slice(0,30000);source.kind='page';source.retrievedAt=page?.observedAt||new Date().toISOString();attachRentalPage(source,page);attachMerchantPage(source,page);attachProductPage(source,page);attachRetailCatalog(source,page);}}catch{trace.push(event('read','该页面未能公开读取，保留搜索摘要并注明来源。'));}
         const priceKey=publicPriceKey(source,s.contract.schema,io);
         if(!source.merchantObservation&&priceReads<2&&priceKey&&!priceUrls.has(priceKey)){
           priceUrls.add(priceKey);priceReads++;try{await appendPublicPrice(source,s.contract.schema,io);}catch{}
         }
       }
       // The agent may select specific detail links, but only from URLs actually observed.
+      if(s.contract.researchFocus)return {sources,trace};
       const refined=await refineObservedCatalogs(sources,s.contract,io,{question:s.previous?.question||s.question,event:message=>trace.push(event('read',message))});
       sources.unshift(...refined.sources);
       const links=observedResearchLinks(sources,{exclude:sources.map(source=>source.url)});
       if(links.length&&typeof io.fetchSource==='function'){
         try{
-          const selected=await io.model([{role:'system',content:'Select up to 6 concrete alternative detail pages relevant to this decision, from the supplied observed links ONLY. Choose at least 4 likely matches when available, plus useful alternatives for the proposed What-if conditions. FIRST match the requested object type: a component, accessory or another product category is not the requested complete object. 缺少目录参数不等于不符合要求，应该打开详情验证，不要因为目录没写重量、面积等就返回空列表。优先可能符合的同类对象，不在目录阶段臆测最终资格。Use actual summaries, preserving the location/type. Return compact JSON {urls:[]}. No invented URLs or navigation/login pages.'},{role:'user',content:JSON.stringify({question:s.question,settings:s.contract.settings,dimensions:s.contract.schema.fields,whatifs:s.contract.whatifs,links:links.slice(0,30)})}]);
+          const selected=await io.model([{role:'system',content:'Select up to 6 concrete alternative detail pages relevant to this decision, from the supplied observed links ONLY. For a general category choose at least 4 likely matches when available, plus useful What-if alternatives. When the user specifies an exact product/configuration, prioritize that exact product across independent sellers; do not pad the selection with other brands, accessory parts or different generations. FIRST match the requested object type: a component, accessory or another product category is not the requested complete object. 缺少目录参数不等于不符合要求，应该打开详情验证，不要因为目录没写重量、面积等就返回空列表。优先可能符合的同类对象，不在目录阶段臆测最终资格。Use actual summaries, preserving the location/type. Return compact JSON {urls:[]}. No invented URLs or navigation/login pages.'},{role:'user',content:JSON.stringify({question:s.question,settings:s.contract.settings,dimensions:s.contract.schema.fields,whatifs:s.contract.whatifs,links:links.slice(0,30)})}]);
           for(const url of [...new Set(Array.isArray(selected.urls)?selected.urls:[])].filter(url=>links.some(l=>l.url===url)).slice(0,6)){
             trace.push(event('read','正在打开具体方案的详情，核对同一方案的资料。'));
-            try{const page=await io.fetchSource(url),text=typeof page==='string'?page:page?.text||page?.raw_content;if(text){const detail={id:'source-'+randomUUID().slice(0,12),url,title:'方案详情',text:text.slice(0,30000),kind:'page',retrievedAt:new Date().toISOString()};attachRentalPage(detail,page);attachMerchantPage(detail,page);sources.unshift(detail);}}catch{}
+            try{const page=await io.fetchSource(url),text=typeof page==='string'?page:page?.text||page?.raw_content;if(text){const detail={id:'source-'+randomUUID().slice(0,12),url:page?.url||url,title:page?.title||'方案详情',text:text.slice(0,30000),kind:'page',retrievedAt:page?.observedAt||new Date().toISOString()};attachRentalPage(detail,page);attachMerchantPage(detail,page);attachProductPage(detail,page);attachRetailCatalog(detail,page);sources.unshift(detail);}}catch{}
           }
         }catch{trace.push(event('read','暂未选出更多可读详情，继续整理已取得的资料。'));}
       }
@@ -258,13 +272,13 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
     },
     extract:async(s,io)=>{
       if(!s.sources.length)return {raw:[],trace:[...s.trace,event('extract','尚未取得公开来源，保留你的条件，暂不生成方案。')]};
-      const raw=s.sources.filter(source=>source.rentalObservation||source.merchantObservation).map(source=>source.merchantObservation?merchantRawCandidate(source,s.contract.schema):rentalRawCandidate(source,s.contract.schema)).filter(Boolean),trace=[...s.trace];
-      const chosen=prioritizeSources(s.sources.filter(source=>!source.rentalObservation&&!source.merchantObservation&&!source.observedLinks?.length),s.contract.schema);
+      const raw=s.sources.filter(source=>source.rentalObservation||source.merchantObservation||source.productObservation).map(source=>source.productObservation?structuredProductCandidate(source,s.contract.schema):source.merchantObservation?merchantRawCandidate(source,s.contract.schema):rentalRawCandidate(source,s.contract.schema)).filter(Boolean),trace=[...s.trace];
+      const chosen=prioritizeSources(s.sources.filter(source=>!source.rentalObservation&&!source.merchantObservation&&!source.productObservation&&!source.observedLinks?.length),s.contract.schema);
       for(let offset=0;offset<chosen.length;offset+=2){
         const batch=chosen.slice(offset,offset+2).map(x=>({...x,text:dimensionExcerpt(x.text,s.contract.schema)}));
         for(let attempt=0;attempt<2;attempt++){
           try{
-            const answer=await io.model([{role:'system',content:extractionPrompt(s.contract.schema,attempt?1:2)},{role:'user',content:JSON.stringify({question:s.previous?.question||s.question,sources:batch})}]);
+            const answer=await io.model([{role:'system',content:extractionPrompt(s.contract.schema,attempt?1:2)},{role:'user',content:JSON.stringify({question:s.contract.researchFocus?.request||s.previous?.question||s.question,sources:batch})}]);
             if(!Array.isArray(answer.candidates))throw new Error('Invalid extraction');raw.push(...answer.candidates.slice(0,2));break;
           }catch{if(attempt)trace.push(event('extract','这部分资料暂未能可靠整理，原文仍保留在依据中。'));}
         }
@@ -274,6 +288,7 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
     corroborate:async(s,io)=>{
       const checked=checkDecisionCandidates(s.raw||[],s.sources,s.contract.schema),sources=structuredClone(s.sources),raw=[...(s.raw||[])],trace=[...s.trace];
       const targets=checked.candidates.filter(c=>{
+        if(s.contract.researchFocus&&!matchesResearchFocus(c,sources,s.contract.researchFocus))return false;
         const missing=s.contract.schema.fields.some(f=>(s.contract.settings.limits[f.key]!==null||s.contract.settings.weights[f.key]>0)&&c.facts[f.key]?.value===null);
         const linked=new Set(Object.values(c.facts).flatMap(f=>[f.sourceId,...(f.evidence||[]).map(o=>o.sourceId)]).filter(Boolean));
         const sites=new Set(sources.filter(source=>linked.has(source.id)).map(source=>sourceSite(source.url)));
@@ -289,7 +304,7 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
           for(const row of prioritizeSources((Array.isArray(rows)?rows:[]).map(r=>collectedSource(r,query)).filter(Boolean),s.contract.schema,2)){
             if(sources.some(source=>source.url===row.url))continue;
             const source={id:'source-'+randomUUID().slice(0,12),...row};sources.push(source);fresh.push(source);
-            if(typeof io.fetchSource==='function')try{const response=await io.fetchSource(source.url),text=typeof response==='string'?response:response?.text||response?.raw_content;if(text){source.text=text.slice(0,30000);source.kind='page';attachRentalPage(source,response);attachMerchantPage(source,response);}}catch{}
+            if(typeof io.fetchSource==='function')try{const response=await io.fetchSource(source.url),text=typeof response==='string'?response:response?.text||response?.raw_content;if(text){source.text=text.slice(0,30000);source.kind='page';source.retrievedAt=response?.observedAt||new Date().toISOString();attachRentalPage(source,response);attachMerchantPage(source,response);attachProductPage(source,response);attachRetailCatalog(source,response);}}catch{}
           }
         }catch{trace.push(event('corroborate','本次补查没有返回新的依据，已有资料和未知项保持保留。'));}
       }
@@ -298,9 +313,18 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
       for(let offset=0;offset<unstructured.length;offset+=2){
         const batch=unstructured.slice(offset,offset+2).map(source=>({...source,text:dimensionExcerpt(source.text,s.contract.schema)}));
         try{
-          const answer=await io.model([{role:'system',content:extractionPrompt(s.contract.schema)},{role:'user',content:JSON.stringify({question:s.previous?.question||s.question,sources:batch})}]);
+          const answer=await io.model([{role:'system',content:extractionPrompt(s.contract.schema)},{role:'user',content:JSON.stringify({question:s.contract.researchFocus?.request||s.previous?.question||s.question,sources:batch})}]);
           if(Array.isArray(answer.candidates))raw.push(...answer.candidates.slice(0,2));
         }catch{trace.push(event('corroborate','补查页面未能可靠提取，保留原文，不填入猜测值。'));}
+      }
+      return {sources,raw,trace};
+    },
+    compare_offers:async(s,io)=>{
+      const sources=structuredClone(s.sources),raw=[...(s.raw||[])],trace=[...s.trace];
+      if(!s.contract.researchFocus){
+        const compared=await researchComparableOffers({candidates:checkDecisionCandidates(raw,sources,s.contract.schema).candidates,sources,schema:s.contract.schema},io,{event:message=>trace.push(event('compare_offers',message)),exactOnly:/同款|同一款|同一商品|同一个商品/.test(s.contract.question)&&!/不同配置|不同型号|不同品牌|多款|多个型号/.test(s.contract.question)});
+        for(const source of compared.sources)if(!sources.some(s=>s.url===source.url))sources.push(source);
+        raw.push(...compared.raw);
       }
       return {sources,raw,trace};
     },
@@ -311,26 +335,28 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
     complete:async(s,io)=>{
       const schema=structuredClone(s.contract.schema);
       const {candidates,drafts,warnings}=checkDecisionCandidates(s.raw,s.sources,schema);
+      if(s.contract.researchFocus)for(let i=candidates.length-1;i>=0;i--)if(!matchesResearchFocus(candidates[i],s.sources,s.contract.researchFocus))candidates.splice(i,1);
       bindRentalImages(candidates,s.sources);
       bindMerchantImages(candidates,s.sources);
+      for(const c of candidates){const source=s.sources.find(s=>s.id===c.sourceId),image=source?.productObservation?.image;if(!c.media&&image?.startsWith('https://'))c.media={url:image,sourceId:source.id,sourceUrl:source.url,kind:'product-photo',label:'该商品原页结构化配图 · 非生成图片'};}
       // Preview images only from a cited detail page, never a general search/listing cover.
-      if(typeof io.enrichImages==='function'){
+      if(!s.contract.researchFocus&&typeof io.enrichImages==='function'){
         const targets=candidates.filter(c=>!c.media).map(c=>({candidate:c,source:s.sources.find(source=>source.id===c.sourceId&&source.kind==='page'&&source.url&&!rentalDetailUrl(source.url)&&(clean(source.title).includes(clean(c.name))||source.pageIdentity?.name&&clean(source.pageIdentity.name).replace(/\s/g,'')===clean(c.name).replace(/\s/g,'')))})).filter(item=>item.source).slice(0,6);
         if(targets.length)try{
           const images=await io.enrichImages([...new Set(targets.map(t=>t.source.retrieval?.priceSourceUrl||t.source.url))]);
           for(const {candidate,source} of targets){const pageUrl=source.retrieval?.priceSourceUrl||source.url;const image=images.find(image=>image.sourceUrl===pageUrl&&safeUrl(image.url)?.startsWith('https://')&&(!image.pageUrl||sourceSite(image.pageUrl)===sourceSite(source.url)));if(image)candidate.media={url:image.url,sourceId:source.id,pageUrl:image.pageUrl||pageUrl,kind:'page-preview',label:'来源页配图 · 不作为配置核验'};}
         }catch{warnings.push('来源页配图暂未取得，文字依据保留。');}
       }
-      if(s.contract.evidenceRequirements?.sourcePhotos)for(let i=candidates.length-1;i>=0;i--)if(!candidates[i].media?.url){drafts.push({name:candidates[i].name,sourceId:candidates[i].sourceId,reason:'已取得文字依据，但尚未取得与该方案对应的原页图片'});candidates.splice(i,1);}
+      if(!s.contract.researchFocus&&s.contract.evidenceRequirements?.sourcePhotos)for(let i=candidates.length-1;i>=0;i--)if(!candidates[i].media?.url){drafts.push({name:candidates[i].name,sourceId:candidates[i].sourceId,reason:'已取得文字依据，但尚未取得与该方案对应的原页图片'});candidates.splice(i,1);}
       if(s.contract.evidenceRequirements?.unresolvedRentalRegion){
         drafts.push(...candidates.map(c=>({name:c.name,sourceId:c.sourceId,reason:'尚未核对用户指定区域，不能当作符合区域要求的房源'})));candidates.splice(0);
         warnings.push('这轮尚未核对指定区域，资料已保留，暂不推荐全市房源作为替代。');
       }
-      if(s.contract.evidenceRequirements?.distinctConfigurations)for(let i=candidates.length-1;i>=0;i--)if(!observedConfigurationKey(candidates[i],s.sources,schema,{question:s.previous?.question||s.question})){drafts.push({name:candidates[i].name,sourceId:candidates[i].sourceId,reason:'原页参数尚不足以支持区分配置；资料保留，不计入不同配置数量'});candidates.splice(i,1);}
+      if(!s.contract.researchFocus&&s.contract.evidenceRequirements?.distinctConfigurations)for(let i=candidates.length-1;i>=0;i--)if(!observedConfigurationKey(candidates[i],s.sources,schema,{question:s.previous?.question||s.question})){drafts.push({name:candidates[i].name,sourceId:candidates[i].sourceId,reason:'原页参数尚不足以支持区分配置；资料保留，不计入不同配置数量'});candidates.splice(i,1);}
       const diverse=selectDiverseCandidates(candidates,s.sources,schema,s.contract.settings,{question:s.previous?.question||s.question});
       candidates.splice(0,candidates.length,...diverse.candidates);drafts.push(...diverse.duplicates);
       for(const f of schema.fields){
-        if((f.type||'number')!=='number'||f.range)continue;
+        if(s.contract.researchFocus||(f.type||'number')!=='number'||f.range)continue;
         const values=candidates.map(c=>c.facts[f.key]?.value).filter(Number.isFinite),min=Math.min(...values),max=Math.max(...values);
         if(Number.isFinite(min)&&max>min)f.range={min,max};
       }
@@ -345,11 +371,21 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
         let selected=result.scenarios.find(x=>x.id===s.scenario?.id)||result.scenarios[0];
         if(s.adaptation){
           if(result.scenarios.length>=24)throw new Error('最多保留 24 个情景，当前情况始终保留');
-          selected={id:'scenario-'+randomUUID(),parentScenarioId:selected.id,name:s.adaptation.slice(0,80),settings:s.contract.settings,candidateIds:[...(selected.candidateIds||result.candidates.map(c=>c.id))]};result.scenarios.push(selected);
+          selected={id:'scenario-'+randomUUID(),parentScenarioId:selected.id,name:(s.contract.researchFocus?'核对'+s.contract.researchFocus.fields.map(f=>f.label).join('、')+'后的比较':s.adaptation).slice(0,80),settings:s.contract.settings,candidateIds:[...(selected.candidateIds||result.candidates.map(c=>c.id))]};result.scenarios.push(selected);
           result.canvasScenarioIds=[...new Set([...(result.canvasScenarioIds||[selected.parentScenarioId]),selected.id])];
         }
         const added=[];
-        for(const c of candidates){
+        if(s.contract.researchFocus){
+          const focus=s.contract.researchFocus,original=result.candidates.find(c=>c.id===focus.candidateId);
+          let updated=original;
+          for(const c of candidates)updated=mergeFocusedEvidence(updated,c,[...result.sources,...s.sources],schema,focus)||updated;
+          if(updated!==original&&result.candidates.length<60){
+            result.candidates.push(updated);added.push(updated.id);
+            selected.candidateIds=selected.candidateIds.map(id=>id===original.id?updated.id:id);
+          }
+          selected.research={focus:{...focusedEvidenceStatus({...result,sources:[...result.sources,...s.sources]},updated,focus),updatedCandidateId:updated.id}};
+        }
+        for(const c of s.contract.researchFocus?[]:candidates){
           const url=s.sources.find(x=>x.id===c.sourceId)?.url;
           const existing=result.candidates.find(x=>candidateIdentityKey(x,result.sources)===candidateIdentityKey(c,s.sources));
           const same=existing&&Object.keys(c.facts).every(k=>existing.facts[k]?.value===c.facts[k].value)&&result.sources.find(y=>y.id===existing.sourceId)?.url===url;
@@ -367,7 +403,7 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
           selected.candidateIds=scoped.candidates.map(c=>c.id);drafts.push(...scoped.duplicates);
         }
         result.drafts=[...(result.drafts||[]),...drafts];
-        selected.research={at:new Date().toISOString(),summary:`这轮整理了 ${added.length} 个有依据的${s.contract.schema.optionLabel}`};
+        selected.research={...selected.research,at:new Date().toISOString(),summary:s.contract.researchFocus?`已核对${s.contract.researchFocus.candidateName}的${s.contract.researchFocus.fields.map(f=>f.label).join('、')}，${selected.research.focus.status==='evidence-found'?'取得可追溯依据':'仍有待核实信息'}`:`这轮整理了 ${added.length} 个有依据的${s.contract.schema.optionLabel}`};
         result.activeScenarioId=selected.id;result.settings=structuredClone(selected.settings);result.trace.push(...trace);
       }else{
         result={title:schema.label,question:s.question,mode:'live',schema,settings:s.contract.settings,baselineSettings:structuredClone(s.contract.settings),candidates,sources:s.sources,trace,warnings,drafts};
@@ -375,7 +411,7 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
         result.canvasScenarioIds=result.scenarios.map(scenario=>scenario.id);
       }
       result.evidenceRequirements=structuredClone(s.contract.evidenceRequirements||{});
-      result.agent={...structuredClone(adaptiveAgentInfo),nodes:['understand','search','read','extract','corroborate','review','recover','review_after_recovery','complete'],runs:s.agentRuns||[],reviews:s.agentReviews||[],planRepairs:s.contract.planRepairs,recovery:s.recovery,diversity:{method:'observed-specifications-v1',collapsed:diverse.duplicates.length}};
+      result.agent={...structuredClone(adaptiveAgentInfo),nodes:['understand','search','read','extract','corroborate','review','recover','compare_offers','review_after_recovery','complete'],runs:s.agentRuns||[],reviews:s.agentReviews||[],planRepairs:s.contract.planRepairs,recovery:s.recovery,diversity:{method:'observed-specifications-v1',collapsed:diverse.duplicates.length}};
       if((s.agentReviews||[]).some(review=>['unavailable','context-budget-exceeded'].includes(review.status)))result.warnings.push('模型独立审查未完成；本轮结果仍按程序的来源与引文规则校验。');
       if(result.pendingConversationResearch?.request===s.adaptation){
         const selected=result.scenarios.find(branch=>branch.id===result.activeScenarioId),pool=result.candidates.filter(c=>selected.candidateIds.includes(c.id)),rows=evaluateDecision(pool,selected.settings,result.schema),eligible=rows.filter(r=>r.status==='eligible'),unresolved=rows.filter(r=>r.status==='unresolved');
@@ -409,7 +445,7 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
   };
   const specialists={
     coordinator:createSpecialist('coordinator',{understand:stages.understand},io),
-    researcher:createSpecialist('researcher',Object.fromEntries(['search','read','extract','corroborate','recover'].map(phase=>[phase,stages[phase]])),io),
+    researcher:createSpecialist('researcher',Object.fromEntries(['search','read','extract','corroborate','compare_offers','recover'].map(phase=>[phase,stages[phase]])),io),
     reviewer:createSpecialist('reviewer',{review:(state,tools)=>reviewEvidence(state,tools,{checkCandidates:checkDecisionCandidates,event})},io),
     analyst:createSpecialist('analyst',{analyze:stages.analyze},io),
   };
@@ -436,16 +472,17 @@ export function createGeneralResearchGraph(io,{onProgress=()=>{},checkpointer=ne
     .addNode('read',delegate('researcher','read'))
     .addNode('extract',delegate('researcher','extract'))
     .addNode('corroborate',delegate('researcher','corroborate'))
+    .addNode('compare_offers',delegate('researcher','compare_offers'))
     .addNode('review',review)
     .addNode('recover',delegate('researcher','recover'))
     .addNode('review_after_recovery',review)
     .addNode('complete',state=>stages.complete(state,io))
     .addNode('analyze',delegate('analyst','analyze'))
-    .addEdge(START,'understand').addEdge('understand','search').addEdge('search','read').addEdge('read','extract').addEdge('extract','corroborate').addEdge('corroborate','review').addEdge('review','recover').addEdge('recover','review_after_recovery').addEdge('review_after_recovery','complete').addEdge('complete','analyze').addEdge('analyze',END);
+    .addEdge(START,'understand').addEdge('understand','search').addEdge('search','read').addEdge('read','extract').addEdge('extract','corroborate').addEdge('corroborate','review').addEdge('review','recover').addEdge('recover','compare_offers').addEdge('compare_offers','review_after_recovery').addEdge('review_after_recovery','complete').addEdge('complete','analyze').addEdge('analyze',END);
   return graph.compile({checkpointer});
 }
 export async function runGeneralResearch(question,io,onProgress=()=>{},options={}){
   const graph=createGeneralResearchGraph(io,{onProgress,...options});
-  const output=await graph.invoke(options.resume?null:{question,previous:options.previous||null,scenario:options.scenario||null,scenarios:options.scenarios||null,adaptation:options.adaptation||null},{configurable:{thread_id:options.threadId||randomUUID()},recursionLimit:16,durability:'sync'});
+  const output=await graph.invoke(options.resume?null:{question,previous:options.previous||null,scenario:options.scenario||null,scenarios:options.scenarios||null,adaptation:options.adaptation||null,researchFocus:options.researchFocus||null},{configurable:{thread_id:options.threadId||randomUUID()},recursionLimit:16,durability:'sync'});
   return output.result;
 }

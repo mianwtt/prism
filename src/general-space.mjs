@@ -1,5 +1,7 @@
 import {decisionScenarios,validateDecisionSchema,validateDecisionSettings,validateDecisionScenarios} from './decision-schema.mjs';
 import {reviewDecisionFacts,captureDecision} from './decision-workflow.mjs';
+import {validateTaskMemory} from './task-memory.mjs';
+import {offerSelectionBranch} from './product-offers.mjs';
 // A fixed fictional fixture only. Live planning never imports or uses these fields.
 export function housingContract(question=''){
   const sale=/买房|购房/.test(question);
@@ -8,6 +10,7 @@ export function housingContract(question=''){
 }
 export function editGeneralSpace(previous,input) {
   const next=reviewDecisionFacts(previous,input.reviews||[]);
+  if (input.taskMemory !== undefined) next.taskMemory = validateTaskMemory(input.taskMemory);
   next.baselineSettings??=structuredClone(previous.settings);
   next.baselineCandidateIds??=previous.candidates.map(c=>c.id);
   next.scenarios=validateDecisionScenarios(previous,input.scenarios||decisionScenarios(previous));
@@ -22,6 +25,7 @@ export function editGeneralSpace(previous,input) {
   if(input.decision!==undefined){
     next.decision=captureDecision(next,input.decision,selected);
   }
+  if(input.offerSelection!==undefined){if(!input.offerSelection||typeof input.offerSelection!=='object'||Array.isArray(input.offerSelection))throw new Error('报价选择格式无效');return offerSelectionBranch(next,{...input.offerSelection,scenarioId:selected.id});}
   return next;
 }
 export function housingDemo(){

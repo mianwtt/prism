@@ -30,7 +30,8 @@ if(settings.searchProvider==='tofu'){
     const probe=spawnSync(python,['-c','import tofu_search; print("tofu-search importable")'],{encoding:'utf8',timeout:15000,windowsHide:true});
     report(probe.status===0,'Local tofu runtime',probe.status===0?'Python package loads':'Run npm run setup:search');
   }else report(false,'Local tofu runtime','Install uv, then run npm run setup:search');
-}else report(settings.hasSearchKey,'Tavily configuration','Choose tofu for no commercial search key, or configure a Tavily key');
+}else if(settings.searchProvider==='searxng')report(Boolean(settings.searxngUrl),'SearXNG configuration','Instance URL configured; JSON API availability is checked by actual search');
+else report(settings.hasSearchKey,'Tavily configuration','Choose tofu/SearXNG for no commercial search key, or configure a Tavily key');
 if(process.argv.includes('--connect')&&modelUrl&&configured(env.LLM_API_KEY)){
   try{
     const result=await fetch(modelUrl.href.replace(/\/$/,'')+'/models',{headers:{Authorization:'Bearer '+env.LLM_API_KEY},signal:AbortSignal.timeout(8000)});

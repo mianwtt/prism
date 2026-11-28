@@ -13,10 +13,10 @@ export function tofuPython(env = process.env) {
     )
   );
 }
-export function searchWithTofu(query, env = process.env) {
+export function searchWithTofu(query, env = process.env, {maxResults=8} = {}) {
   if (typeof query !== "string" || !query.trim() || query.length > 500)
     throw new Error("搜索关键词必须为 1–500 字");
-  return callTofu({ query }, env).then((data) => data.results);
+  return callTofu({ query, maxResults: Math.min(12, Math.max(4, maxResults)) }, env).then((data) => data.results);
 }
 export function fetchWithTofu(url, env = process.env) {
   return callTofu({ operation: "fetch", url }, env).then((data) => data.text);
@@ -33,7 +33,7 @@ function callTofu(request, env) {
         cwd: projectRoot,
         windowsHide: true,
         stdio: ["pipe", "pipe", "ignore"],
-        env: { ...process.env, PYTHONUTF8: "1" },
+        env: { ...process.env, ...env, PYTHONUTF8: "1" },
       },
     );
     let output = "",

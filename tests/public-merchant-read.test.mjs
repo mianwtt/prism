@@ -8,10 +8,11 @@ const snapshot={url,title:'测试配置甲 32GB/1TB',productTitle:'测试配置�
 const spec={url:'https://www.suning.com/itemcanshu/0000000000/123456.html',cells:['内存容量：32GB','最大支持内存：64GB','硬盘容量：1TB','硬盘类型：固态硬盘','净重：1.5千克','包装重量：2.5千克']};
 const schema={fields:[{key:'cost',label:'价格',type:'number',unit:'元'},{key:'ram',label:'内存',type:'number',unit:'GB'},{key:'ssd',label:'硬盘',type:'number',unit:'GB'},{key:'mass',label:'重量',type:'number',unit:'kg'}]};
 function source(){const o=parseMerchantDetail(snapshot,spec),s={id:'a',url,text:o.text,kind:'page'};attachMerchantPage(s,{merchantObservation:o,observedAt:new Date().toISOString()});return s;}
-test('public detail adapter maps only observed attributes to Agent dimensions, preserving units and price despite no stock',()=>{
+test('public detail adapter preserves observed units and a sold-out reference price without promoting it to a usable offer',()=>{
   const s=source(),raw=merchantRawCandidate(s,schema),{candidates}=checkDecisionCandidates([raw],[s],schema);
   assert.deepEqual(Object.values(raw.facts).map(f=>f.value),[6499,32,1024,1.5]);
-  assert.equal(candidates.length,1);assert.ok(Object.values(candidates[0].facts).every(f=>f.status==='cited'));
+  assert.equal(candidates.length,1);assert.ok(['ram','ssd','mass'].every(key=>candidates[0].facts[key].status==='cited'));
+  assert.equal(candidates[0].facts.cost.value,null);assert.equal(candidates[0].commerce.offers[0].price,6499);assert.equal(candidates[0].commerce.offers[0].comparable,false);
   bindMerchantImages(candidates,[s]);assert.equal(candidates[0].media.sourceUrl,url);assert.equal(candidates[0].media.images.length,1);
   assert.equal(merchantRawCandidate(s,{fields:[{key:'time',label:'续航',type:'number',unit:'小时'}]}).facts.time,undefined);
   const storage={fields:[{key:'capacity',label:'固态硬盘容量',type:'number',unit:'GB'}]};
@@ -35,17 +36,17 @@ test('different seller or product cannot supply parameters or source photographs
   assert.equal(merchantRawCandidate(duplicate,schema).facts.ram,undefined);
   assert.equal(parseMerchantDetail({...snapshot,priceContext:'国补后 ¥6499.00'},spec).offer,null);
 });
-test('actual graph executes an Agent-selected catalog category and binds complete products without an offsite search or guessed extraction',async()=>{
- const requests=[];const catalog='https://search.suning.com/testing/';
+test('actual graph uses observed catalog details and also searches beyond the first platform without guessed extraction',async()=>{
+ const requests=[],searches=[];const catalog='https://search.suning.com/testing/';
  const plan={schema:{fields:schema.fields.map(f=>({...f,direction:['cost','mass'].includes(f.key)?-1:1})),layout:{primaryField:'cost'}},constraints:[{field:'cost',value:7000,quote:'价格不超过7000元'}],queries:['fallback'],catalogRequests:[{platform:'suning',keywords:'测试商品类别'}],whatifs:[]};
  const urls=Array.from({length:4},(_,i)=>url.replace('123456',String(123456+i)));
  const result=await runGeneralResearch('价格不超过7000元；比较内存、硬盘和重量，需要来源图片',{
    publicCatalogs:[{platform:'suning'}],async searchCatalog(request){requests.push(request);return {url:catalog,title:'测试目录',text:'测试目录',observedLinks:urls.map(u=>({url:u,title:'测试配置'}))};},
    async model(messages){const system=messages[0].content;if(system.includes('Analyze this individual'))return plan;if(system.includes('Select up to 6'))return {urls};if(system.includes('Propose 2 or 3'))return {whatifs:[]};if(system.includes('Analyze ONLY'))return {summary:'',insights:[]};throw new Error('Unexpected extraction');},
-   async search(){assert.fail('observed catalog should not need an offsite search');},
+   async search(query){searches.push(query);return [];},
    async fetchSource(target){if(target===catalog)return {url:catalog,text:'测试目录',observedLinks:urls.map(u=>({url:u,title:'测试配置'}))};const o=parseMerchantDetail({...snapshot,url:target,productTitle:'测试配置'+target.split('/').pop()},null);o.attributes=spec.cells.filter(s=>!s.includes('最大')).map(s=>{const [label,value]=s.split('：');return {label,value,quote:s};});o.text+='\n'+o.attributes.map(a=>a.quote).join('\n');return {text:o.text,merchantObservation:o};}
  });
- assert.deepEqual(requests,[{platform:'suning',keywords:'测试商品类别'}]);assert.equal(result.candidates.length,4);assert.ok(result.candidates.every(c=>c.media?.url&&Object.values(c.facts).every(f=>f.status==='cited')));
+ assert.deepEqual(requests,[{platform:'suning',keywords:'测试商品类别'}]);assert.ok(searches.includes('fallback'));assert.equal(result.candidates.length,4);assert.ok(result.candidates.every(c=>c.media?.url&&c.facts.ram.status==='cited'&&c.facts.cost.value===null&&c.commerce.offers[0].price===6499));
 });
 test('catalog routing allows public search only and does not accept authentication or private destinations',()=>{
   assert.ok(merchantCatalogUrl('https://search.suning.com/笔记本/'));

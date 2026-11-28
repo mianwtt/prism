@@ -1,10 +1,11 @@
 import {decisionScenarios,evaluateDecision,hasDecisionValue,validateDecisionSettings} from './decision-schema.mjs';
 import {observationIssue,observationConversion} from './decision-evidence.mjs';
+import {offerPriceCurrent} from './product-offers.mjs';
 const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 export function factObservations(space,candidate,field){
   const fact=candidate.facts[field.key]||{},all=[fact,...(fact.evidence||[]),...(fact.conflictingEvidence||[])],seen=new Set();
   return all.filter(o=>hasDecisionValue(o.value,field)&&o.sourceId&&o.quote).filter(o=>{const key=JSON.stringify([o.value,o.sourceId,o.quote]);if(seen.has(key))return false;seen.add(key);return true;}).map(o=>{
-    const source=space.sources.find(s=>s.id===o.sourceId),issue=observationIssue(field,o,source);
+    const source=space.sources.find(s=>s.id===o.sourceId),issue=!offerPriceCurrent(candidate,field)?'当前报价已过期或不再可用于比较，请重新核对':observationIssue(field,o,source);
     const conversion=observationConversion(field,o);
     return {...o,source,verifiable:!issue,...(conversion?{conversion}:{}),...(issue?{verificationIssue:issue}:{})};
   });

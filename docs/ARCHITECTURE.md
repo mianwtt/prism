@@ -2,6 +2,8 @@
 
 Prism's useful unit is a decision space, not a chat answer. A space contains a question, typed model, source snapshots, candidate facts, branch scopes, conversation and a versioned personal decision.
 
+The production research adapter now uses the official MCP SDK for tool discovery and calls, and specialist contexts load task-selected Agent Skills. This adds protocol and procedural guidance layers while preserving the existing role permissions, evidence rules and deterministic decision engine. See [MCP and Skills](MCP-SKILLS.md).
+
 ## System overview
 
 ![Prism system architecture: the browser workspace, local API, application services, multi-agent research, model/source adapters and separate local stores](assets/system-architecture.en.svg)

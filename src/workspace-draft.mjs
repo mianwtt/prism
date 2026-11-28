@@ -22,7 +22,8 @@ function normalized(space,raw){
  const activeScenarioId=ids.has(raw.activeScenarioId)?raw.activeScenarioId:'scenario-baseline';
  const canvasScenarioIds=[...new Set(['scenario-baseline',...(Array.isArray(raw.canvasScenarioIds)?raw.canvasScenarioIds:[])].filter(id=>ids.has(id)))];
  const decisionDraft={candidateId:space.candidates.some(c=>c.id===raw.decisionDraft?.candidateId)?raw.decisionDraft.candidateId:'',rationale:String(raw.decisionDraft?.rationale||'').slice(0,1500)};
- return {scenarios,activeScenarioId,canvasScenarioIds,dirty:raw.dirty===true,pane:['canvas','evidence','memory','research'].includes(raw.pane)?raw.pane:'canvas',
+ return {scenarios,activeScenarioId,canvasScenarioIds,dirty:raw.dirty===true,pane:['overview','canvas','evidence','memory','research'].includes(raw.pane)?raw.pane:'canvas',
+  taskNoteDraft:typeof raw.taskNoteDraft==='string'?raw.taskNoteDraft.slice(0,2000):space.taskMemory?.text||'',
   chatDraft:String(raw.chatDraft||'').slice(0,1500),researchDraft:String(raw.researchDraft||'').slice(0,1500),decisionDraft};
 }
 export function readWorkspaceDraft(space,storage=localStore()){

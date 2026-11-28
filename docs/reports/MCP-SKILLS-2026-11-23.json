@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-23",
+  "scope": "Software protocol/skill integration and existing behavior regression; controlled data and model callbacks",
+  "results": {
+    "sdk": "@modelcontextprotocol/sdk 1.32.2",
+    "unit_http_passed": 307,
+    "edge_browser_passed": 71,
+    "new_protocol_skill_and_graph_tests": 8,
+    "syntax_and_source_checks": "passed",
+    "npm_audit_vulnerabilities": 0,
+    "skills": [
+      "decision-planning",
+      "offer-research",
+      "rental-research",
+      "evidence-review",
+      "decision-analysis"
+    ]
+  },
+  "default_tool_transport": "official MCP SDK in-memory client/server session",
+  "external_stdio_client_checked": true,
+  "new_live_model_or_live_search_benefit_benchmark": false,
+  "skill_routing": "Application/role rules; trusted bundled SKILL.md; no third-party script execution",
+  "source_sha256": {
+    "src/mcp-research.mjs": "b6eba3807baa89362849a24869ed484954c0769ca3fafce77fd045c70ede28a5",
+    "src/mcp-server.mjs": "930190854e25b4f7cdace84d2fed27d95b48910de925fbe51ceecb0b9f32c3ea",
+    "src/skills.mjs": "00ca10b421895a8efa1462e1abe7b42ec5ad34b679043015316fead9e2d3106f",
+    "src/agents/specialist.mjs": "c0b685399158b4fb7b02f2eaeb78a7c5ff521cb269def385df60b3fb7be000f1",
+    "src/research-providers.mjs": "c25f1722805408558875cb481bad88595c749c66c09178de360e6d0f14c123c4",
+    "tests/mcp-skills.test.mjs": "a5ba5c6e8ad919041413438d2eaed5760365f050aa345bc473dee74dcc9e86ee",
+    "tests/multi-agent.test.mjs": "799f641adee033a4b837fe87906382b59ba652235e0dd2c5170c2de81e104101"
+  }
+}

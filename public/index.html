@@ -16,6 +16,10 @@
     <link rel="stylesheet" href="/workflow.css" />
     <link rel="stylesheet" href="/studio-design.css" />
     <link rel="stylesheet" href="/branch-comparison.css" />
+    <link rel="stylesheet" href="/task-studio.css" />
+    <link rel="stylesheet" href="/decision-studio-upgrade.css" />
+    <link rel="stylesheet" href="/selection-workspace.css" />
+    <link rel="stylesheet" href="/product-offers.css" />
   </head>
   <body>
     <aside class="sidebar">
@@ -319,8 +323,10 @@
         ><select id="search-provider">
           <option value="tofu">tofu-search · 本机运行，无需搜索密钥</option>
           <option value="tavily">Tavily · 需要 API Key</option>
+          <option value="searxng">SearXNG · 自建多引擎搜索</option>
         </select>
         <p id="search-provider-help" class="muted"></p>
+        <div id="searxng-field" hidden><label for="searxng-url">SearXNG 服务地址</label><input id="searxng-url" type="url" placeholder="http://127.0.0.1:8080" /></div>
         <div id="search-key-field">
           <label for="search-key"
             >Tavily API Key <span id="search-key-status"></span></label

@@ -1,11 +1,14 @@
+import {attachRetailCatalog} from './retail-catalog.mjs';
 import {randomUUID} from 'node:crypto';
 import {dimensionExcerpt,prioritizeSources,collectedSource,extractionPrompt} from './general-retrieval.mjs';
 import {attachRentalPage,rentalRawCandidate} from './public-rental-read.mjs';
 import {sourceSite} from './decision-evidence.mjs';
 import {safeUrl} from './evidence.mjs';
 import {attachMerchantPage,merchantRawCandidate} from './public-merchant-read.mjs';
+import {attachProductPage} from './public-product-page.mjs';
 import {catalogRequestForConditions} from './catalog-navigation.mjs';
 import {normalizeCatalogRequests,catalogRequestKey} from './plan-constraints.mjs';
+import {productDescriptor} from './product-offers.mjs';
 
 export function observedResearchLinks(records,{exclude=[]}={}) {
   const seen=new Set(exclude),links=[];
@@ -14,8 +17,11 @@ export function observedResearchLinks(records,{exclude=[]}={}) {
     if(!url||seen.has(url)||/\/(?:login|signin|sign-in|passport|auth)(?:\/|$)/i.test(new URL(url).pathname))return;
     seen.add(url);links.push({...link,url});
   };
+  const groups=records.map(s=>[...(s.observedLinks||[])]);
+  // Interleave shops before generic text links. One large directory must not
+  // consume the model's entire bounded discovery context.
+  while(groups.some(g=>g.length))for(const group of groups)if(group.length)add(group.shift());
   for(const source of records){
-    for(const link of source.observedLinks||[])add(link);
     for(const match of String(source.text||'').matchAll(/https?:\/\/[^\s<>"')\]]+/g)){
       const url=safeUrl(match[0]),parent=safeUrl(source.url);
       if(url&&parent&&new URL(url).hostname===new URL(parent).hostname)add({url,title:source.title});
@@ -32,7 +38,11 @@ export function observedResearchLinks(records,{exclude=[]}={}) {
 // One bounded recovery. Use acquired pages before buying another search/model turn.
 // The assessor is the same evidence/eligibility gate as the rest of the research graph.
 export async function recoverResearch(state,io,{event,assess}) {
-  const target=3,before=assess(state.raw||[],state.sources,state.contract);
+  const focus=state.contract.researchFocus,question=focus?.request||state.previous?.question||state.question;
+  const exactProduct=/同款|同一款|同一商品|同一个商品/.test(question)&&(state.raw||[]).some(c=>productDescriptor(state.sources.find(s=>s.id===c.sourceId))?.identity);
+  // Exact-product tasks need independent offers, not three unrelated products.
+  // The following compare_offers stage handles cross-merchant coverage.
+  const target=focus||exactProduct?1:3,before=assess(state.raw||[],state.sources,state.contract);
   const calls={selection:0,rewrite:0,search:0,catalog:0,read:0,extract:0};
   if(before.comparable>=target)return {recovery:{strategy:'observed-navigation-v2',target,before,after:before,calls,stopReason:'not-needed'}};
   const sources=structuredClone(state.sources),raw=[...(state.raw||[])],trace=[...state.trace];
@@ -42,7 +52,7 @@ export async function recoverResearch(state,io,{event,assess}) {
   const enough=()=>progress().comparable>=target;
   const finish=()=>{const after=progress();return {sources,raw,trace,recovery:{strategy:'observed-navigation-v2',target,before,after,calls,
     stopReason:after.comparable>=target?'target-reached':calls.extract>=3||calls.read>=14||calls.selection>=4||calls.search+calls.catalog>=2?'budget-exhausted':'sources-exhausted'}};};
-  trace.push(event('recover','可比较的不同选择还不够，我会先利用已找到的详情，再补查新的来源。'));
+  trace.push(event('recover',state.contract.researchFocus?'关键字段依据尚未补齐，在预算内继续核对同一候选。':'可比较的不同选择还不够，我会先利用已找到的详情，再补查新的来源。'));
 
   function observed(records) {
     return observedResearchLinks(records,{exclude:attemptedUrls}).slice(0,24);
@@ -53,8 +63,8 @@ export async function recoverResearch(state,io,{event,assess}) {
     for(let attempt=0;attempt<2&&calls.selection<4;attempt++){
       calls.selection++;
       try{
-        const answer=await io.model([{role:'system',content:prompt+' Match the requested object type first; components/accessories are not a substitute for the complete object. 优先补足不同实际配置；相同配置的配色或卖家变化不算新的独立选择，参考gaps.observedAlternatives和duplicateConfigurations避免重复。目录没写参数是打开详情核对的理由，不是排除理由。不要因重量、面积等未知而跳过所有同类对象；最终资格由详情证据判定。'+(attempt?' Repair the selection using validationFeedback. Return exactly JSON {urls:[...]} using supplied URLs.':'')},
-          {role:'user',content:JSON.stringify({question:state.previous?.question||state.question,settings:state.contract.settings,
+        const answer=await io.model([{role:'system',content:prompt+(focus?' Research only the supplied target and requested fields. Do not substitute other entities/configurations or relax conditions.':' Match the requested object type first; components/accessories are not a substitute for the complete object. 优先补足不同实际配置；相同配置的配色或卖家变化不算新的独立选择，参考gaps.observedAlternatives和duplicateConfigurations避免重复。目录没写参数是打开详情核对的理由，不是排除理由。不要因重量、面积等未知而跳过所有同类对象；最终资格由详情证据判定。')+(attempt?' Repair the selection using validationFeedback. Return exactly JSON {urls:[...]} using supplied URLs.':'')},
+          {role:'user',content:JSON.stringify({question,target:focus||undefined,settings:state.contract.settings,
             fields:state.contract.schema.fields,gaps:progress(),links,validationFeedback:feedback})}]);
         if(!Array.isArray(answer?.urls))throw new Error('invalid-selection');
         const urls=[...new Set(answer.urls)].filter(url=>typeof url==='string'&&links.some(link=>link.url===url)).slice(0,limit);
@@ -82,7 +92,7 @@ export async function recoverResearch(state,io,{event,assess}) {
         calls.extract++;
         try{
           const answer=await io.model([{role:'system',content:extractionPrompt(state.contract.schema,2)},
-            {role:'user',content:JSON.stringify({question:state.previous?.question||state.question,gaps:progress(),
+            {role:'user',content:JSON.stringify({question,target:focus||undefined,gaps:progress(),
               ...(attempt?{validationFeedback:'The previous extraction failed or lacked a candidates array. Return a JSON object with candidates:[], using only evidence in these sources.'}:{}),
               sources:batch.map(source=>({...source,text:dimensionExcerpt(source.text,state.contract.schema)}))})}]);
           if(!Array.isArray(answer?.candidates))throw new Error('Invalid recovery extraction');
@@ -101,7 +111,7 @@ export async function recoverResearch(state,io,{event,assess}) {
           const page=await io.fetchSource(url),text=typeof page==='string'?page:page?.text||page?.raw_content;
           if(!text)continue;
           const source={id:'source-'+randomUUID().slice(0,12),url,title:'方案详情',text:text.slice(0,30000),kind:'page',retrievedAt:new Date().toISOString()};
-          attachRentalPage(source,page);attachMerchantPage(source,page);attemptedUrls.add(source.url);sources.push(source);batch.push(source);
+          attachRentalPage(source,page);attachMerchantPage(source,page);attachProductPage(source,page);attachRetailCatalog(source,page);attemptedUrls.add(source.url);sources.push(source);batch.push(source);
         }catch{}
       }
       await extractRecords(batch);
@@ -109,15 +119,15 @@ export async function recoverResearch(state,io,{event,assess}) {
   }
 
   const links=observed(sources);
-  const selected=await selectLinks(links,6,'There are fewer than 3 comparable alternatives. Select up to 6 additional concrete detail URLs ONLY from these observed catalog rows. Prefer rows meeting ALL supplied conditions; include useful What-if alternatives when matches are scarce. Return JSON {urls:[]}. Never invent links or facts.');
+  const selected=await selectLinks(links,6,focus?'Select observed detail URLs that could verify the requested fields of this exact candidate. Return JSON {urls:[]}. Never invent links or facts.':'There are fewer than 3 comparable alternatives. Select up to 6 additional concrete detail URLs ONLY from these observed catalog rows. Prefer rows meeting ALL supplied conditions; include useful What-if alternatives when matches are scarce. Return JSON {urls:[]}. Never invent links or facts.');
   await readDetailUrls(selected);
   if(enough())return finish();
 
   const validCatalogRequest=r=>!r.keywords||r.keywords.length<=20&&!/(?:\d+(?:\.\d+)?\s*(?:kg\b|千克|公斤|元|CNY\b)|[¥￥]\s*\d|CNY\s*\d)/i.test(r.keywords);
   let queries=[],catalogRequests=[];calls.rewrite++;
   try{
-    const answer=await io.model([{role:'system',content:'The first sources produced ZERO concrete, source-supported alternatives or too few fully comparable matches. Return JSON {queries:["at most 2 short alternative search queries"],catalogRequests:[]}. Use ONLY location + concrete category + a public platform name, under 35 characters. Remove numeric thresholds, photo/citation instructions and restrictive site: filters. Use gaps to focus on the actual missing evidence. Apply conditions after reading real details. Preserve the location/topic, use the supplied public-reader hints, avoid generic essays/news/encyclopedias/government navigation. Do not invent URLs. 若有适用的公开目录工具，优先用catalogRequests，最多2项。每项按平台声明的input使用实际字段，请求格式示例：'+JSON.stringify((io.publicCatalogs||[]).map(p=>({platform:p.platform,[p.input||'keywords']:p.input==='location'?'用户城市名':'简短商品类别'})))+'。location只写用户城市，不要使用keywords字段。根据已观察的超限原因调整商品查询，如太重则找便携类别，太贵则找价位更低的类别；可以保留明确要求的配置词，不猜品牌、不改条件、不重复已有结果的目录。若目录因网络问题没有取得结果，可以重试该目录。keywords最多20字符。没有相关目录工具时用queries。'},
-      {role:'user',content:JSON.stringify({question:state.previous?.question||state.question,failedQueries:state.contract.queries,
+    const answer=await io.model([{role:'system',content:focus?'The requested fields of this exact existing candidate remain unresolved. Return JSON {queries:["at most 2 short targeted searches"]}. Use target identity and missing fields, preserve the exact entity/configuration and user conditions. Do not seek other alternatives or invent URLs.':'The first sources produced ZERO concrete, source-supported alternatives or too few fully comparable matches. Return JSON {queries:["at most 2 short alternative search queries"],catalogRequests:[]}. Use ONLY location + concrete category + a public platform name, under 35 characters. Remove numeric thresholds, photo/citation instructions and restrictive site: filters. Use gaps to focus on the actual missing evidence. Apply conditions after reading real details. Preserve the location/topic, use the supplied public-reader hints, avoid generic essays/news/encyclopedias/government navigation. Do not invent URLs. 若有适用的公开目录工具，优先用catalogRequests，最多2项。每项按平台声明的input使用实际字段，请求格式示例：'+JSON.stringify((io.publicCatalogs||[]).map(p=>({platform:p.platform,[p.input||'keywords']:p.input==='location'?'用户城市名':'简短商品类别'})))+'。location只写用户城市，不要使用keywords字段。根据已观察的超限原因调整商品查询，如太重则找便携类别，太贵则找价位更低的类别；可以保留明确要求的配置词，不猜品牌、不改条件、不重复已有结果的目录。若目录因网络问题没有取得结果，可以重试该目录。keywords最多20字符。没有相关目录工具时用queries。'},
+      {role:'user',content:JSON.stringify({question,target:focus||undefined,failedQueries:state.contract.queries,
         previousSites:[...new Set(sources.map(source=>sourceSite(source.url)))],publicReaders:io.publicReadHints||[],availablePublicCatalogs:io.publicCatalogs||[],initialCatalogRequests:state.contract.catalogRequests||[],observedCatalogRequests:sources.map(s=>s.retrieval?.catalogRequest).filter(Boolean),fields:state.contract.schema.fields,settings:state.contract.settings,gaps:progress()})}]);
     const seen=new Set();
     queries=(Array.isArray(answer?.queries)?answer.queries:[]).filter(q=>typeof q==='string'&&q.trim()&&q.length<=160)
@@ -125,7 +135,7 @@ export async function recoverResearch(state,io,{event,assess}) {
     const identity=catalogRequestKey;
     const observedCatalogs=sources.map(s=>s.retrieval?.catalogRequest).filter(Boolean);
     const used=new Set((observedCatalogs.length?observedCatalogs:sources.some(s=>s.observedLinks?.length)?state.contract.catalogRequests||[]:[]).map(identity));
-    catalogRequests=normalizeCatalogRequests(answer.catalogRequests,io.publicCatalogs).filter(validCatalogRequest).filter(r=>{const key=identity(r);if(used.has(key))return false;used.add(key);return true;});
+    catalogRequests=focus?[]:normalizeCatalogRequests(answer.catalogRequests,io.publicCatalogs).filter(validCatalogRequest).filter(r=>{const key=identity(r);if(used.has(key))return false;used.add(key);return true;});
   }catch{trace.push(event('recover','暂未得到新的有效检索词，已有资料保持保留。'));}
 
   // A new observation can change the next action. Replanning and repair share
@@ -156,7 +166,7 @@ export async function recoverResearch(state,io,{event,assess}) {
     calls.catalog++;trace.push(event('recover','根据刚才的取舍，补查公开目录：'+(request.keywords||request.location)));
     try{const page=await io.searchCatalog(catalogRequestForConditions(request,state.contract,io.publicCatalogs));if(!page?.url||!page.text||sources.some(s=>s.url===page.url))continue;
       const source={id:'source-'+randomUUID().slice(0,12),url:page.url,title:page.title||'补查目录',text:page.text.slice(0,30000),kind:'page',retrievedAt:page.observedAt||new Date().toISOString(),retrieval:{catalogRequest:request}};
-      attachRentalPage(source,page);attachMerchantPage(source,page);sources.unshift(source);attemptedUrls.add(source.url);
+      attachRentalPage(source,page);attachMerchantPage(source,page);attachProductPage(source,page);attachRetailCatalog(source,page);sources.unshift(source);attemptedUrls.add(source.url);
       const selected=await selectLinks(observed([source]),6,'Choose up to 6 concrete detail URLs from these OBSERVED catalog rows to VERIFY likely same-type alternatives against the supplied conditions and recorded exclusion reasons. Return JSON {urls:[]}. No invented URLs.',{exploreUnknown:true});
       await readDetailUrls(selected);
     }catch{}
@@ -180,7 +190,7 @@ export async function recoverResearch(state,io,{event,assess}) {
       for(const source of batch)if(typeof io.fetchSource==='function'&&searchPageReads<4&&calls.read<14){
         searchPageReads++;calls.read++;
         try{const page=await io.fetchSource(source.url),text=typeof page==='string'?page:page?.text||page?.raw_content;
-          if(text){source.text=text.slice(0,30000);source.kind='page';attachRentalPage(source,page);attachMerchantPage(source,page);attemptedUrls.add(source.url);}}catch{}
+          if(text){source.text=text.slice(0,30000);source.kind='page';attachRentalPage(source,page);attachMerchantPage(source,page);attachProductPage(source,page);attachRetailCatalog(source,page);attemptedUrls.add(source.url);}}catch{}
       }
       await extractRecords(batch);
     }

@@ -30,7 +30,8 @@ def main():
     query=request.get('query')
     if not isinstance(query,str) or not 1<=len(query.strip())<=500:
         raise ValueError('invalid query')
-    results=search(query,max_results=4)
+    max_results=min(12,max(4,int(request.get('maxResults',8))))
+    results=search(query,max_results=max_results)
     normalized=[{'title':r.get('title',''),'url':r.get('url',''),
                  'raw_content':r.get('full_content') or '',
                  'content':r.get('snippet') or '',

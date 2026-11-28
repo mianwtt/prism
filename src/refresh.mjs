@@ -1,5 +1,7 @@
 const normalize = (s) => s.replace(/\s+/g, " ").trim();
 import { enrichCandidateMedia } from "./media.mjs";
+import {attachProductPage} from './public-product-page.mjs';
+import {attachMerchantPage} from './public-merchant-read.mjs';
 export async function refreshSpace(
   previous,
   io,
@@ -28,9 +30,12 @@ export async function refreshSpace(
     let text,
       failed = false;
     try {
-      text = await io.fetchSource(source.url);
+      const page = await io.fetchSource(source.url);
+      text = typeof page==='string'?page:page?.text||page?.raw_content;
       if (typeof text !== "string" || !text.trim()) throw new Error("empty");
-      text = text.slice(0, 16000);
+      text = text.slice(0, 30000);
+      delete source.productObservation;delete source.merchantObservation;
+      attachProductPage(source,page);attachMerchantPage(source,page);
     } catch {
       failed = true;
     }

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc" font-family="Microsoft YaHei, Segoe UI, Arial, sans-serif">
+<title id="title">同款证据、独立报价与画布分支</title><desc id="desc">商家实际详情经过配置核对后归并为一个商品、两个报价。采用另一来源和降低预算分别建立分支。</desc>
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4 0 8" fill="none" stroke="#6a9387" stroke-width="1.5"/></marker></defs>
+<rect width="1120" height="620" rx="20" fill="#fff"/>
+<text x="28" y="42" font-size="26" font-weight="700" fill="#193f39">先核对同款，再选择购买来源</text>
+<text x="28" y="73" font-size="17" fill="#647a74">同一商品配置独立于商家报价；改报价和改条件都保留原来的情况。</text>
+<g fill="#f5f9f7" stroke="#cddfd7"><rect x="28" y="110" width="250" height="180" rx="14"/><rect x="28" y="330" width="250" height="180" rx="14"/></g>
+<g fill="none" stroke="#72a18f" stroke-width="2"><path d="M49 132h21l8 8v24H49zM70 132v9h8M55 149h16M55 156h12"/><path d="M49 352h21l8 8v24H49zM70 352v9h8M55 369h16M55 376h12"/></g>
+<g fill="#214e43" font-size="21" font-weight="650"><text x="91" y="155">DFRobot</text><text x="91" y="375">微雪电子</text></g>
+<g fill="#193f39" font-size="30" font-weight="700"><text x="50" y="205">¥1,599</text><text x="50" y="425">¥1,739</text></g>
+<g fill="#5d756d" font-size="17"><text x="50" y="239">主商品静态价格</text><text x="50" y="267">包装清单：开发板 ×1</text><text x="50" y="459">Edge 等待动态主价</text><text x="50" y="487">已选：单独主机无套餐</text></g>
+<g fill="none" stroke="#6a9387" stroke-width="2" marker-end="url(#a)"><path d="M278 201H311Q329 201 329 219V240H354"/><path d="M278 419H311Q329 419 329 396V265H354"/></g>
+<rect x="363" y="125" width="338" height="247" rx="16" fill="#edf5f0" stroke="#b8d5c5"/>
+<rect x="388" y="153" width="73" height="57" rx="7" fill="#387c62"/><rect x="406" y="169" width="30" height="27" rx="3" fill="#d5e6bf"/><g fill="#dbe9e2"><rect x="451" y="159" width="17" height="12"/><rect x="451" y="184" width="17" height="12"/></g>
+<text x="482" y="176" fill="#214e43" font-size="21" font-weight="700">1 个商品配置</text><text x="482" y="204" fill="#648174" font-size="16">来源归并前核对身份</text>
+<g fill="#315e4e" font-size="19"><text x="389" y="248">✓ 树莓派 5 · 8GB</text><text x="389" y="284">✓ BCM2712 · 单板</text><text x="389" y="320">✓ 同配置，独立保存报价</text></g>
+<rect x="365" y="409" width="336" height="104" rx="13" fill="#f6f8fa" stroke="#d9e3e7"/>
+<text x="388" y="442" fill="#315567" font-size="20" font-weight="650">2 条带原文的商家报价</text><text x="388" y="477" fill="#617780" font-size="17">普通标价、库存描述与采集时间</text>
+<path d="M532 372v32" fill="none" stroke="#6a9387" stroke-width="2" marker-end="url(#a)"/>
+<path d="M701 252H738V174H771" fill="none" stroke="#6a9387" stroke-width="2" marker-end="url(#a)"/>
+<g><rect x="781" y="112" width="310" height="112" rx="14" fill="#f2f7f2" stroke="#bad1b9"/><text x="804" y="144" fill="#486545" font-size="17">当前情况 · 预算 2,000 元</text><text x="804" y="183" fill="#244d37" font-size="26" font-weight="700">DFRobot · ¥1,599</text><text x="804" y="209" fill="#63806b" font-size="16">默认采用已核对来源中的低价</text></g>
+<g><rect x="781" y="278" width="310" height="112" rx="14" fill="#f5f7fb" stroke="#bed1e3"/><text x="804" y="310" fill="#526d87" font-size="17">用户采用另一报价 → 新分支</text><text x="804" y="349" fill="#2e526f" font-size="26" font-weight="700">微雪电子 · ¥1,739</text><text x="804" y="375" fill="#678094" font-size="16">原价、原条件与原始来源保留</text></g>
+<g><rect x="781" y="444" width="310" height="112" rx="14" fill="#fbf4f0" stroke="#e3c8b7"/><text x="804" y="476" fill="#8b6853" font-size="17">在报价分支将预算改为 1,600 元</text><text x="804" y="515" fill="#9b5941" font-size="26" font-weight="700">1 → 0 个匹配方案</text><text x="804" y="541" fill="#987763" font-size="16">仅重算已有事实，不启动新研究</text></g>
+<g fill="none" stroke="#6a9387" stroke-width="2" marker-end="url(#a)"><path d="M937 224v48"/><path d="M937 390v48"/></g>
+<text x="28" y="579" fill="#687f76" font-size="16">示例采用2026-11-27实际公开标价；运费尚未全部核实，不代表最终到手价或全网最低。</text>
+<text x="28" y="606" fill="#83938c" font-size="14">图为机制示意；原页链接、引用和实际 Edge 截图见正文。</text>
+</svg>

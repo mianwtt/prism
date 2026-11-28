@@ -96,7 +96,7 @@ export class Jobs {
     if (related.length) this.saver.db.pragma('wal_checkpoint(TRUNCATE)');
     return { deletedJobIds: related.map(job => job.id) };
   }
-  start({ question, type = "research", parentId, scenarios, scenarioId, adaptive=false, change }) {
+  start({ question, type = "research", parentId, scenarios, scenarioId, adaptive=false, change, researchFocus }) {
     if (this.deletedSpaceIds.has(parentId))
       throw Object.assign(new Error('这个决策空间已删除'), { statusCode: 404 });
     if (this.busy)
@@ -118,6 +118,7 @@ export class Jobs {
       parentId,
       ...(adaptive||type==='adapt'?{workflow:'adaptive'}:{}),
       ...(change?{change}:{}),
+      ...(researchFocus?{researchFocus}:{}),
       ...(['scenario','adapt'].includes(type)?{scenarios,scenarioId}:{}),
       status: "running",
       events: [],
@@ -169,7 +170,7 @@ export class Jobs {
         const config={configurable:{thread_id:job.id}},existing=resume?await this.saver.getTuple(config):null;
         const scenarios=parent?validateDecisionScenarios(parent,job.scenarios||decisionScenarios(parent)):null;
         const scenario=scenarios?.find(s=>s.id===job.scenarioId)||scenarios?.find(s=>s.id===parent.activeScenarioId)||scenarios?.[0];
-        result=await runGeneralResearch(job.question,io,progress,{checkpointer:this.saver,threadId:job.id,resume:Boolean(existing),previous:parent,scenarios,scenario,adaptation:job.change||null});
+        result=await runGeneralResearch(job.question,io,progress,{checkpointer:this.saver,threadId:job.id,resume:Boolean(existing),previous:parent,scenarios,scenario,adaptation:job.change||null,researchFocus:job.researchFocus||null});
       } else if (job.type === "refresh") {
         parent = await this.store.get(job.parentId);
         const path = resolve(this.directory, job.id + ".refresh.json");

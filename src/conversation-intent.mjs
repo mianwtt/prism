@@ -5,7 +5,7 @@ export const fieldNames=field=>[...new Set([field.label,field.conditionLabel,fie
 export function mentionedFields(message,schema){
   return schema.fields.filter(field=>fieldNames(field).some(name=>new RegExp(escapeRE(name),'i').test(message))).map(field=>field.key);
 }
-export const isExplanation=message=>/^(?:为什么|为何|怎么|请解释|解释|哪些|哪[一几]个)/.test(message)||/(?:不要|别|先不|暂不|不必)(?:进行)?(?:改|修改|调整|改变|改动)(?:动)?(?:任何)?(?:条件|设置|筛选|参数|要求)/.test(message)||/^(?:我(?:只是|只)?(?:想|想要)?(?:了解|问|知道)|你觉得|你认为|能否解释|可以解释|请问).*(?:合不合适|会不会|是否|是不是|为什么|怎么样|合理|偏高|太低|太高|合适)/.test(message);
+export const isExplanation=message=>(/(?:怎么选|如何选|推荐哪|哪[个些一].{0,16}更(?:合适|适合))/.test(message)&&!/(?:改到|改为|改成|设为|调整到)/.test(message))||/^(?:为什么|为何|怎么|请解释|解释|哪些|哪[一几]个)/.test(message)||/(?:不要|别|先不|暂不|不必)(?:进行)?(?:改|修改|调整|改变|改动)(?:动)?(?:任何)?(?:条件|设置|筛选|参数|要求)/.test(message)||/^(?:我(?:只是|只)?(?:想|想要)?(?:了解|问|知道)|你觉得|你认为|能否解释|可以解释|请问).*(?:合不合适|会不会|是否|是不是|为什么|怎么样|合理|偏高|太低|太高|合适)/.test(message);
 export const isUndo=message=>/^(?:请|帮我)?(?:撤销(?:这次|上次|刚才的?)?(?:修改|操作|变化)?|还是刚才那样|恢复(?:到)?(?:刚才|上一步|修改前)(?:那样|的条件)?)[吧呢了。！!？?\s]*$/.test(message);
 const clearRequest=message=>!/(?:不要|别|不想|无需|先不|不)\s*(?:取消|清空|去掉|移除)/.test(message)&&/(?:不再限制|不限制|不限|没有(?:什么|任何)?要求|没要求|无要求|取消|清空|去掉|移除|不考虑|不用考虑|不管|不设上限)/.test(message);
 const clearParts=message=>message.split(/[，,。；;]/).flatMap(part=>part.split(/但是|但|同时|并且|而且|(?=保留|保持)/)).filter(clearRequest);

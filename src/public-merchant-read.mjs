@@ -81,7 +81,7 @@ export function attachMerchantPage(source,page){
   return true;
 }
 const normalize=s=>String(s||'').replace(/[\s()（）]/g,'').replace(/(?:GB|TB|kg|千克|公斤|元|CNY)$/i,'').toLowerCase();
-const synonyms={'内存容量':['内存','ram'],'运行内存':['内存','ram'],'机身内存':['存储','存储容量','rom','机身存储','机身存储容量'],'硬盘容量':['硬盘','固态硬盘','固态硬盘容量','存储','存储容量','ssd','ssd容量'],'净重':['重量','机身重量','机身净重','weight'],'重量':['净重','机身重量','机身净重','weight']};
+const synonyms={'内存':['内存容量','运行内存','RAM'],'内存容量':['内存','ram'],'运行内存':['内存','ram'],'机身内存':['存储','存储容量','rom','机身存储','机身存储容量'],'硬盘容量':['硬盘','固态硬盘','固态硬盘容量','存储','存储容量','ssd','ssd容量'],'净重':['重量','机身重量','机身净重','weight'],'重量':['净重','机身重量','机身净重','weight']};
 export function merchantRawCandidate(source,schema){
   const o=source.merchantObservation;if(!o)return null;const facts={};
   for(const f of schema.fields){

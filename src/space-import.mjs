@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { adaptLegacyDecision } from './legacy-decision.mjs';
 import { validateDecisionSchema, validateDecisionSettings, validateDecisionScenarios } from './decision-schema.mjs';
 import { factObservations } from './decision-workflow.mjs';
+import {validateTaskMemory} from './task-memory.mjs';
+import {offerComparison,offerPriceField} from './product-offers.mjs';
 
 export const IMPORT_LIMIT = 5 * 1024 * 1024;
 const id = z.string().regex(/^[-a-zA-Z0-9]{1,80}$/);
@@ -24,11 +26,17 @@ const candidate = z.object({
   facts: z.record(z.string(), fact),
   media: z.object({url, images:z.array(url).max(12).optional(), sourceUrl: url.optional(), sourceId: id.optional()}).optional(),
   displayDetails: z.array(z.object({label:text(80),value:text(1000),quote:text(20000).optional(),sourceId:id.optional()})).max(40).optional(),
+  commerce:z.object({selectedOfferId:id.nullable().optional()}).optional(),
 });
+const productAttribute=z.object({label:text(100),value:text(1000),quote:text(2000)});
+const productOffer=z.object({price:z.number().finite().nonnegative().optional(),value:z.number().finite().nonnegative().optional(),currency:text(8).optional(),quote:text(2000),seller:text(200).optional(),basis:z.enum(['public','conditional']).optional(),conditions:text(1000).optional(),availability:text(40).optional(),shipping:z.number().finite().nonnegative().nullable().optional(),shippingQuote:text(1000).optional(),validUntil:text(100).nullable().optional()});
+const productObservation=z.object({name:text(300),brand:text(150).optional(),model:text(150).optional(),category:text(60).optional(),gtin:text(20).optional(),attributes:z.array(productAttribute).max(100),offers:z.array(productOffer).max(12),image:url.nullable().optional(),provenance:text(300).optional()});
 const source = z.object({
   id, title: text(500), url: url.nullish(), text: text(500000),
   retrievedAt: z.string().datetime(), kind: text(30).optional(),
-  refreshStatus: z.enum(['verified','failed']).optional(),
+  refreshStatus: z.enum(['verified','failed','changed','unchanged']).optional(),
+  productObservation:productObservation.optional(),
+  merchantObservation:z.object({url,name:text(300),attributes:z.array(productAttribute).max(100),offer:productOffer.nullable().optional()}).optional(),
 });
 const scope = z.array(id).max(200);
 const operation=z.discriminatedUnion('type',[
@@ -52,8 +60,10 @@ const conversationMessage=z.object({
   researchRequest:text(1500).optional(),changedFields:z.array(text(31)).max(8).optional(),
   interaction:z.object({kind:z.enum(['message','explain','clarify','research','research-complete','change','noop','undo']),clarificationId:id.optional(),answered:text(100).optional(),answeredId:id.optional(),researchScheduled:z.boolean().optional()}).optional(),
   action:conversationAction.optional(),
+  decisionAnswer:z.object({version:z.literal(1),scenarioId:id,basisKey:text(80),origin:z.enum(['model','rules','recorded']).optional(),kind:z.enum(['recommendation','investigation']).optional(),summary:text(400),recommendations:z.array(z.object({candidateId:id,reason:text(240),fields:z.array(id).max(3)})).max(2),gaps:z.array(z.object({candidateId:id,fields:z.array(id).max(8)})).max(2)}).optional(),
 });
 const snapshot = z.object({
+  taskMemory: z.object({text:text(2000),updatedAt:z.string().datetime().optional(),origin:text(40).optional()}).nullable().optional(),
   title: text(300).min(1), question: text(4000).min(1), mode: z.enum(['demo','live']),
   candidates: z.array(candidate).max(200), sources: z.array(source).max(300),
   baselineCandidateIds: scope.optional(), activeScenarioId: id.optional(), canvasScenarioIds: z.array(id).max(24).optional(),
@@ -72,6 +82,7 @@ export function importSpace(raw) {
   const parsed = snapshot.safeParse(adapted);
   if(!parsed.success)throw new Error('决策文件格式不完整或包含不支持的来源地址');
   const next = parsed.data;
+  if (next.taskMemory !== undefined) next.taskMemory = validateTaskMemory(next.taskMemory);
   next.schema = validateDecisionSchema(adapted.schema);
   if(next.evidenceRequirements?.rentalScope){
     const scope=next.evidenceRequirements.rentalScope,field=next.schema.fields.find(f=>f.key===scope.field);
@@ -105,6 +116,11 @@ export function importSpace(raw) {
     }
   }
   for(const message of next.conversation||[]){
+    if(message.decisionAnswer){
+      const answer=message.decisionAnswer;
+      answer.origin='recorded';
+      if(!scenarioIds.has(answer.scenarioId)||[...answer.recommendations,...answer.gaps].some(r=>!candidateIds.has(r.candidateId)||r.fields.some(key=>!fieldKeys.has(key))))throw new Error('对话分析引用了不存在的方案或字段');
+    }
     if(message.changedFields?.some(key=>!fieldKeys.has(key)))throw new Error('对话修改引用了不存在的条件');
     if(message.action){
       if(!scenarioIds.has(message.action.scenarioId)||!scenarioIds.has(message.action.sourceScenarioId))throw new Error('对话操作引用了不存在的分支');
@@ -115,6 +131,7 @@ export function importSpace(raw) {
   if(next.decision?.candidateId&&!candidateIds.has(next.decision.candidateId))throw new Error('判断记录中的方案不存在');
   if(next.decision)next.decision.candidateName=next.candidates.find(c=>c.id===next.decision.candidateId)?.name||null;
   for(const c of next.candidates){
+    const savedChoice=c.commerce?.selectedOfferId;delete c.commerce;
     if(c.sourceId&&!sourceIds.has(c.sourceId))throw new Error('方案引用的来源不存在');
     for(const [key,f] of Object.entries(c.facts)){
       if(!next.schema.fields.some(field=>field.key===key))throw new Error('参数不属于这个决策模型');
@@ -123,6 +140,8 @@ export function importSpace(raw) {
       const supported=factObservations(next,c,field).some(o=>o.verifiable&&o.value===f.value&&o.sourceId===f.sourceId&&o.quote===f.quote);
       f.status=next.mode==='demo'?'example':supported?'cited':'unknown';
     }
+    const comparison=offerComparison(c,next.sources,next.schema);
+    if(comparison){const field=offerPriceField(next.schema),fact=c.facts[field.key],o=comparison.offers.find(o=>o.id===savedChoice&&o.sourceId===fact?.sourceId&&o.price===fact?.value&&o.quote===fact?.quote);c.commerce={...comparison,selectedOfferId:o?.id||null};}else delete c.commerce;
   }
   next.importInfo={importedAt:new Date().toISOString(),kind:'snapshot',notice:'从文件创建的新空间；历史版本和人工确认不继承。'};
   next.trace=[{type:'import',message:next.importInfo.notice}];

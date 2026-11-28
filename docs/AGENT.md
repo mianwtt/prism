@@ -22,6 +22,8 @@ flowchart LR
 | `complete` | Validate supported fields, photo requirements, scopes and suggested branches |
 | `analyze` | Keep match/unresolved counts deterministic; retain source-bound model interpretation separately |
 
+Production search/read/catalog adapters now use the official MCP SDK with in-memory sessions by default. Specialist roles load task-selected, versioned `SKILL.md` guidance while retaining scoped tool permissions. See [MCP and Skills implementation](MCP-SKILLS.md) for the external stdio entry, scope and verification boundaries.
+
 The graph is compiled with a checkpointer. `src/jobs.mjs` persists task progress and SQLite checkpoints; a failed task can continue from saved steps. An interrupted external request may repeat. Model responses cannot execute arbitrary tools or exceed application budgets.
 
 The four specialists have separate task contexts and adapter capabilities; ordinary conversation and What-if remain on their existing application routes. The current implementation executes sequentially using the configured model provider. It is a bounded workflow with specialist handoffs, not a benchmarked claim of better accuracy or parallel performance. See [role contracts, failure behavior and actual verification](MULTI-AGENT.md).
